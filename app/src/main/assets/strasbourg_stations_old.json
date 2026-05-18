@@ -1,0 +1,51 @@
+{
+  "stations": [
+    { "id": "rotonde",        "name": "Rotonde",              "lon": 7.7442, "lat": 48.5834, "lines": ["A","D"] },
+    { "id": "homme_fer",      "name": "Homme de Fer",         "lon": 7.7477, "lat": 48.5833, "lines": ["A","B","C","D","E","F"] },
+    { "id": "gallia",         "name": "Gallia",               "lon": 7.7492, "lat": 48.5820, "lines": ["A","D"] },
+    { "id": "gare_centrale",  "name": "Gare Centrale",        "lon": 7.7346, "lat": 48.5854, "lines": ["A","D"] },
+    { "id": "finkwiller",     "name": "Finkwiller",           "lon": 7.7425, "lat": 48.5789, "lines": ["A","D"] },
+    { "id": "baggersee",      "name": "Baggersee",            "lon": 7.7234, "lat": 48.5572, "lines": ["A"] },
+    { "id": "elsau",          "name": "Elsau",                "lon": 7.7205, "lat": 48.5629, "lines": ["A"] },
+    { "id": "poteries",       "name": "Poteries",             "lon": 7.7225, "lat": 48.5686, "lines": ["A"] },
+    { "id": "laiterie",       "name": "Laiterie",             "lon": 7.7257, "lat": 48.5727, "lines": ["A"] },
+    { "id": "montagne_verte", "name": "Montagne Verte",       "lon": 7.7298, "lat": 48.5764, "lines": ["A"] },
+    { "id": "musee_doeuvres", "name": "Musée d'Oeuvres",      "lon": 7.7352, "lat": 48.5790, "lines": ["A"] },
+    { "id": "aube",           "name": "Aube",                 "lon": 7.7397, "lat": 48.5807, "lines": ["A"] },
+    { "id": "langstross",     "name": "Langstross Grand'Rue", "lon": 7.7455, "lat": 48.5824, "lines": ["A","C"] },
+    { "id": "archives",       "name": "Archives",             "lon": 7.7518, "lat": 48.5830, "lines": ["A"] },
+    { "id": "alt_winmaerik",  "name": "Alt Winmaerik",        "lon": 7.7583, "lat": 48.5815, "lines": ["A"] },
+    { "id": "etoile_bourse",  "name": "Étoile Bourse",        "lon": 7.7628, "lat": 48.5794, "lines": ["A","D"] },
+    { "id": "wacken",         "name": "Wacken",               "lon": 7.7675, "lat": 48.5840, "lines": ["A"] },
+    { "id": "palais_congres", "name": "Palais des Congrès",   "lon": 7.7710, "lat": 48.5879, "lines": ["A"] },
+    { "id": "campus",         "name": "Campus",               "lon": 7.7751, "lat": 48.5918, "lines": ["A"] },
+    { "id": "hautepierre",    "name": "Hautepierre Mairie",   "lon": 7.6970, "lat": 48.5947, "lines": ["A"] },
+
+    { "id": "pont_phario",    "name": "Pont Phario",          "lon": 7.7350, "lat": 48.5712, "lines": ["B"] },
+    { "id": "marché",         "name": "Marché de Koenigshoffen","lon": 7.7272, "lat": 48.5745, "lines": ["B"] },
+    { "id": "place_halles",   "name": "Place des Halles",     "lon": 7.7509, "lat": 48.5813, "lines": ["B","F"] },
+    { "id": "brant",          "name": "Brant",                "lon": 7.7566, "lat": 48.5860, "lines": ["B"] },
+    { "id": "esplanade",      "name": "Esplanade",            "lon": 7.7614, "lat": 48.5882, "lines": ["B"] },
+    { "id": "robertsau",      "name": "Robertsau Forest",     "lon": 7.7710, "lat": 48.6002, "lines": ["B"] },
+
+    { "id": "oberhausbergen", "name": "Oberhausbergen",       "lon": 7.6802, "lat": 48.5897, "lines": ["C"] },
+    { "id": "sav_centre",     "name": "Saverne Centre",       "lon": 7.6875, "lat": 48.5905, "lines": ["C"] },
+    { "id": "lingolsheim",    "name": "Lingolsheim Centre",   "lon": 7.6985, "lat": 48.5578, "lines": ["C"] },
+    { "id": "illkirch_lixenbuhl","name":"Illkirch Lixenbuhl", "lon": 7.7132, "lat": 48.5241, "lines": ["C"] },
+    { "id": "illkirch_centre","name": "Illkirch Centre",      "lon": 7.7185, "lat": 48.5292, "lines": ["C"] },
+
+    { "id": "wolfisheim",     "name": "Wolfisheim",           "lon": 7.6712, "lat": 48.5857, "lines": ["D"] },
+    { "id": "eckbolsheim",    "name": "Eckbolsheim",          "lon": 7.6808, "lat": 48.5834, "lines": ["D"] },
+    { "id": "parc_foret",     "name": "Parc de la Forêt",     "lon": 7.6902, "lat": 48.5815, "lines": ["D"] },
+    { "id": "cronenbourg",    "name": "Cronenbourg",          "lon": 7.7012, "lat": 48.5809, "lines": ["D"] },
+    { "id": "colmar",         "name": "Rue de Colmar",        "lon": 7.7098, "lat": 48.5812, "lines": ["D"] },
+    { "id": "ducs",           "name": "Place des Ducs",       "lon": 7.7165, "lat": 48.5818, "lines": ["D"] },
+    { "id": "coop",           "name": "Coopérative",          "lon": 7.7238, "lat": 48.5824, "lines": ["D"] },
+    { "id": "porte_blanche",  "name": "Porte Blanche",        "lon": 7.7320, "lat": 48.5836, "lines": ["D"] },
+
+    { "id": "cathedrale",     "name": "Cathédrale",           "lon": 7.7511, "lat": 48.5817, "lines": ["F"] },
+    { "id": "kléber",         "name": "Place Kléber",         "lon": 7.7487, "lat": 48.5834, "lines": ["F"] },
+    { "id": "observatoire",   "name": "Observatoire",         "lon": 7.7586, "lat": 48.5768, "lines": ["F"] },
+    { "id": "cité_administrative","name":"Cité Administrative","lon": 7.7655,"lat": 48.5721, "lines": ["F"] }
+  ]
+}

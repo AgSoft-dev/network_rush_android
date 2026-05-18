@@ -1,0 +1,4 @@
+com.triviamap.test.app-androidTest-0 /Users/adrien/PhoneApp/Android/TriviaMap/app/build/generated/res/resValues/androidTest/debug
+com.triviamap.test.app-mergeDebugAndroidTestResources-1 /Users/adrien/PhoneApp/Android/TriviaMap/app/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/merged.dir
+com.triviamap.test.app-mergeDebugAndroidTestResources-2 /Users/adrien/PhoneApp/Android/TriviaMap/app/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/stripped.dir
+com.triviamap.test.app-debugAndroidTest-3 /Users/adrien/PhoneApp/Android/TriviaMap/app/build/intermediates/merged_res/debugAndroidTest/mergeDebugAndroidTestResources
