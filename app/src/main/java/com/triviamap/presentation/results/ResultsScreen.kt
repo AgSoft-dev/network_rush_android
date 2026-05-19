@@ -16,11 +16,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.triviamap.domain.model.GameMode
 import com.triviamap.presentation.common.*
 
 @Composable
 fun ResultsScreen(
-    lineId: String,
+    mode: GameMode,
     score: Int,
     onHome: () -> Unit,
     onRetry: () -> Unit
@@ -42,7 +43,7 @@ fun ResultsScreen(
             modifier = Modifier.padding(32.dp)
         ) {
             Text(
-                text = "LINE $lineId",
+                text = if (mode == GameMode.STATION_SPRINT) "STATION SPRINT" else "NETWORK TRACE",
                 color = OnSurfaceMed,
                 letterSpacing = 4.sp,
                 fontSize = 13.sp
@@ -53,21 +54,32 @@ fun ResultsScreen(
             // Score
             Text(
                 text = animatedScore.toString(),
-                color = scoreColor(score),
+                color = scoreColor(mode, score),
                 fontSize = 88.sp,
                 fontWeight = FontWeight.Black
             )
-            Text(
-                text = "/ 1000",
-                color = OnSurfaceMed,
-                fontSize = 20.sp
-            )
+            
+            if (mode == GameMode.TRACE_NETWORK) {
+                Text(
+                    text = "/ 1000",
+                    color = OnSurfaceMed,
+                    fontSize = 20.sp
+                )
+            } else {
+                Text(
+                    text = "TOTAL POINTS",
+                    color = OnSurfaceMed,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 2.sp
+                )
+            }
 
             Spacer(Modifier.height(4.dp))
 
             Text(
-                text = scoreLabel(score),
-                color = scoreColor(score),
+                text = scoreLabel(mode, score),
+                color = scoreColor(mode, score),
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 3.sp
             )
@@ -102,13 +114,22 @@ fun ResultsScreen(
     }
 }
 
-private fun scoreColor(score: Int) = when {
+private fun scoreColor(mode: GameMode, score: Int) = when {
+    mode == GameMode.STATION_SPRINT -> Accent
     score >= 800 -> Success
     score >= 500 -> Accent
     else -> Error
 }
 
-private fun scoreLabel(score: Int) = when {
+private fun scoreLabel(mode: GameMode, score: Int) = when {
+    mode == GameMode.STATION_SPRINT -> {
+        when {
+            score > 5000 -> "LEGENDARY"
+            score > 2500 -> "ELITE"
+            score > 1000 -> "SPEEDSTER"
+            else -> "GOOD RUN"
+        }
+    }
     score >= 900 -> "PERFECT"
     score >= 700 -> "GREAT"
     score >= 500 -> "GOOD"

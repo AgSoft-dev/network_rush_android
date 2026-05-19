@@ -2,9 +2,5 @@
     {
         "merged": "com.triviamap.app-debug-64:/drawable_ic_launcher.xml.flat",
         "source": "com.triviamap.app-main-66:/drawable/ic_launcher.xml"
-    },
-    {
-        "merged": "/Users/adrien/.gradle/daemon/9.0-milestone-1/com.triviamap.app-debug-64:/drawable_ic_launcher.xml.flat",
-        "source": "/Users/adrien/.gradle/daemon/9.0-milestone-1/com.triviamap.app-main-66:/drawable/ic_launcher.xml"
     }
 ]

@@ -12,7 +12,7 @@ data class ScoreBreakdown(
     val stationOrder: Float,   // 0..1
     val completion: Float,     // 0..1
     val speedBonus: Float,     // 0..1
-    val total: Int             // 0..1000
+    val total: Int             // Arcade score or 0..1000 percentage
 )
 
 object ScoringEngine {

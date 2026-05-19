@@ -86,7 +86,7 @@ fun TriviaMapNavGraph(navController: NavHostController) {
             val mode  = GameMode.valueOf(backStack.arguments?.getString("mode") ?: GameMode.TRACE_NETWORK.name)
             val score = backStack.arguments?.getInt("score") ?: 0
             ResultsScreen(
-                lineId = if (mode == GameMode.TRACE_NETWORK) "NETWORK" else "SPRINT",
+                mode = mode,
                 score  = score,
                 onHome  = { navController.navigate(Route.Home.path) { popUpTo(Route.Home.path) } },
                 onRetry = { navController.navigate(Route.Home.path) { popUpTo(Route.Home.path) } }

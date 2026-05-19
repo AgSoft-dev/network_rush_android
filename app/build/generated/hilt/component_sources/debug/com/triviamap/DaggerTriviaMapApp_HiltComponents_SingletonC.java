@@ -413,9 +413,9 @@ public final class DaggerTriviaMapApp_HiltComponents_SingletonC {
 
       static String com_triviamap_presentation_stats_StatsViewModel = "com.triviamap.presentation.stats.StatsViewModel";
 
-      static String com_triviamap_presentation_gameplay_GameplayViewModel = "com.triviamap.presentation.gameplay.GameplayViewModel";
-
       static String com_triviamap_presentation_gameplay_SprintViewModel = "com.triviamap.presentation.gameplay.SprintViewModel";
+
+      static String com_triviamap_presentation_gameplay_GameplayViewModel = "com.triviamap.presentation.gameplay.GameplayViewModel";
 
       @KeepFieldType
       LineSelectionViewModel com_triviamap_presentation_lineselection_LineSelectionViewModel2;
@@ -424,10 +424,10 @@ public final class DaggerTriviaMapApp_HiltComponents_SingletonC {
       StatsViewModel com_triviamap_presentation_stats_StatsViewModel2;
 
       @KeepFieldType
-      GameplayViewModel com_triviamap_presentation_gameplay_GameplayViewModel2;
+      SprintViewModel com_triviamap_presentation_gameplay_SprintViewModel2;
 
       @KeepFieldType
-      SprintViewModel com_triviamap_presentation_gameplay_SprintViewModel2;
+      GameplayViewModel com_triviamap_presentation_gameplay_GameplayViewModel2;
     }
   }
 
@@ -491,25 +491,25 @@ public final class DaggerTriviaMapApp_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_triviamap_presentation_stats_StatsViewModel = "com.triviamap.presentation.stats.StatsViewModel";
-
       static String com_triviamap_presentation_lineselection_LineSelectionViewModel = "com.triviamap.presentation.lineselection.LineSelectionViewModel";
 
-      static String com_triviamap_presentation_gameplay_SprintViewModel = "com.triviamap.presentation.gameplay.SprintViewModel";
+      static String com_triviamap_presentation_stats_StatsViewModel = "com.triviamap.presentation.stats.StatsViewModel";
 
       static String com_triviamap_presentation_gameplay_GameplayViewModel = "com.triviamap.presentation.gameplay.GameplayViewModel";
 
-      @KeepFieldType
-      StatsViewModel com_triviamap_presentation_stats_StatsViewModel2;
+      static String com_triviamap_presentation_gameplay_SprintViewModel = "com.triviamap.presentation.gameplay.SprintViewModel";
 
       @KeepFieldType
       LineSelectionViewModel com_triviamap_presentation_lineselection_LineSelectionViewModel2;
 
       @KeepFieldType
-      SprintViewModel com_triviamap_presentation_gameplay_SprintViewModel2;
+      StatsViewModel com_triviamap_presentation_stats_StatsViewModel2;
 
       @KeepFieldType
       GameplayViewModel com_triviamap_presentation_gameplay_GameplayViewModel2;
+
+      @KeepFieldType
+      SprintViewModel com_triviamap_presentation_gameplay_SprintViewModel2;
     }
 
     private static final class SwitchingProvider<T> implements Provider<T> {

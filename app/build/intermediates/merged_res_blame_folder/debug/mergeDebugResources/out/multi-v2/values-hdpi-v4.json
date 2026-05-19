@@ -4,7 +4,7 @@
             "outputFile": "com.triviamap.app-mergeDebugResources-62:/values-hdpi-v4/values-hdpi-v4.xml",
             "map": [
                 {
-                    "source": "/Users/adrien/.gradle/caches/9.0-milestone-1/transforms/758885e5a5ce0963ffd0f2be2f724c8e/transformed/appcompat-1.7.0/res/values-hdpi-v4/values-hdpi-v4.xml",
+                    "source": "/Users/adrien/.gradle/caches/9.0-milestone-1/transforms/5c139be7d46c79eb0ef5e08618467d5c/transformed/appcompat-1.7.0/res/values-hdpi-v4/values-hdpi-v4.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
