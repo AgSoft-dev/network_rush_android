@@ -128,7 +128,7 @@ fun SprintScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(start = 4.dp, end = 4.dp, top = 10.dp, bottom = 4.dp),
+                                    .padding(start = 4.dp, top = 10.dp, end = 4.dp, bottom = 4.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -191,7 +191,7 @@ private fun HeaderLineBadge(name: String, color: Long) {
     Surface(
         color = Color(color),
         shape = RoundedCornerShape(6.dp),
-        modifier = Modifier.widthIn(min = 50.dp).height(30.dp)
+        modifier = Modifier.widthIn(min = 60.dp).height(32.dp)
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 8.dp)) {
             Text(
@@ -200,7 +200,7 @@ private fun HeaderLineBadge(name: String, color: Long) {
                 fontWeight = FontWeight.Black, 
                 fontSize = 14.sp,
                 maxLines = 1,
-                overflow = TextOverflow.Visible
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -385,10 +385,12 @@ private fun TileList(
     var dragOffsetY by remember { mutableFloatStateOf(0f) }
     var dragOffsetX by remember { mutableFloatStateOf(0f) }
     
+    // Stable references to prevent gesture cancellation on question transitions
     val currentTiles by rememberUpdatedState(tiles)
     val currentOnMove by rememberUpdatedState(onMove)
     val currentOnSideChanged by rememberUpdatedState(onSideChanged)
     val currentSides by rememberUpdatedState(stationSides)
+    val currentChallengeType by rememberUpdatedState(challengeType)
 
     val l1Color = Color(line1?.color ?: 0xFF000000)
     val l2Color = Color(line2?.color ?: 0xFF000000)
@@ -397,7 +399,7 @@ private fun TileList(
         state = listState,
         verticalArrangement = Arrangement.spacedBy(4.dp), 
         contentPadding = PaddingValues(bottom = 60.dp),
-        modifier = Modifier.pointerInput(Unit) {
+        modifier = Modifier.pointerInput(Unit) { // Stable key is critical
             detectDragGestures(
                 onDragStart = { offset ->
                     val item = listState.layoutInfo.visibleItemsInfo
@@ -410,9 +412,9 @@ private fun TileList(
                         if (station != null) {
                             draggedStationId = station.id
                             dragOffsetY = 0f
-                            // Initialize offsetX based on current side to prevent jump
+                            // Initialize horizontal offset based on current snap to prevent initial jump
                             val currentSide = currentSides[station.id] ?: 0
-                            dragOffsetX = with(density) { (currentSide * 32f).dp.toPx() }
+                            dragOffsetX = with(density) { (currentSide * 24f).dp.toPx() }
                         }
                     }
                 },
@@ -420,7 +422,9 @@ private fun TileList(
                     change.consume()
                     val stationId = draggedStationId ?: return@detectDragGestures
                     dragOffsetY += dragAmount.y
-                    if (challengeType == ChallengeType.CLASSIFY) {
+                    
+                    // Always read the latest challengeType from the updated state
+                    if (currentChallengeType == ChallengeType.CLASSIFY) {
                         dragOffsetX += dragAmount.x
                     }
 
@@ -450,9 +454,9 @@ private fun TileList(
                 },
                 onDragEnd = {
                     val stationId = draggedStationId
-                    if (stationId != null && challengeType == ChallengeType.CLASSIFY) {
+                    if (stationId != null && currentChallengeType == ChallengeType.CLASSIFY) {
                         // Use density-independent threshold
-                        val thresholdPx = with(density) { 40.dp.toPx() }
+                        val thresholdPx = with(density) { 30.dp.toPx() }
                         val side = when {
                             dragOffsetX < -thresholdPx -> -1
                             dragOffsetX > thresholdPx -> 1
@@ -525,7 +529,7 @@ private fun TileList(
                     )
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        // Small line badge with letter for CLASSIFY
+                        // Small square line badge for CLASSIFY
                         if (challengeType == ChallengeType.CLASSIFY) {
                             Surface(
                                 color = l1Color,

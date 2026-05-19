@@ -13,3 +13,74 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# ========================
+# Android / Gradle
+# ========================
+.gradle/
+build/
+*/build/
+**/build/
+
+# Local configuration
+local.properties
+*.iml
+
+# ========================
+# Android Studio
+# ========================
+.idea/
+*.iws
+*.ipr
+*.iml
+*.swp
+
+# ========================
+# Keystore files (IMPORTANT)
+# ========================
+*.jks
+*.keystore
+
+# ========================
+# Kotlin / Java
+# ========================
+*.class
+*.log
+
+# ========================
+# OS files
+# ========================
+.DS_Store
+Thumbs.db
+
+# ========================
+# Compose / kapt / ksp
+# ========================
+ksp/
+kapt/
+
+# ========================
+# Firebase / Google services (optional)
+# ========================
+google-services.json
+
+# ========================
+# Proguard
+# ========================
+proguard/
+
+# ========================
+# Caches
+# ========================
+.cxx/
+.externalNativeBuild/
+
+# ========================
+# Crashlytics / logs
+# ========================
+crashlytics-build.properties
+
+# ========================
+# Android profiling
+# ========================
+*.hprof
