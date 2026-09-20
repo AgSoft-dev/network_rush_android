@@ -14,15 +14,19 @@ interface GameResultDao {
     fun getResultsForLine(lineId: String): Flow<List<GameResultEntity>>
 
     @Query("""
-        SELECT * FROM game_results 
-        WHERE id IN (
-            SELECT id FROM game_results 
-            GROUP BY lineId 
-            HAVING MAX(score)
-        )
-        ORDER BY score DESC
+        SELECT r.* FROM game_results r
+        JOIN (
+            SELECT mode, difficulty, MAX(score) AS best
+            FROM game_results
+            GROUP BY mode, difficulty
+        ) m ON r.mode = m.mode AND r.difficulty = m.difficulty AND r.score = m.best
+        GROUP BY r.mode, r.difficulty
+        ORDER BY r.score DESC
     """)
     fun getBestScores(): Flow<List<GameResultEntity>>
+
+    @Query("SELECT MAX(score) FROM game_results WHERE mode = :mode AND difficulty = :difficulty")
+    suspend fun getHighScore(mode: String, difficulty: String): Int?
 
     @Query("DELETE FROM game_results")
     suspend fun clearAll()

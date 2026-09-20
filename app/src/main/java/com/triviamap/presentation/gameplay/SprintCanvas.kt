@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import com.triviamap.domain.model.Difficulty
@@ -26,7 +27,8 @@ fun SprintCanvas(
     bounds: GeoBounds,
     targetStation: Station?,
     visitedStations: List<Station>,
-    difficulty: Difficulty,
+    sessionStations: List<Station> = emptyList(),
+    @Suppress("UNUSED_PARAMETER") difficulty: Difficulty,
     onTap: (GeoPoint) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -48,10 +50,27 @@ fun SprintCanvas(
             }
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
+            // 1. Draw connections for session stations (the cumulative path)
+            if (sessionStations.size > 1) {
+                for (i in 0 until sessionStations.size - 1) {
+                    val p1 = sessionStations[i].position.toNormalized(bounds)
+                    val p2 = sessionStations[i + 1].position.toNormalized(bounds)
+                    
+                    drawLine(
+                        color = Color.White.copy(alpha = 0.3f), // Ghostly connection
+                        start = Offset(p1.first * size.width, p1.second * size.height),
+                        end = Offset(p2.first * size.width, p2.second * size.height),
+                        strokeWidth = 4f,
+                        cap = StrokeCap.Round
+                    )
+                }
+            }
+
+            // 2. Draw stations
             line.stations.forEach { station ->
-                val (nx, ny) = station.position.toNormalized(bounds)
-                val sx = nx * size.width
-                val sy = ny * size.height
+                val norm = station.position.toNormalized(bounds)
+                val sx = norm.first * size.width
+                val sy = norm.second * size.height
                 
                 val isVisited = visitedStations.any { it.id == station.id }
                 val isTarget = targetStation?.id == station.id

@@ -8,7 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.triviamap.domain.model.GameMode
 import com.triviamap.domain.model.GameResult
 import com.triviamap.domain.usecase.GetBestScoresUseCase
 import com.triviamap.presentation.common.*
@@ -52,7 +53,7 @@ fun StatsScreen(
                 elevation = 0.dp,
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = OnSurface)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = OnSurface)
                     }
                 },
                 title = {
@@ -75,14 +76,14 @@ fun StatsScreen(
             ) {
                 item {
                     Text(
-                        "Best scores per line",
+                        "Best scores",
                         color = OnSurfaceMed,
                         fontSize = 12.sp,
                         letterSpacing = 2.sp,
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
                 }
-                items(scores, key = { it.id }) { result ->
+                items(scores, key = { "${it.mode}-${it.difficulty}" }) { result ->
                     BestScoreCard(result)
                 }
             }
@@ -105,13 +106,14 @@ private fun BestScoreCard(result: GameResult) {
                 Modifier.size(40.dp).background(Primary.copy(alpha = 0.2f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Text(result.lineId, color = Primary, fontWeight = FontWeight.Black)
+                Text(if (result.mode == GameMode.STATION_SPRINT) "S" else "T", color = Primary, fontWeight = FontWeight.Black)
             }
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text("Line ${result.lineId}", color = OnSurface, fontWeight = FontWeight.SemiBold)
+                Text(if (result.mode == GameMode.STATION_SPRINT) "Station Sprint" else "Trace Network", color = OnSurface, fontWeight = FontWeight.SemiBold)
                 Text(
                     result.difficulty.name.lowercase().replaceFirstChar { it.uppercase() } +
+                            (if (result.mode == GameMode.STATION_SPRINT) " · level ${result.level}" else "") +
                             " · " + SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                         .format(Date(result.timestampMs)),
                     color = OnSurfaceMed,
@@ -129,7 +131,7 @@ private fun BestScoreCard(result: GameResult) {
 }
 
 private fun scoreColor(score: Int) = when {
-    score >= 800 -> Success
-    score >= 500 -> Accent
+    score >= 5000 -> Success
+    score >= 2000 -> Accent
     else -> Error
 }

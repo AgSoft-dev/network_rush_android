@@ -56,5 +56,11 @@ data class GameResult(
     val speedBonusScore: Float,     // 0..1
     val durationMs: Long,
     val timestampMs: Long = System.currentTimeMillis(),
-    val playerPath: List<GeoPoint> = emptyList()
+    val playerPath: List<GeoPoint> = emptyList(),
+    /** Sprint: last level reached. */
+    val level: Int = 0,
+    /** Sprint: best combo streak. */
+    val maxCombo: Int = 0,
+    /** Sprint: correct submissions / total submissions (0..1). */
+    val accuracy: Float = 0f
 )

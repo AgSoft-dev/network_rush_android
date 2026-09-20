@@ -2,9 +2,9 @@ package com.triviamap.presentation.gameplay
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,18 +21,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,20 +41,41 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.triviamap.domain.model.Difficulty
 import com.triviamap.domain.model.Station
 import com.triviamap.presentation.common.*
-import kotlinx.coroutines.delay
 
 @Composable
 fun SprintScreen(
     @Suppress("UNUSED_PARAMETER") difficulty: Difficulty,
-    onFinished: (Int) -> Unit,
+    onFinished: (Int, Float, Int, Int, Boolean, Int) -> Unit,
     onBack: () -> Unit,
     vm: SprintViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
 
+    // Freeze the run whenever the screen leaves the foreground
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, vm) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_STOP -> vm.pause()
+                Lifecycle.Event.ON_START -> vm.resume()
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     LaunchedEffect(state.phase) {
-        if (state.phase is GamePhase.Finished) {
-            onFinished(state.score)
+        val phase = state.phase
+        if (phase is GamePhase.Finished) {
+            onFinished(
+                state.score, 
+                phase.breakdown.stationOrder, 
+                state.level,
+                state.maxCombo,
+                state.isNewRecord,
+                state.streak
+            )
         }
     }
 
@@ -64,14 +85,14 @@ fun SprintScreen(
             Column(modifier = Modifier.statusBarsPadding()) {
                 SprintTopBar(
                     score = state.score,
-                    level = state.level,
-                    feedbackTrigger = state.feedbackTrigger,
-                    isCorrect = state.isCorrectFeedback,
-                    onBack = onBack
+                    stage = state.stage,
+                    onBack = onBack,
+                    onSkipShortcut = vm::skipQuestion
                 )
                 MetroTimerBar(
                     timeLeftMs = state.timeLeftMs,
                     difficulty = state.difficulty,
+                    combo = state.combo,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp, vertical = 4.dp)
@@ -85,28 +106,72 @@ fun SprintScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+            // Background Map with cumulative session connections
+            if (state.line != null && state.bounds != null) {
+                SprintCanvas(
+                    line = state.line!!,
+                    bounds = state.bounds!!,
+                    targetStation = null,
+                    visitedStations = emptyList(),
+                    sessionStations = state.sessionStations,
+                    difficulty = state.difficulty,
+                    onTap = {},
+                    modifier = Modifier.fillMaxSize().alpha(0.12f)
+                )
+            }
+
             when (state.phase) {
                 GamePhase.Loading -> {
-                    CircularProgressIndicator(Modifier.align(Alignment.Center), color = Primary)
+                    if (state.loadFailed) {
+                        Column(Modifier.align(Alignment.Center).padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Couldn't load the network data.", color = OnSurface, fontWeight = FontWeight.Bold)
+                            Spacer(Modifier.height(16.dp))
+                            Button(onClick = vm::retryLoad, colors = ButtonDefaults.buttonColors(backgroundColor = Primary, contentColor = Color.White)) {
+                                Text("RETRY")
+                            }
+                        }
+                    } else {
+                        CircularProgressIndicator(Modifier.align(Alignment.Center), color = Primary)
+                    }
                 }
                 GamePhase.Drawing, GamePhase.Validating -> {
                     Column(
                         modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            "Level ${state.level}",
-                            color = Primary,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Black
-                        )
-                        
-                        Text(
-                            if (state.challengeType == ChallengeType.REORDER) "Reorder the stations" else "Sort & Reorder",
-                            color = OnSurface,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally, 
+                                modifier = Modifier.align(Alignment.Center)
+                            ) {
+                                Text(
+                                    "Stage ${state.stage}",
+                                    color = Primary,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Black
+                                )
+                                
+                                Text(
+                                    when (state.challengeType) {
+                                        ChallengeType.REORDER -> "Reorder the stations"
+                                        ChallengeType.CLASSIFY -> "Sort & Reorder"
+                                        ChallengeType.SPEED_BURST -> "RAPID FIRE!"
+                                    },
+                                    color = OnSurface,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = state.combo >= 2,
+                                enter = slideInHorizontally { it } + fadeIn(),
+                                exit = slideOutHorizontally { it } + fadeOut(),
+                                modifier = Modifier.align(Alignment.CenterEnd)
+                            ) {
+                                ComboBadge(state.combo)
+                            }
+                        }
                         
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -119,8 +184,17 @@ fun SprintScreen(
                                 if (state.isForward) "FOLLOW DIRECTION" else "REVERSE DIRECTION",
                                 color = OnSurfaceMed,
                                 fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.5.sp
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        if (state.challengeType == ChallengeType.SPEED_BURST) {
+                            Spacer(Modifier.height(8.dp))
+                            LinearProgressIndicator(
+                                progress = 1f - state.burstTimer,
+                                modifier = Modifier.fillMaxWidth(0.6f).height(4.dp).clip(CircleShape),
+                                color = Accent,
+                                backgroundColor = OnSurface.copy(alpha = 0.1f)
                             )
                         }
 
@@ -128,29 +202,19 @@ fun SprintScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(start = 4.dp, top = 10.dp, end = 4.dp, bottom = 4.dp),
+                                    .padding(top = 10.dp, bottom = 4.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                HeaderLineBadge(state.line?.name ?: "", state.line?.color ?: 0xFF000000)
+                                HeaderLineBadge(state.line?.id ?: "", state.line?.color ?: 0xFF000000L)
                                 Text("HUB", color = OnSurfaceMed, fontSize = 10.sp, fontWeight = FontWeight.Black)
-                                HeaderLineBadge(state.line2?.name ?: "", state.line2?.color ?: 0xFF000000)
+                                HeaderLineBadge(state.line2?.id ?: "", state.line2?.color ?: 0xFF000000L)
                             }
                         }
                         
                         Spacer(Modifier.height(8.dp))
                         
                         Box(modifier = Modifier.weight(1f)) {
-                            // Watermark direction arrow
-                            Icon(
-                                if (state.isForward) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
-                                contentDescription = null,
-                                tint = OnSurface.copy(alpha = 0.03f),
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(48.dp)
-                            )
-
                             TileList(
                                 tiles = state.currentTiles,
                                 challengeType = state.challengeType,
@@ -159,7 +223,8 @@ fun SprintScreen(
                                 isForward = state.isForward,
                                 stationSides = state.stationSides,
                                 onMove = vm::moveTile,
-                                onSideChanged = vm::setStationSide
+                                onSideChanged = vm::setStationSide,
+                                isSuccessState = state.showFeedback && state.isCorrectFeedback
                             )
                         }
                     }
@@ -167,11 +232,19 @@ fun SprintScreen(
                 else -> {}
             }
             
-            FeedbackOverlay(
-                show = state.showFeedback,
-                isCorrect = state.isCorrectFeedback,
-                timeGain = state.lastTimeGain
-            )
+            androidx.compose.animation.AnimatedVisibility(
+                visible = state.showFeedback,
+                enter = fadeIn() + scaleIn(initialScale = 0.8f),
+                exit = fadeOut() + scaleOut(targetScale = 1.2f),
+                modifier = Modifier.align(Alignment.Center)
+            ) {
+                FeedbackOverlay(
+                    isCorrect = state.isCorrectFeedback,
+                    timeGain = state.lastTimeGain,
+                    timePenalty = state.lastTimePenalty,
+                    combo = state.combo
+                )
+            }
 
             if (state.phase is GamePhase.Validating && !state.showFeedback) {
                 Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.4f)), contentAlignment = Alignment.Center) {
@@ -187,21 +260,22 @@ fun SprintScreen(
 }
 
 @Composable
-private fun HeaderLineBadge(name: String, color: Long) {
-    Surface(
-        color = Color(color),
-        shape = RoundedCornerShape(6.dp),
-        modifier = Modifier.widthIn(min = 60.dp).height(32.dp)
+private fun SprintTopBar(score: Int, stage: Int, onBack: () -> Unit, onSkipShortcut: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 8.dp)) {
-            Text(
-                text = name, 
-                color = Color.White, 
-                fontWeight = FontWeight.Black, 
-                fontSize = 14.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+        IconButton(onClick = onBack) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = OnSurface)
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text("SCORE (STAGE $stage)", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = OnSurfaceMed)
+            Text(score.toString(), fontSize = 22.sp, fontWeight = FontWeight.Black, color = OnSurface)
+        }
+        TextButton(onClick = onSkipShortcut) {
+            Icon(Icons.Default.SkipNext, null, tint = OnSurfaceMed, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(4.dp))
+            Text("SKIP -4s", color = OnSurfaceMed, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -210,162 +284,43 @@ private fun HeaderLineBadge(name: String, color: Long) {
 private fun MetroTimerBar(
     timeLeftMs: Long,
     difficulty: Difficulty,
+    combo: Int,
     modifier: Modifier = Modifier
 ) {
     val totalTimeMs = when(difficulty) {
         Difficulty.EASY -> 60_000L
         Difficulty.MEDIUM -> 45_000L
-        Difficulty.HARD -> 30_000L
+        else -> 30_000L
     }.toFloat()
 
-    val progress by animateFloatAsState(
-        targetValue = (timeLeftMs / totalTimeMs).coerceIn(0f, 1f),
-        animationSpec = tween(100, easing = LinearEasing),
-        label = "timer_progress"
-    )
+    val progress by animateFloatAsState(targetValue = (timeLeftMs / totalTimeMs).coerceIn(0f, 1f), label = "timer")
+    val isLowTime = timeLeftMs < 10000
     
-    val isLowTime = timeLeftMs < 5000
-    val color by animateColorAsState(
-        if (isLowTime) Error else Accent,
-        animationSpec = if (isLowTime) infiniteRepeatable(tween(400), RepeatMode.Reverse) else tween(400),
-        label = "timer_color"
+    val baseColor = when {
+        combo >= 10 -> Color(0xFFFFD700)
+        combo >= 5 -> Color(0xFF00BFFF)
+        else -> Accent
+    }
+
+    val pulseScale by animateFloatAsState(
+        targetValue = if (isLowTime) 1.06f else 1.0f,
+        animationSpec = if (isLowTime) infiniteRepeatable(tween(500), RepeatMode.Reverse) else spring(),
+        label = "pulse"
     )
 
-    Column(modifier = modifier) {
-        Canvas(modifier = Modifier.fillMaxWidth().height(16.dp)) {
-            val width = size.width
-            val height = size.height
-            val centerY = height / 2
-            val strokeWidth = 6.dp.toPx()
-            val stationRadius = 5.dp.toPx()
-            
-            drawLine(
-                color = OnSurfaceMed.copy(alpha = 0.1f),
-                start = Offset(stationRadius, centerY),
-                end = Offset(width - stationRadius, centerY),
-                strokeWidth = strokeWidth,
-                cap = StrokeCap.Round
-            )
-            
-            val activeWidth = (width - 2 * stationRadius) * progress
-            if (progress > 0) {
-                drawLine(
-                    color = color,
-                    start = Offset(stationRadius, centerY),
-                    end = Offset(stationRadius + activeWidth, centerY),
-                    strokeWidth = strokeWidth,
-                    cap = StrokeCap.Round
-                )
-            }
-            
-            val stationCount = 5
-            for (i in 0..stationCount) {
-                val x = stationRadius + ((width - 2 * stationRadius) / stationCount) * i
-                val isReached = x <= (stationRadius + activeWidth) + 1f
-                
-                drawCircle(
-                    color = if (isReached) color else OnSurfaceMed.copy(alpha = 0.2f),
-                    radius = stationRadius,
-                    center = Offset(x, centerY)
-                )
-                
-                drawCircle(
-                    color = if (isReached) Color.White else Background,
-                    radius = stationRadius * 0.4f,
-                    center = Offset(x, centerY)
-                )
-            }
-        }
+    val color by animateColorAsState(if (isLowTime) Error else baseColor, label = "color")
+
+    Box(modifier = modifier.graphicsLayer(scaleX = pulseScale, scaleY = pulseScale)) {
+        LinearProgressIndicator(
+            progress = progress,
+            modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
+            color = color,
+            backgroundColor = OnSurface.copy(alpha = 0.1f)
+        )
     }
 }
 
-@Composable
-private fun FeedbackOverlay(show: Boolean, isCorrect: Boolean, timeGain: Int) {
-    AnimatedVisibility(
-        visible = show,
-        enter = fadeIn() + scaleIn(initialScale = 0.5f, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)),
-        exit = fadeOut() + scaleOut(targetScale = 1.5f)
-    ) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = if (isCorrect) Color(0xFF4CAF50) else Color(0xFFF44336),
-                elevation = 12.dp,
-                modifier = Modifier.padding(32.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 40.dp, vertical = 32.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    val scale by animateFloatAsState(
-                        targetValue = if (show) 1.1f else 1f,
-                        animationSpec = infiniteRepeatable(tween(400), RepeatMode.Reverse)
-                    )
-                    
-                    Text(
-                        if (isCorrect) "PERFECT!" else "WRONG!",
-                        color = Color.White,
-                        fontWeight = FontWeight.Black,
-                        fontSize = 32.sp,
-                        modifier = Modifier.graphicsLayer(scaleX = scale, scaleY = scale)
-                    )
-                    
-                    if (isCorrect) {
-                        Spacer(Modifier.height(12.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Timer, null, tint = Color.White, modifier = Modifier.size(24.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text("+$timeGain SECONDS", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SprintTopBar(
-    score: Int, 
-    level: Int, 
-    feedbackTrigger: Int,
-    isCorrect: Boolean,
-    onBack: () -> Unit
-) {
-    var scoreScale by remember { mutableFloatStateOf(1f) }
-    LaunchedEffect(feedbackTrigger) {
-        if (feedbackTrigger > 0 && isCorrect) {
-            scoreScale = 1.3f
-            delay(100)
-            scoreScale = 1f
-        }
-    }
-    val animatedScoreScale by animateFloatAsState(
-        targetValue = scoreScale,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioHighBouncy)
-    )
-
-    TopAppBar(
-        backgroundColor = Background,
-        elevation = 0.dp,
-        navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = OnSurface)
-            }
-        },
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.graphicsLayer(scaleX = animatedScoreScale, scaleY = animatedScoreScale)) {
-                    Text("Sprint - Lvl $level", color = OnSurface, fontWeight = FontWeight.Black, fontSize = 15.sp)
-                    Text("SCORE: $score", color = Accent, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                }
-                Spacer(Modifier.weight(1f))
-            }
-        }
-    )
-}
-
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 private fun TileList(
     tiles: List<Station>,
@@ -375,7 +330,8 @@ private fun TileList(
     isForward: Boolean,
     stationSides: Map<String, Int>,
     onMove: (Int, Int) -> Unit,
-    onSideChanged: (String, Int) -> Unit
+    onSideChanged: (String, Int) -> Unit,
+    isSuccessState: Boolean
 ) {
     val listState = rememberLazyListState()
     val haptic = LocalHapticFeedback.current
@@ -385,34 +341,29 @@ private fun TileList(
     var dragOffsetY by remember { mutableFloatStateOf(0f) }
     var dragOffsetX by remember { mutableFloatStateOf(0f) }
     
-    // Stable references to prevent gesture cancellation on question transitions
     val currentTiles by rememberUpdatedState(tiles)
     val currentOnMove by rememberUpdatedState(onMove)
     val currentOnSideChanged by rememberUpdatedState(onSideChanged)
     val currentSides by rememberUpdatedState(stationSides)
-    val currentChallengeType by rememberUpdatedState(challengeType)
 
-    val l1Color = Color(line1?.color ?: 0xFF000000)
-    val l2Color = Color(line2?.color ?: 0xFF000000)
+    val l1Color = Color(line1?.color ?: 0xFF000000L)
+    val l2Color = Color(line2?.color ?: 0xFF000000L)
 
     LazyColumn(
         state = listState,
-        verticalArrangement = Arrangement.spacedBy(4.dp), 
-        contentPadding = PaddingValues(bottom = 60.dp),
-        modifier = Modifier.pointerInput(Unit) { // Stable key is critical
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(bottom = 100.dp),
+        modifier = Modifier.pointerInput(challengeType) {
             detectDragGestures(
                 onDragStart = { offset ->
                     val item = listState.layoutInfo.visibleItemsInfo
-                        .firstOrNull { item ->
-                            offset.y.toInt() in item.offset..(item.offset + item.size)
-                        }
+                        .firstOrNull { offset.y.toInt() in it.offset..(it.offset + it.size) }
                     
                     item?.let { 
                         val station = currentTiles.getOrNull(it.index)
                         if (station != null) {
                             draggedStationId = station.id
                             dragOffsetY = 0f
-                            // Initialize horizontal offset based on current snap to prevent initial jump
                             val currentSide = currentSides[station.id] ?: 0
                             dragOffsetX = with(density) { (currentSide * 24f).dp.toPx() }
                         }
@@ -422,40 +373,27 @@ private fun TileList(
                     change.consume()
                     val stationId = draggedStationId ?: return@detectDragGestures
                     dragOffsetY += dragAmount.y
-                    
-                    // Always read the latest challengeType from the updated state
-                    if (currentChallengeType == ChallengeType.CLASSIFY) {
-                        dragOffsetX += dragAmount.x
-                    }
+                    if (challengeType == ChallengeType.CLASSIFY) { dragOffsetX += dragAmount.x }
 
-                    // Find index reliably from ID to fix "wrong indexing" bug
                     val fromIndex = currentTiles.indexOfFirst { it.id == stationId }
                     if (fromIndex == -1) return@detectDragGestures
 
                     val info = listState.layoutInfo
-                    // Use stable key to find item info instead of stale indices
-                    val draggedItemInfo = info.visibleItemsInfo.firstOrNull { it.key == stationId } 
-                        ?: return@detectDragGestures
-
-                    // Vertical Reordering
+                    val draggedItemInfo = info.visibleItemsInfo.firstOrNull { it.key == stationId } ?: return@detectDragGestures
                     val draggedCenterY = draggedItemInfo.offset + dragOffsetY + draggedItemInfo.size / 2
                     val target = info.visibleItemsInfo.firstOrNull { item ->
-                        item.index != fromIndex &&
-                                draggedCenterY.toInt() in item.offset..(item.offset + item.size)
+                        item.index != fromIndex && draggedCenterY.toInt() in item.offset..(item.offset + item.size)
                     }
 
                     if (target != null) {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         currentOnMove(fromIndex, target.index)
-                        
-                        // Vertical reconciliation to prevent jittering
                         dragOffsetY += (draggedItemInfo.offset - target.offset)
                     }
                 },
                 onDragEnd = {
                     val stationId = draggedStationId
-                    if (stationId != null && currentChallengeType == ChallengeType.CLASSIFY) {
-                        // Use density-independent threshold
+                    if (stationId != null && challengeType == ChallengeType.CLASSIFY) {
                         val thresholdPx = with(density) { 30.dp.toPx() }
                         val side = when {
                             dragOffsetX < -thresholdPx -> -1
@@ -464,137 +402,58 @@ private fun TileList(
                         }
                         if (side != (currentSides[stationId] ?: 0)) {
                             currentOnSideChanged(stationId, side)
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         }
                     }
                     draggedStationId = null
-                    dragOffsetY = 0f
-                    dragOffsetX = 0f
-                },
-                onDragCancel = {
-                    draggedStationId = null
-                    dragOffsetY = 0f
-                    dragOffsetX = 0f
                 }
             )
         }
     ) {
-        itemsIndexed(tiles, key = { _, station -> station.id }) { index, station ->
-            val isDragging = station.id == draggedStationId
+        itemsIndexed(tiles, key = { _, s -> s.id }) { index, station ->
             val side = stationSides[station.id] ?: 0
+            val isDragging = station.id == draggedStationId
             
-            val animatedScale by animateFloatAsState(if (isDragging) 1.04f else 1f)
-            
-            // Background logic: Half/Half Gradient for center/hubs
-            val halfHalfBrush = Brush.horizontalGradient(listOf(l1Color.copy(alpha = 0.5f), l2Color.copy(alpha = 0.5f)))
-            
+            val cascadeOffset by animateDpAsState(
+                targetValue = if (isSuccessState) 800.dp else 0.dp,
+                animationSpec = tween(400, delayMillis = index * 60),
+                label = "cascade"
+            )
+
             val targetColor = when (side) {
                 -1 -> l1Color.copy(alpha = 0.6f)
                 1 -> l2Color.copy(alpha = 0.6f)
-                else -> Color.Transparent
+                else -> Surface
             }
-            val animatedBackgroundColor by animateColorAsState(if (isDragging) Primary.copy(alpha = 0.9f) else targetColor)
+            val tileColor by animateColorAsState(if (isDragging) Primary.copy(alpha = 0.9f) else targetColor, label = "color")
 
-            Surface(
+            Card(
+                elevation = if (isDragging) 8.dp else 2.dp,
+                shape = RoundedCornerShape(12.dp),
+                backgroundColor = tileColor,
+                border = if (side != 0 && !isDragging) BorderStroke(1.5.dp, if (side == -1) l1Color else l2Color) else null,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .zIndex(if (isDragging) 1f else 0f)
+                    .offset(x = cascadeOffset)
                     .graphicsLayer {
                         translationY = if (isDragging) dragOffsetY else 0f
                         translationX = if (isDragging) dragOffsetX else (side * 24f).dp.toPx()
-                        scaleX = animatedScale
-                        scaleY = animatedScale
                     }
-                    .let { if (!isDragging) it.animateItemPlacement() else it },
-                shape = RoundedCornerShape(10.dp),
-                color = Color.Transparent,
-                elevation = if (isDragging) 8.dp else 2.dp,
-                border = if (side != 0 && !isDragging) androidx.compose.foundation.BorderStroke(1.5.dp, if (side == -1) l1Color else l2Color) else null
+                    .zIndex(if (isDragging) 1f else 0f)
+                    .animateItemPlacement()
             ) {
-                Box(
-                    modifier = Modifier
-                        .background(if (side == 0 && !isDragging) halfHalfBrush else SolidColor(animatedBackgroundColor))
-                        .padding(horizontal = 12.dp, vertical = 10.dp), // Thinner tiles
-                    contentAlignment = Alignment.CenterStart
-                ) {
+                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = if (isForward) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .padding(end = 40.dp)
-                            .size(24.dp)
-                            .alpha(0.05f),
-                        tint = if (isDragging) Color.White else OnSurface
+                        contentDescription = null, tint = OnSurface.copy(alpha = 0.1f), modifier = Modifier.size(20.dp)
                     )
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        // Small square line badge for CLASSIFY
-                        if (challengeType == ChallengeType.CLASSIFY) {
-                            Surface(
-                                color = l1Color,
-                                shape = RoundedCornerShape(4.dp),
-                                modifier = Modifier.size(22.dp).alpha(if (side == -1) 1f else 0.3f)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text(line1?.name?.take(1) ?: "", color = Color.White, fontWeight = FontWeight.Black, fontSize = 11.sp)
-                                }
-                            }
-                            Spacer(Modifier.width(6.dp))
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .background(if (isDragging) Color.White.copy(alpha = 0.2f) else Background, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "${index + 1}",
-                                fontWeight = FontWeight.Black,
-                                color = if (isDragging) Color.White else OnSurfaceMed,
-                                fontSize = 12.sp
-                            )
-                        }
-                        
-                        Spacer(Modifier.width(10.dp))
-                        
-                        Text(
-                            text = station.name,
-                            modifier = Modifier.weight(1f),
-                            color = if (isDragging || side != 0) Color.White else OnSurface,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 15.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            textAlign = if (challengeType == ChallengeType.CLASSIFY) {
-                                when(side) {
-                                    -1 -> TextAlign.Start
-                                    1 -> TextAlign.End
-                                    else -> TextAlign.Center
-                                }
-                            } else TextAlign.Start
-                        )
-
-                        if (challengeType == ChallengeType.CLASSIFY) {
-                            Spacer(Modifier.width(6.dp))
-                            Surface(
-                                color = l2Color,
-                                shape = RoundedCornerShape(4.dp),
-                                modifier = Modifier.size(22.dp).alpha(if (side == 1) 1f else 0.3f)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text(line2?.name?.take(1) ?: "", color = Color.White, fontWeight = FontWeight.Black, fontSize = 11.sp)
-                                }
-                            }
-                        } else {
-                            Icon(
-                                Icons.Default.Menu,
-                                contentDescription = null,
-                                tint = if (isDragging || side != 0) Color.White.copy(alpha = 0.6f) else OnSurfaceMed.copy(alpha = 0.4f),
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = station.name, modifier = Modifier.weight(1f),
+                        fontWeight = FontWeight.Bold, color = OnSurface,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis
+                    )
+                    if (!isDragging && !isSuccessState) {
+                        Icon(Icons.Default.DragHandle, null, tint = OnSurfaceMed.copy(alpha = 0.5f))
                     }
                 }
             }
@@ -604,29 +463,56 @@ private fun TileList(
 
 @Composable
 private fun SubmitSection(onSubmit: () -> Unit) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = Background,
-        elevation = 16.dp
-    ) {
+    Box(modifier = Modifier.fillMaxWidth().padding(24.dp)) {
         Button(
             onClick = onSubmit,
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-                .height(56.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(28.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = Primary, contentColor = Color.White)
         ) {
-            Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(24.dp))
-            Spacer(Modifier.width(12.dp))
-            Text("SUBMIT ORDER", fontWeight = FontWeight.Black, letterSpacing = 2.sp, fontSize = 15.sp)
+            Text("CHECK ORDER", fontWeight = FontWeight.Black, letterSpacing = 2.sp)
         }
     }
 }
 
-private fun formatTimeLeft(ms: Long): String {
-    val seconds = (ms / 1000).toInt()
-    val deciseconds = (ms % 1000 / 100).toInt()
-    return "$seconds.$deciseconds"
+@Composable
+private fun FeedbackOverlay(isCorrect: Boolean, timeGain: Int, timePenalty: Int, combo: Int) {
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = if (isCorrect) Success else Error,
+        elevation = 8.dp
+    ) {
+        Column(modifier = Modifier.padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(if (isCorrect) Icons.Default.CheckCircle else Icons.Default.Warning, null, tint = Color.White, modifier = Modifier.size(48.dp))
+            Spacer(Modifier.height(16.dp))
+            Text(if (isCorrect) "CORRECT!" else "WRONG!", color = Color.White, fontWeight = FontWeight.Black, fontSize = 24.sp)
+            if (isCorrect && combo >= 3) {
+                Text("x$combo COMBO!", color = Color.White.copy(alpha = 0.9f), fontWeight = FontWeight.ExtraBold)
+            }
+            Text(if (isCorrect) "+${timeGain}s" else "-${timePenalty}s", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+private fun ComboBadge(combo: Int) {
+    Surface(color = Accent, shape = RoundedCornerShape(12.dp), elevation = 4.dp) {
+        Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.Whatshot, null, tint = Color.White, modifier = Modifier.size(14.dp))
+            Spacer(Modifier.width(4.dp))
+            Text("x$combo", color = Color.White, fontWeight = FontWeight.Black, fontSize = 12.sp)
+        }
+    }
+}
+
+@Composable
+private fun HeaderLineBadge(name: String, color: Long) {
+    Surface(
+        color = Color(color), shape = RoundedCornerShape(6.dp),
+        modifier = Modifier.widthIn(min = 40.dp).height(32.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 8.dp)) {
+            Text(text = name, color = Color.White, fontWeight = FontWeight.Black, fontSize = 14.sp)
+        }
+    }
 }

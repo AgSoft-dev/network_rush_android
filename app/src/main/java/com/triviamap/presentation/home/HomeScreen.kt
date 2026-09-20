@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.triviamap.BuildConfig
 import com.triviamap.domain.model.Difficulty
 import com.triviamap.domain.model.GameMode
 import com.triviamap.presentation.common.*
@@ -64,15 +65,18 @@ fun HomeScreen(
 
             Spacer(Modifier.height(48.dp))
 
-            ModeButton(
-                title = "TRACE NETWORK",
-                icon = Icons.Default.Map,
-                color = Primary,
-                onClick = { pendingMode = GameMode.TRACE_NETWORK }
-            )
-            
-            Spacer(Modifier.height(16.dp))
-            
+            // Trace Network is parked until its scoring is reworked: dev builds only
+            if (BuildConfig.DEBUG) {
+                ModeButton(
+                    title = "TRACE NETWORK (DEV)",
+                    icon = Icons.Default.Map,
+                    color = Primary,
+                    onClick = { pendingMode = GameMode.TRACE_NETWORK }
+                )
+
+                Spacer(Modifier.height(16.dp))
+            }
+
             ModeButton(
                 title = "STATION SPRINT",
                 icon = Icons.Default.ElectricBolt,
@@ -153,9 +157,9 @@ private fun DifficultyPickerDialog(
         title = { Text("Select Difficulty", fontWeight = FontWeight.Bold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                DifficultyOption("Easy", "Sequential stops segment", Success) { onSelect(Difficulty.EASY) }
-                DifficultyOption("Medium", "Random stops from one line", Accent) { onSelect(Difficulty.MEDIUM) }
-                DifficultyOption("Hard", "Truly random network stops", Error) { onSelect(Difficulty.HARD) }
+                DifficultyOption("Easy", "60 s clock · +12 s per correct answer", Success) { onSelect(Difficulty.EASY) }
+                DifficultyOption("Medium", "45 s clock · +10 s per correct answer", Accent) { onSelect(Difficulty.MEDIUM) }
+                DifficultyOption("Hard", "30 s clock · +8 s per correct answer", Error) { onSelect(Difficulty.HARD) }
             }
         },
         buttons = {

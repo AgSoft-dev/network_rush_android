@@ -17,6 +17,14 @@ object GeoJsonParser {
         val root = gson.fromJson(json, JsonObject::class.java)
         val linesObj = root.getAsJsonObject("lines") ?: return emptyList()
         
+        // Station ids shared between lines are interchange hubs.
+        val linesByStation = mutableMapOf<String, MutableList<String>>()
+        linesObj.entrySet().forEach { (lineId, element) ->
+            element.asJsonObject.getAsJsonArray("stations").forEach { s ->
+                linesByStation.getOrPut(s.asJsonObject.get("id").asString) { mutableListOf() }.add(lineId)
+            }
+        }
+
         return linesObj.entrySet().map { (lineId, element) ->
             val lineData = element.asJsonObject
             val colorHex = lineData.get("color")?.asString ?: "#888888"
@@ -28,11 +36,11 @@ object GeoJsonParser {
                     id = sObj.get("id").asString,
                     name = sObj.get("name").asString,
                     position = GeoPoint(sObj.get("x").asDouble, sObj.get("y").asDouble),
-                    lines = listOf(lineId) // In this dataset, stations are per line
+                    lines = linesByStation.getValue(sObj.get("id").asString)
                 )
             }
             
-            val geometry = lineData.getAsJsonArray("geometry").map { g ->
+            val geometry = (lineData.getAsJsonArray("geometry") ?: com.google.gson.JsonArray()).map { g ->
                 val gArr = g.asJsonArray
                 GeoPoint(gArr[0].asDouble, gArr[1].asDouble)
             }
