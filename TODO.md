@@ -100,4 +100,112 @@ Constats principaux :
   - ⏸ concerne Trace + fond Sprint ; à traiter avec le §3.
 - [x] **P2 — Dépendances datées** : Kotlin 1.9.23, Compose BOM 2024.05, AGP 8.13.2 (décalage avec Kotlin/Gradle), `compileSdk/targetSdk 34` (Play exige 35 depuis 2025-08), Gson (maintenance mode), Material 2 (roadmap M3 abandonnée en pratique). Planifier bump : Kotlin 2.x + plugin Compose compiler, BOM récent, targetSdk 35/36, `kotlinx.serialization`.
   - ✅ 2026-09-21 : Gradle 8.13→9.7.1, AGP 8.13.2→9.4.1 (Kotlin intégré), Kotlin 1.9.23→2.3.21 (plugin Compose), KSP 2.3.12, Hilt 2.59.2, Room 2.8.5, Compose BOM 2026.09.00, Navigation 2.10.1, Lifecycle 2.10.0, Activity 1.12.4, DataStore 1.2.1, coroutines 1.10.2, Gson 2.13.2, compileSdk 37 / targetSdk 35, JDK daemon épinglé à 21 (`gradle-daemon-jvm.properties` + foojay). Build vérifié : `testDebugUnitTest` (21 tests OK), `lintDebug`, `assembleDebug`, `assembleRelease` (R8). Corrigé : `animateItemPlacement`→`animateItem`, `hiltViewModel`/`LocalLifecycleOwner` déplacés, lint `NonObservableLocale`.
-  - ⏸ Reste : targetSdk 36 (lint `OldTargetApi`) à tester visuellement (edge-to-edge), migration Material 3, `kotlinx.serialization` à la place de Gson (le ⏸ précédent ci-dessous est obsolète).
+  - ⏸ Reste : targetSdk 36 (lint `OldTargetApi`) à tester visuellement (edge-to-edge), migration Material 3, `kotlinx.serialization` à la place de Gson.
+- [x] **P2 — Pas de CI / lint** : ajouter GitHub Actions (`./gradlew lintDebug testDebugUnitTest assembleDebug`), ktlint/detekt.
+  - ✅ `.github/workflows/ci.yml` (tests + lintDebug + assembleDebug, JDK 17). Reste : ktlint/detekt, lint jamais exécuté localement.
+- [ ] **P2 — Logging / analytics / crash reporting** : rien. Au minimum Crashlytics (ou équivalent respectueux de la vie privée) avant beta.
+  - ⏸ non traité (choix produit : outil, vie privée).
+- [ ] **P3 — Pas de `versionName` / changelog / signature release** planifiés.
+- [ ] **P3 — Perf de démarrage** : parse JSON 32 Ko sur IO, trivial ; RAS. À surveiller si multi-villes (§5) → prévoir parsing lazy par ville et cache.
+- [ ] **P3 — Modularisation** (`:core:model`, `:feature:sprint`, `:feature:trace`) seulement si multi-villes/équipe ; pas prioritaire.
+
+---
+
+## 3. Gameplay — mode Trace Network
+
+Problème de fond : **la promesse ("redessine le réseau de mémoire") n'est pas tenue par le scoring actuel.**
+
+- [ ] **P0 — Le score ne dépend plus du tracé** : `computeGlobal` n'utilise que l'ordre des stations *touchées* (LCS) et la complétion. Un joueur qui zigzague sur l'écran en passant par les stations dans l'ordre obtient un score parfait. La précision géométrique a été retirée ("Removed accuracy scoring") sans remplacement. → décider de la vision :
+  - (a) jeu de **mémoire topologique** : ce qui compte = ordre + connexions (stations reliées consécutivement) → scorer les **arêtes** (paire de stations consécutives touchées d'affilée) plutôt que le LCS ;
+  - (b) jeu de **mémoire géographique** : réintégrer Fréchet/Hausdorff normalisé (attention à la déformation, cf. §2).
+- [ ] **P1 — Détection de visite trop permissive et bruitée** : snap radius fixe 30 unités sur un plan de ~580×470 → ~5 % de la largeur, alors que des stations de lignes différentes sont parfois à < 1 unité (min mesuré 0.65). En traçant la ligne A près d'un croisement, on valide les stations d'autres lignes proches ; l'ordre est l'ordre de **première visite** seulement (repasser sur une station ne change rien). Traiter : rayon relatif au zoom, hystérésis, séquence = ordre de passage réel (avec doublons pour les allers-retours), et snapping par ligne active uniquement (déjà le cas, mais hubs partagés IDs entre lignes → ok).
+- [ ] **P1 — Direction non vérifiée** : LCS non orienté dans le sens : un tracé inversé donne un mauvais score, mais le joueur n'a **aucune consigne** de direction. Accepter les deux sens (max(LCS, LCS reversed)).
+- [ ] **P1 — Pas de feedback de fin** : après validation, retour direct sur l'écran de résultat avec un total ; aucune visualisation de ce qui était juste/faux (README roadmap : "animated validation overlay"). C'est **le** moment pédagogique du jeu → superposer réseau réel vs tracé, stations manquées en rouge.
+- [ ] **P1 — Une seule partie = tout le réseau (7 lignes, ~165 stations) en 3–5 min** : charge énorme pour du mobile, tracé au doigt imprécis, et un seul score global (`lineId = "ALL"`). Proposer des parties **par ligne** (`LineSelectionScreen` existe, orphelin) et des paliers (1 ligne → 2 → réseau complet).
+- [ ] **P1 — Difficulté peu lisible** : EASY affiche les fantômes + noms au fur et à mesure, MEDIUM affiche **tous les noms** (donc plus facile que "mémoire" : on lit la carte), HARD masque les noms mais pas les positions/cercles des stations → on retrouve l'itinéraire à vue. Une vraie difficulté "mémoire" = ne montrer ni positions ni noms, seulement une liste de stations à placer/relier. Revoir les 3 niveaux.
+- [ ] **P1 — Limite de temps non appliquée** : `timeLimitMs` sert seulement au bonus de vitesse, aucun arrêt à 0 ; le timer HUD monte indéfiniment (`elapsedMs`) sans limite visible.
+- [ ] **P2 — Pas d'annulation partielle** : "Clear" efface toute la ligne active ; ajouter undo du dernier trait.
+- [ ] **P2 — Outil de tracé** : dessin libre au doigt (imprécis, le doigt masque la cible). Alternative plus jouable : **relier des stations en tapant** (tap station → tap suivante) avec le tracé auto-lissé ; garder le dessin libre en mode expert.
+- [ ] **P2 — Onboarding absent** : aucun tutoriel (pan à 2 doigts ? pinch ? comment dessiner ?), aucune explication du score sur Home.
+- [ ] **P2 — Fond de carte** : aucun repère (Rhin, centre-ville, gares) → sans contexte, difficile de "se placer" ; un fond minimal (contour communes/eau) en `Path` statique aiderait sans casser le style.
+
+---
+
+## 4. Gameplay — mode Station Sprint
+
+Le mode le plus prometteur (boucle courte, tension du timer, combos). Points d'équilibrage et de design :
+
+- [ ] **P0 — Pas de vraie condition de défaite ni de courbe de difficulté finie** : la seule fin est le timer à 0 ; skip gratuit (cf. §1) + gains de temps 8–12 s pour ≤ 8 tuiles → un joueur régulier peut jouer indéfiniment. Ajouter : skip coûteux (−temps, −combo, quota limité), et/ou décroissance du gain de temps avec le niveau (au-delà du stage 5, "else" = stage 5 permanent, plus aucune montée).
+- [ ] **P0 — Stage 5 infini à difficulté constante** : `getStage` plafonne à 5 dès le niveau 21 ; count 7–8 constant, gain de temps `coerceAtLeast(4000)`. Ajouter une montée continue (moins de temps, plus de tuiles, distracteurs, lignes moins connues) pour qu'une partie ait un plafond de compétence.
+- [ ] **P1 — Les gains/pénalités de temps créent une boucle "positive"** : gain (≥ 4 s + combo jusqu'à +5 s + 5 s classify) vs pénalité (5–9 s) ; à partir de ~5 réponses justes le joueur est net positif quelle que soit la difficulté (plafond `maxTimeMs` de 30–60 s seulement). Simuler l'économie (script) : temps moyen de résolution par type × gains, cible ~ 60–90 s de survie pour un joueur moyen.
+- [ ] **P1 — CLASSIFY : l'"ordre correct" est mal défini** (cf. §1) : trier des stations de deux lignes différentes par `minOf(idx1, idx2)` n'a pas de sens géographique/pédagogique (l'index 3 de la ligne A n'est pas "avant" l'index 5 de la ligne D). Le joueur ne peut pas déduire l'ordre → frustration/aléatoire. Séparer : (1) classer gauche/droite/hub, (2) ordonner **dans chaque colonne**.
+- [ ] **P1 — CLASSIFY : ambiguïté hub** : une station "hub" (commune aux deux lignes) est correcte uniquement au centre ; mais l'UI ne montre que trois offsets de 24 dp (translationX) : très faible affordance (les tuiles bougent à peine), seuil 30 dp au relâché. Zones de dépôt visibles nécessaires (colonnes colorées).
+- [ ] **P1 — Direction "FOLLOW / REVERSE" mal expliquée** : une flèche ↓/↑ minuscule ; l'ordre "reverse" est la source principale d'échecs involontaires. Afficher les **terminus** ("de Graffenstaden vers Parc des Sports") au lieu d'une flèche.
+- [x] **P1 — Stage 1 filtre "stations à correspondance + terminus"** : n'a pas de sens si `Station.lines` ne contient qu'**une** ligne (le parser met `listOf(lineId)` "stations are per line") → `s.lines.size > 1` est **toujours faux**, le filtre ne garde que les 2 terminus → `availableStations.size <= count` → tuiles = 2 stations, jamais 3–4. À vérifier / corriger (dériver `lines` en croisant les IDs partagés entre lignes).
+  - ✅ le parser dérive maintenant `Station.lines` des ids partagés entre lignes (les hubs sont détectés) ; repli sur la ligne complète si < 3 stations. À vérifier en jeu : les tuiles du stage 1 = hubs + terminus, pas forcément contigus.
+- [ ] **P1 — Répétition des défis** : `allLines.random()` sans mémoire → mêmes lignes/segments de suite, aucune progression de "connaissance". Ajouter un tirage pondéré par erreurs passées (répétition espacée), et éviter les doublons consécutifs.
+- [ ] **P1 — Pas de feedback pédagogique** : sur une mauvaise réponse → "WRONG! −5s" (et le libellé `-5s` est **codé en dur** alors que la pénalité est 5–9 s), pas de correction affichée. Montrer la bonne réponse (ou au moins quelles tuiles étaient mal placées) : c'est ce qui fait apprendre le réseau.
+- [ ] **P1 — Un seul submit à valider = grille tout-ou-rien** : 8 tuiles, une erreur → 0 point + pénalité. Ajouter un retour partiel (nombre de tuiles bien placées façon Wordle) pour un flux plus doux.
+- [ ] **P2 — SPEED_BURST** : `burstTimer` de 6 s fixe avec 3 tuiles, et le timeout **retire 3 s** mais ne compte pas comme échec de `totalSubmissions`/`combo` reset (il reset le combo, ok) ; le mode n'apparaît qu'au stage 5 avec 20 % de chance → jamais vu par la majorité. Le rendre plus visible (stage 2–3) ou en faire un mode à part.
+- [ ] **P2 — Score** : `basePoints * speedFactor * comboFactor` : le `speedFactor` plafonne à 1.5 pour < 10 s et vaut 1.0 après 20 s, donc rapidité peu récompensée ; combo à ×2 max atteint à 10 → plafond bas. `isNewRecord = score > previousHigh && previousHigh > 0` → **le premier score n'est jamais un record**, bien que ce soit compréhensible, l'UX du "premier run" est vide.
+- [ ] **P2 — Difficulté = simple durée de timer** (60/45/30 s) : ne change ni le contenu ni les règles. Ajouter des variantes (masquer partiellement les noms, lignes moins connues, sens inverse forcé).
+- [ ] **P2 — Feedback tactile/sonore** : haptique présent au drag, mais pas de vibration succès/échec, aucun son. Le jeu vit de ce feedback (combos).
+- [ ] **P2 — Le fond `SprintCanvas` à 12 % d'opacité** dessine la ligne en arrière-plan : décoratif, mais peut **donner la réponse** (la géométrie de la ligne et les stations sont visibles derrière). Vérifier que l'ordre spatial ne fuit pas.
+- [ ] **P2 — Badges** : seulement `hub_expert` et `night_rider` (22h–4h, condition `hour >= 22 || hour <= 4`) attribués silencieusement, jamais affichés dans le code lu → écran badges absent.
+- [ ] **P3 — Modes additionnels** (déjà en roadmap) : *Daily challenge* (graine par jour → requiert `Random` seedable, cf. §2), *"Quelle ligne dessert ces stations ?"*, *"Quelle est la prochaine station ?"*, *Trouve le segment manquant*, *Terminus/correspondances*.
+
+---
+
+### Drag & drop des tuiles : ressenti peu réactif (investigation 2026-09-21)
+
+Analyse statique de `TileList` (`SprintScreen.kt` ~l.324-460) et de `SprintViewModel` ; **rien n'a été mesuré sur appareil** (à confirmer avec le Layout Inspector, un compteur de recompositions ou JankStats). Causes probables, par ordre d'impact estimé :
+
+- [x] **P1 — Conflit drag ↔ scroll du `LazyColumn`.** Le `pointerInput { detectDragGestures }` est posé sur le modifier du `LazyColumn`, donc parent du scrollable : le scroll reçoit les événements en premier. Or dès 6 tuiles (stage 3+) la liste déborde sur un téléphone standard (≈ 64 dp par tuile + 100 dp de `contentPadding` bas, ~370 dp utiles, estimation à vérifier) → le geste est tantôt un scroll, tantôt un drag, avec un seuil de slop avant tout retour visuel. *Solution :* `userScrollEnabled = draggedStationId == null`, démarrer le drag sur **appui long court** (`detectDragGesturesAfterLongPress`) ou sur la poignée seule, avec auto-scroll aux bords ; ou supprimer le scroll (hauteur de tuile adaptative pour que la liste tienne toujours).
+  - ✅ geste détecté sur la passe `Initial` du `LazyColumn` (avant son scroll) : appui sur la poignée (zone de 80 dp à droite) = drag immédiat ; appui long sur une tuile = drag ; sinon le scroll fonctionne normalement. `userScrollEnabled = false` pendant un drag et les événements du drag sont consommés. À valider au doigt sur appareil.
+- [x] **P1 — Pas de `onDragCancel`** : si le geste est annulé (scroll qui prend la main, changement de phase, feedback), `draggedStationId` reste non nul → tuile « collée » en surbrillance, offsets faux. *Solution :* réinitialiser l'état dans `onDragCancel` et quand la phase quitte `Drawing`.
+  - ✅ état réinitialisé si le geste est annulé (`finally`), à chaque nouveau défi (`LaunchedEffect(tiles)`) et au début de la cascade de succès.
+- [x] **P1 — `animateItem()` appliqué aussi à la tuile déplacée** : à chaque échange elle est réanimée vers son nouvel emplacement pendant qu'on compense `dragOffsetY` à la main → saut / traînée. *Solution :* ne l'appliquer qu'aux autres tuiles (`if (!isDragging) Modifier.animateItem() else Modifier`), ou adopter une lib éprouvée (`sh.calvin.reorderable` : slop, auto-scroll, animations, accessibilité).
+  - ✅ `animateItem()` retiré de la tuile glissée uniquement.
+- [x] **P1 — Chaque échange passe par le ViewModel et un `StateFlow` global.** `moveTile` ré-émet tout `SprintUiState`, qui est aussi mis à jour toutes les 50 ms par le timer (et toutes les 30 ms en SPEED_BURST) → `SprintScreen` se recompose ~20-30×/s pendant le drag. *Solution :* (a) isoler le temps (`timeLeftMs`, `burstTimer`) dans son propre flux lu seulement par `MetroTimerBar` ; (b) garder l'ordre des tuiles dans un `mutableStateListOf` local à `TileList` pendant le geste et ne le commiter au VM qu'à `onDragEnd` ; (c) marquer `Station`/`SprintUiState` `@Immutable`/`@Stable` (strong skipping est actif avec Kotlin 2.3 mais ne remplace pas (a)).
+  - ✅ partiellement fait (point b) : l'ordre est tenu localement pendant le drag et commité une seule fois au relâchement (`SprintViewModel.setTileOrder`, `moveTile` supprimé). Restent (a) isoler le temps dans son propre flux et (c) `@Immutable`.
+- [ ] **P2 — Échanges sur une mise en page périmée** : après `onMove`, `layoutInfo` n'est à jour qu'à la frame suivante ; des `onDrag` intermédiaires peuvent recalculer un échange avec des offsets obsolètes (double swap / va-et-vient). *Solution :* cible calculée depuis la position du doigt avec hystérésis (~50 % de la hauteur voisine) et pas de nouveau swap avant la mesure suivante.
+- [ ] **P2 — Fin de drag sans transition** : `onDragEnd` remet `draggedStationId = null` sans animer le retour → « téléportation ». *Solution :* `Animatable` sur l'offset de la tuile relâchée, `spring` vers 0 / vers la colonne (CLASSIFY).
+- [ ] **P2 — Retour visuel tardif au démarrage** : rien ne change avant le franchissement du touch slop. *Solution :* feedback dès l'appui (scale ~1.03, ombre, haptique `LongPress`), zone de saisie ≥ 48 dp.
+- [ ] **P2 — CLASSIFY : décalage horizontal trop faible et non animé** (±24 dp, seuil 30 dp au relâché, `translationX` non interpolé) → le joueur ne voit pas s'il a « déposé » la tuile. *Solution :* colonnes de dépôt visibles (gauche / hub / droite) surlignées pendant le drag, snap animé, seuil relatif à la largeur d'écran (voir aussi CLASSIFY plus haut).
+- [ ] **P2 — `MetroTimerBar` : `animateFloatAsState` relancé toutes les 50 ms** + pulsation infinie sur la même arborescence. *Solution :* alimenter la barre par une valeur non animée (le pas de 50 ms suffit) et la lire dans `drawWithContent`/`graphicsLayer` pour rester hors composition.
+- [ ] **P3 — Mesure & non-régression :** Macrobenchmark/JankStats sur « réordonner 8 tuiles » (budget : aucune frame > 16 ms pendant un drag) et test UI (`ComposeTestRule` + `performTouchInput { swipe }`) du réordonnancement.
+- [x] **P2 — Mode gaucher** (2026-09-21) : réglage `Left-handed mode` dans un nouvel écran Settings (Home → SETTINGS), stocké en DataStore (`left_handed`). Poignée de drag et zone de saisie passent à gauche, l'icône de direction à droite. Test manuel à faire au doigt.
+- [ ] **P3 — Settings à étoffer** : l'écran ne contient que ce réglage ; candidats : haptique on/off, sons, langue, réinitialiser les scores.
+- [ ] **P3 — Alternative d'accessibilité :** boutons monter/descendre par tuile (TalkBack, précision), utile aussi comme repli sur petits écrans.
+
+## 5. Produit / contenu / croissance
+
+- [ ] **P1 — Qualité et provenance des données** : coordonnées `x/y` "diagramme" (non géographiques) → documenter comment elles ont été produites, source, licence (le README cite Etalab mais le fichier source a changé). Valider : noms de stations officiels CTS, ordre des stations par ligne (fourches de ligne A/D, branches E/F), stations partagées (38 noms sur plusieurs lignes), lignes **G** et **H**, tram-train, extensions récentes (mises à jour de réseau). Script de validation en test unitaire (IDs uniques, ordre, pas de doublons, nombre de stations attendu).
+- [ ] **P1 — Cible & promesse** : le jeu est ultra-local (Strasbourg). Définir le public (habitants/étudiants ? touristes ?) et la valeur (apprendre le réseau ? défis entre amis ?). Sans multi-villes, plafond d'audience faible → prioriser l'abstraction ville (`CityDataSource`, README v1.0) tôt, car le modèle actuel (`strasbourg_stations.json` hardcodé dans le repo) est un couplage fort.
+- [ ] **P2 — Boucle de rétention** : streak + badges existent en base mais peu visibles ; ajouter un daily challenge partageable (résultat texte/emoji façon Wordle) — meilleur levier organique pour un jeu de niche.
+- [ ] **P2 — Progression** : XP/niveaux de "connaissance du réseau" (par ligne, % de stations maîtrisées) affichés dans Stats au lieu d'un simple top score.
+- [ ] **P2 — Stats** : afficher évolution, taux d'erreur par ligne/station, stations les plus ratées (donnée disponible si on journalise les réponses).
+- [ ] **P3 — Multi / social** : ghost replays, classement (Firebase) → nécessite anti-triche (score calculé côté client aujourd'hui).
+- [ ] **P3 — Monétisation** : non abordée ; pas d'impact technique avant la beta.
+- [ ] **P3 — Store** : icône (`ic_launcher.xml` unique, pas d'adaptive icon ni monochrome), captures, politique de confidentialité si analytics.
+
+---
+
+## 6. Ordre de traitement suggéré
+
+1. Hygiène repo : `git rm --cached app/build`, supprimer fichiers morts, réécrire README (§1 P0, §2).
+2. Fiabiliser le socle : chargement des données/erreurs, timer lifecycle, streak, requête best scores, ajout de tests (§1–§2).
+3. Trancher la vision du mode Trace (topologie vs géographie) et refaire son scoring + feedback de fin (§3).
+4. Rééquilibrer Sprint : skip, économie du temps, stage 5, CLASSIFY, feedback pédagogique (§4).
+5. Extraire la logique de jeu (générateurs/règles) + `Random`/`Clock` injectables → daily challenge.
+6. Accessibilité, i18n fr/en, CI, deps, release (proguard).
+7. Abstraction multi-villes.
+
+---
+
+## Questions ouvertes
+
+- Trace : jeu de mémoire **topologique** (ordre/connexions) ou **géographique** (forme du tracé) ?
+- Public visé : Strasbourgeois qui connaissent déjà le réseau (donc besoin de difficulté) ou apprentissage pour nouveaux arrivants ?
+- Le mode Sprint remplace-t-il Trace comme mode principal ?
+- Langue(s) du jeu à la sortie ?

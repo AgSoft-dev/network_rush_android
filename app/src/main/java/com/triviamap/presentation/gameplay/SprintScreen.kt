@@ -5,7 +5,8 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -26,6 +27,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -37,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import kotlinx.coroutines.withTimeoutOrNull
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.triviamap.domain.model.Difficulty
 import com.triviamap.domain.sprint.ChallengeType
@@ -223,8 +227,9 @@ fun SprintScreen(
                                 line2 = state.line2,
                                 isForward = state.isForward,
                                 stationSides = state.stationSides,
-                                onMove = vm::moveTile,
+                                onReorder = vm::setTileOrder,
                                 onSideChanged = vm::setStationSide,
+                                leftHanded = state.leftHanded,
                                 isSuccessState = state.showFeedback && state.isCorrectFeedback
                             )
                         }
@@ -329,8 +334,9 @@ private fun TileList(
     line2: com.triviamap.domain.model.TramLine?,
     isForward: Boolean,
     stationSides: Map<String, Int>,
-    onMove: (Int, Int) -> Unit,
+    onReorder: (List<Station>) -> Unit,
     onSideChanged: (String, Int) -> Unit,
+    leftHanded: Boolean,
     isSuccessState: Boolean
 ) {
     val listState = rememberLazyListState()
@@ -340,79 +346,138 @@ private fun TileList(
     var draggedStationId by remember { mutableStateOf<String?>(null) }
     var dragOffsetY by remember { mutableFloatStateOf(0f) }
     var dragOffsetX by remember { mutableFloatStateOf(0f) }
-    
+
+    // Order is kept locally while dragging (synchronous with the drag offset) and only
+    // committed to the ViewModel on release: no StateFlow round-trip per swap.
+    var order by remember { mutableStateOf(tiles) }
+
     val currentTiles by rememberUpdatedState(tiles)
-    val currentOnMove by rememberUpdatedState(onMove)
+    val currentOnReorder by rememberUpdatedState(onReorder)
     val currentOnSideChanged by rememberUpdatedState(onSideChanged)
     val currentSides by rememberUpdatedState(stationSides)
+    val currentType by rememberUpdatedState(challengeType)
+    val currentSuccess by rememberUpdatedState(isSuccessState)
+    val currentLeftHanded by rememberUpdatedState(leftHanded)
+
+    fun resetDrag() {
+        draggedStationId = null
+        dragOffsetX = 0f
+        dragOffsetY = 0f
+    }
+
+    // New challenge (or new order from the ViewModel): drop any gesture in flight and resync
+    LaunchedEffect(tiles) {
+        resetDrag()
+        order = tiles
+    }
+    // The success cascade must never start with a tile stuck in "dragging" state
+    LaunchedEffect(isSuccessState) { if (isSuccessState) resetDrag() }
+
+    fun startDrag(stationId: String) {
+        draggedStationId = stationId
+        dragOffsetY = 0f
+        val side = currentSides[stationId] ?: 0
+        dragOffsetX = with(density) { (side * 24f).dp.toPx() }
+        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+    }
+
+    fun dragBy(dx: Float, dy: Float) {
+        val stationId = draggedStationId ?: return
+        dragOffsetY += dy
+        if (currentType == ChallengeType.CLASSIFY) dragOffsetX += dx
+
+        val fromIndex = order.indexOfFirst { it.id == stationId }
+        if (fromIndex == -1) return
+        val info = listState.layoutInfo
+        val dragged = info.visibleItemsInfo.firstOrNull { it.key == stationId } ?: return
+        // Layout not yet re-measured after our last swap: wait for it, offsets would be stale
+        if (dragged.index != fromIndex) return
+
+        val centerY = dragged.offset + dragOffsetY + dragged.size / 2
+        val target = info.visibleItemsInfo.firstOrNull { item ->
+            item.index != fromIndex && centerY.toInt() in item.offset..(item.offset + item.size)
+        } ?: return
+
+        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        order = order.toMutableList().apply { add(target.index, removeAt(fromIndex)) }
+        dragOffsetY += (dragged.offset - target.offset)
+    }
+
+    fun endDrag() {
+        val stationId = draggedStationId ?: return
+        if (currentType == ChallengeType.CLASSIFY) {
+            val thresholdPx = with(density) { 30.dp.toPx() }
+            val side = when {
+                dragOffsetX < -thresholdPx -> -1
+                dragOffsetX > thresholdPx -> 1
+                else -> 0
+            }
+            if (side != (currentSides[stationId] ?: 0)) currentOnSideChanged(stationId, side)
+        }
+        if (order != currentTiles) currentOnReorder(order)
+        resetDrag()
+    }
 
     val l1Color = Color(line1?.color ?: 0xFF000000L)
     val l2Color = Color(line2?.color ?: 0xFF000000L)
 
     LazyColumn(
         state = listState,
+        // A drag must never scroll the list underneath
+        userScrollEnabled = draggedStationId == null,
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(bottom = 100.dp),
-        modifier = Modifier.pointerInput(challengeType) {
-            detectDragGestures(
-                onDragStart = { offset ->
-                    val item = listState.layoutInfo.visibleItemsInfo
-                        .firstOrNull { offset.y.toInt() in it.offset..(it.offset + it.size) }
-                    
-                    item?.let { 
-                        val station = currentTiles.getOrNull(it.index)
-                        if (station != null) {
-                            draggedStationId = station.id
-                            dragOffsetY = 0f
-                            val currentSide = currentSides[station.id] ?: 0
-                            dragOffsetX = with(density) { (currentSide * 24f).dp.toPx() }
+        modifier = Modifier.pointerInput(Unit) {
+            // Runs in the Initial pass, i.e. before the list's own scroll gesture:
+            //  - touch on the drag handle (right edge, left edge in left-handed mode): drag starts immediately
+            //  - long press anywhere on a tile: drag starts
+            //  - anything else falls through to normal scrolling
+            val handleZonePx = 80.dp.toPx()
+            awaitEachGesture {
+                val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                val hit = listState.layoutInfo.visibleItemsInfo
+                    .firstOrNull { down.position.y.toInt() in it.offset..(it.offset + it.size) }
+                val station = hit?.let { order.getOrNull(it.index) } ?: return@awaitEachGesture
+                if (currentSuccess) return@awaitEachGesture
+
+                val onHandle = if (currentLeftHanded) down.position.x <= handleZonePx
+                                else down.position.x >= size.width - handleZonePx
+                val armed = onHandle || withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
+                    while (true) {
+                        val change = awaitPointerEvent(PointerEventPass.Initial).changes
+                            .firstOrNull { it.id == down.id } ?: return@withTimeoutOrNull false
+                        if (!change.pressed) return@withTimeoutOrNull false
+                        if ((change.position - down.position).getDistance() > viewConfiguration.touchSlop) {
+                            return@withTimeoutOrNull false
                         }
                     }
-                },
-                onDrag = { change, dragAmount ->
-                    change.consume()
-                    val stationId = draggedStationId ?: return@detectDragGestures
-                    dragOffsetY += dragAmount.y
-                    if (challengeType == ChallengeType.CLASSIFY) { dragOffsetX += dragAmount.x }
+                    @Suppress("UNREACHABLE_CODE")
+                    true
+                } == null
+                if (!armed) return@awaitEachGesture
 
-                    val fromIndex = currentTiles.indexOfFirst { it.id == stationId }
-                    if (fromIndex == -1) return@detectDragGestures
-
-                    val info = listState.layoutInfo
-                    val draggedItemInfo = info.visibleItemsInfo.firstOrNull { it.key == stationId } ?: return@detectDragGestures
-                    val draggedCenterY = draggedItemInfo.offset + dragOffsetY + draggedItemInfo.size / 2
-                    val target = info.visibleItemsInfo.firstOrNull { item ->
-                        item.index != fromIndex && draggedCenterY.toInt() in item.offset..(item.offset + item.size)
+                startDrag(station.id)
+                try {
+                    down.consume()
+                    while (true) {
+                        val change = awaitPointerEvent(PointerEventPass.Initial).changes
+                            .firstOrNull { it.id == down.id } ?: break
+                        if (!change.pressed) { change.consume(); endDrag(); break }
+                        val delta = change.positionChange()
+                        change.consume()
+                        dragBy(delta.x, delta.y)
                     }
-
-                    if (target != null) {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        currentOnMove(fromIndex, target.index)
-                        dragOffsetY += (draggedItemInfo.offset - target.offset)
-                    }
-                },
-                onDragEnd = {
-                    val stationId = draggedStationId
-                    if (stationId != null && challengeType == ChallengeType.CLASSIFY) {
-                        val thresholdPx = with(density) { 30.dp.toPx() }
-                        val side = when {
-                            dragOffsetX < -thresholdPx -> -1
-                            dragOffsetX > thresholdPx -> 1
-                            else -> 0
-                        }
-                        if (side != (currentSides[stationId] ?: 0)) {
-                            currentOnSideChanged(stationId, side)
-                        }
-                    }
-                    draggedStationId = null
+                } finally {
+                    // Cancelled (composition change, pointer lost): never leave a tile stuck
+                    if (draggedStationId != null) resetDrag()
                 }
-            )
+            }
         }
     ) {
-        itemsIndexed(tiles, key = { _, s -> s.id }) { index, station ->
+        itemsIndexed(order, key = { _, s -> s.id }) { index, station ->
             val side = stationSides[station.id] ?: 0
             val isDragging = station.id == draggedStationId
-            
+
             val cascadeOffset by animateDpAsState(
                 targetValue = if (isSuccessState) 800.dp else 0.dp,
                 animationSpec = tween(400, delayMillis = index * 60),
@@ -439,22 +504,30 @@ private fun TileList(
                         translationX = if (isDragging) dragOffsetX else (side * 24f).dp.toPx()
                     }
                     .zIndex(if (isDragging) 1f else 0f)
-                    .animateItem()
+                    // The dragged tile follows the finger: animating its placement would fight the drag offset
+                    .then(if (isDragging) Modifier else Modifier.animateItem())
             ) {
-                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                val handle = @Composable {
+                    Icon(
+                        Icons.Default.DragHandle, null,
+                        tint = OnSurfaceMed.copy(alpha = if (isSuccessState) 0f else 0.5f)
+                    )
+                }
+                val direction = @Composable {
                     Icon(
                         imageVector = if (isForward) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
                         contentDescription = null, tint = OnSurface.copy(alpha = 0.1f), modifier = Modifier.size(20.dp)
                     )
+                }
+                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    if (leftHanded) handle() else direction()
                     Spacer(Modifier.width(12.dp))
                     Text(
                         text = station.name, modifier = Modifier.weight(1f),
                         fontWeight = FontWeight.Bold, color = OnSurface,
                         maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
-                    if (!isDragging && !isSuccessState) {
-                        Icon(Icons.Default.DragHandle, null, tint = OnSurfaceMed.copy(alpha = 0.5f))
-                    }
+                    if (leftHanded) direction() else handle()
                 }
             }
         }

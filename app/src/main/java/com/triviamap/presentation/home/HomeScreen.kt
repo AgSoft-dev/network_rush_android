@@ -30,7 +30,8 @@ import com.triviamap.presentation.common.*
 @Composable
 fun HomeScreen(
     onPlay: (GameMode, Difficulty) -> Unit,
-    onStats: () -> Unit
+    onStats: () -> Unit,
+    onSettings: () -> Unit
 ) {
     var pendingMode by remember { mutableStateOf<GameMode?>(null) }
 
@@ -98,6 +99,12 @@ fun HomeScreen(
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = OnSurface)
             ) {
                 Text("STATISTICS", fontWeight = FontWeight.Medium, letterSpacing = 2.sp)
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            TextButton(onClick = onSettings) {
+                Text("SETTINGS", color = OnSurfaceMed, fontWeight = FontWeight.Medium, letterSpacing = 2.sp)
             }
         }
 

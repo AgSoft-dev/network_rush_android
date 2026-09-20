@@ -53,6 +53,8 @@ data class SprintUiState(
     val lastTimePenalty: Int = 0,
     /** True when the bundled line data could not be loaded. */
     val loadFailed: Boolean = false,
+    /** Setting: drag handles on the left edge. */
+    val leftHanded: Boolean = false,
     
     /** Stats for scoring improvements */
     val challengeStartedAt: Long = 0L,
@@ -105,6 +107,9 @@ class SprintViewModel @Inject constructor(
     private var gameStartedAt = 0L
 
     init {
+        viewModelScope.launch {
+            userPrefs.leftHanded.collect { left -> _state.update { it.copy(leftHanded = left) } }
+        }
         loadLines()
     }
 
@@ -290,14 +295,12 @@ class SprintViewModel @Inject constructor(
         ) }
     }
 
-    fun moveTile(fromIndex: Int, toIndex: Int) {
+    /** Commits the tile order after a drag (the UI reorders locally while dragging). */
+    fun setTileOrder(order: List<Station>) {
         if (finished || paused || _state.value.phase !is GamePhase.Drawing) return
         _state.update { state ->
-            val list = state.currentTiles.toMutableList()
-            if (fromIndex !in list.indices || toIndex !in list.indices) return@update state
-            val item = list.removeAt(fromIndex)
-            list.add(toIndex, item)
-            state.copy(currentTiles = list)
+            // Ignore stale/foreign lists (e.g. a drag released just after a new challenge)
+            if (order.toSet() != state.currentTiles.toSet()) state else state.copy(currentTiles = order)
         }
     }
 

@@ -12,6 +12,7 @@ import com.triviamap.presentation.gameplay.GameplayScreen
 import com.triviamap.presentation.gameplay.SprintScreen
 import com.triviamap.presentation.home.HomeScreen
 import com.triviamap.presentation.results.ResultsScreen
+import com.triviamap.presentation.settings.SettingsScreen
 import com.triviamap.presentation.stats.StatsScreen
 
 sealed class Route(val path: String) {
@@ -34,6 +35,7 @@ sealed class Route(val path: String) {
         ) = "results/${mode.name}/$score?accuracy=$accuracy&level=$level&maxCombo=$maxCombo&isNewRecord=$isNewRecord&streak=$streak"
     }
     object Stats          : Route("stats")
+    object Settings       : Route("settings")
 }
 
 @Composable
@@ -48,7 +50,8 @@ fun TriviaMapNavGraph(navController: NavHostController) {
                         GameMode.STATION_SPRINT -> navController.navigate(Route.Sprint.build(difficulty))
                     }
                 },
-                onStats = { navController.navigate(Route.Stats.path) }
+                onStats = { navController.navigate(Route.Stats.path) },
+                onSettings = { navController.navigate(Route.Settings.path) }
             )
         }
 
@@ -129,6 +132,10 @@ fun TriviaMapNavGraph(navController: NavHostController) {
 
         composable(Route.Stats.path) {
             StatsScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Route.Settings.path) {
+            SettingsScreen(onBack = { navController.popBackStack() })
         }
     }
 }
