@@ -19,7 +19,7 @@ import javax.inject.Singleton
 
 @Singleton
 class TramLineRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) : TramLineRepository {
 
     private val _state = MutableStateFlow<LinesState>(LinesState.Loading)

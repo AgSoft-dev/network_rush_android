@@ -13,10 +13,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.triviamap.domain.model.GameMode
@@ -93,6 +94,7 @@ fun StatsScreen(
 
 @Composable
 private fun BestScoreCard(result: GameResult) {
+    val locale = LocalConfiguration.current.locales[0]
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = SurfaceHigh,
@@ -114,7 +116,7 @@ private fun BestScoreCard(result: GameResult) {
                 Text(
                     result.difficulty.name.lowercase().replaceFirstChar { it.uppercase() } +
                             (if (result.mode == GameMode.STATION_SPRINT) " · level ${result.level}" else "") +
-                            " · " + SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                            " · " + SimpleDateFormat("dd/MM/yyyy", locale)
                         .format(Date(result.timestampMs)),
                     color = OnSurfaceMed,
                     fontSize = 11.sp

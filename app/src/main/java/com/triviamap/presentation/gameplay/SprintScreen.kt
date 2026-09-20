@@ -29,7 +29,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.text.font.FontWeight
@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.triviamap.domain.model.Difficulty
 import com.triviamap.domain.sprint.ChallengeType
 import com.triviamap.domain.model.Station
@@ -321,7 +321,6 @@ private fun MetroTimerBar(
     }
 }
 
-@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 private fun TileList(
     tiles: List<Station>,
@@ -440,7 +439,7 @@ private fun TileList(
                         translationX = if (isDragging) dragOffsetX else (side * 24f).dp.toPx()
                     }
                     .zIndex(if (isDragging) 1f else 0f)
-                    .animateItemPlacement()
+                    .animateItem()
             ) {
                 Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(
