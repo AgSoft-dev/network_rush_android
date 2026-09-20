@@ -12,8 +12,8 @@ import kotlin.math.*
  * bounding box. Y increases downward (screen convention).
  */
 fun GeoPoint.toNormalized(bounds: GeoBounds): Pair<Float, Float> {
-    val nx = ((x - bounds.minX) / (bounds.maxX - bounds.minX)).toFloat()
-    val ny = ((y - bounds.minY) / (bounds.maxY - bounds.minY)).toFloat()
+    val nx = ((x - bounds.minX) / bounds.width).toFloat()
+    val ny = ((y - bounds.minY) / bounds.height).toFloat()
     return nx to ny
 }
 
@@ -23,8 +23,15 @@ data class GeoBounds(
     val minY: Double,
     val maxY: Double
 ) {
+    /** Never zero, so projections cannot divide by zero on degenerate (flat) lines. */
+    val width: Double get() = (maxX - minX).coerceAtLeast(MIN_SPAN)
+    val height: Double get() = (maxY - minY).coerceAtLeast(MIN_SPAN)
+
     companion object {
-        fun from(points: List<GeoPoint>): GeoBounds {
+        private const val MIN_SPAN = 1e-6
+
+        /** Bounding box grown by [padX] / [padY] (fractions of the span) to leave room for UI. */
+        fun from(points: List<GeoPoint>, padX: Double = 0.10, padY: Double = 0.25): GeoBounds {
             require(points.isNotEmpty()) { "Cannot compute bounds of empty list" }
             var minX = Double.MAX_VALUE; var maxX = -Double.MAX_VALUE
             var minY = Double.MAX_VALUE; var maxY = -Double.MAX_VALUE
@@ -34,9 +41,8 @@ data class GeoBounds(
                 if (p.y < minY) minY = p.y
                 if (p.y > maxY) maxY = p.y
             }
-            // Add padding: 10% horizontal, 25% vertical to accommodate UI
-            val dX = (maxX - minX) * 0.10
-            val dY = (maxY - minY) * 0.25
+            val dX = (maxX - minX) * padX
+            val dY = (maxY - minY) * padY
             return GeoBounds(minX - dX, maxX + dX, minY - dY, maxY + dY)
         }
     }
@@ -89,20 +95,18 @@ fun euclideanDistance(a: GeoPoint, b: GeoPoint): Double {
 fun discreteFrechetDistance(p: List<GeoPoint>, q: List<GeoPoint>): Double {
     if (p.isEmpty() || q.isEmpty()) return Double.MAX_VALUE
     val m = p.size; val n = q.size
-    val ca = Array(m) { DoubleArray(n) { -1.0 } }
-
-    fun c(i: Int, j: Int): Double {
-        if (ca[i][j] > -1) return ca[i][j]
+    // Iterative DP (no recursion: safe for long polylines)
+    val ca = Array(m) { DoubleArray(n) }
+    for (i in 0 until m) for (j in 0 until n) {
         val d = euclideanDistance(p[i], q[j])
         ca[i][j] = when {
             i == 0 && j == 0 -> d
-            i == 0 -> maxOf(c(0, j - 1), d)
-            j == 0 -> maxOf(c(i - 1, 0), d)
-            else -> maxOf(minOf(c(i - 1, j), c(i - 1, j - 1), c(i, j - 1)), d)
+            i == 0 -> maxOf(ca[0][j - 1], d)
+            j == 0 -> maxOf(ca[i - 1][0], d)
+            else -> maxOf(minOf(ca[i - 1][j], ca[i - 1][j - 1], ca[i][j - 1]), d)
         }
-        return ca[i][j]
     }
-    return c(m - 1, n - 1)
+    return ca[m - 1][n - 1]
 }
 
 // ---------------------------------------------------------------------------

@@ -7,6 +7,8 @@ Références au format `fichier:ligne` quand pertinent (lignes indicatives, à r
 > **Périmètre actuel (2026-09-20)** : on se concentre sur **Station Sprint**. **Trace Network** est parké : bouton visible uniquement en build debug (`BuildConfig.DEBUG`, libellé "TRACE NETWORK (DEV)"), ses items restent listés (§3) pour la prochaine étape.
 > **Avancement §1** : P0 et P1 Sprint traités (compilation debug + release/R8 OK, **aucun test exécuté** ni sur appareil). Restent §1 : `Accessibilité`, `i18n`, et les items marqués ⏸.
 
+> **Blocage build (2026-09-20)** : depuis la session, je ne peux plus compiler en CLI (Kotlin 1.9.23 ne parse pas la version du JDK 25 de l'Android Studio installé ; le build qui marchait tournait sur un daemon Gradle existant que j'ai arrêté par erreur). Les changements §2 sont **relus mais non compilés ni testés** → lancer `./gradlew testDebugUnitTest assembleDebug` depuis Android Studio (jbr-21) avant de commiter.
+
 ---
 
 ## 0. Synthèse
@@ -80,18 +82,30 @@ Constats principaux :
 
 ## 2. Dette technique / architecture
 
-- [ ] **P1 — Aucun test** (`app/src/test` et `androidTest` inexistants). Le code le plus critique est pur et testable : `ScoringEngine`, `GeometryEngine`, `GeoJsonParser`, génération des défis Sprint, streak. → tests JUnit + Turbine (Flows) ; commencer par : LCS/ordre, `getStage`, générateurs (invariants : `correctOrder` cohérent, tailles, unicité), streak sur plusieurs dates (injecter un `Clock`).
-- [ ] **P1 — Logique de jeu dans les ViewModels** (`SprintViewModel` ~490 lignes) : génération de défis, règles de score, timers, badges, persistance, tout dans une classe. → extraire `ChallengeGenerator`, `SprintRules` (score/temps/pénalités) purs + injection d'un `Random` seedable et d'un `Clock`. Prérequis du daily challenge (§4) et des tests.
+- [x] **P1 — Aucun test** (`app/src/test` et `androidTest` inexistants). Le code le plus critique est pur et testable : `ScoringEngine`, `GeometryEngine`, `GeoJsonParser`, génération des défis Sprint, streak. → tests JUnit + Turbine (Flows) ; commencer par : LCS/ordre, `getStage`, générateurs (invariants : `correctOrder` cohérent, tailles, unicité), streak sur plusieurs dates (injecter un `Clock`).
+  - ✅ JUnit 4 ajouté (`app/src/test`) : `SprintRulesTest`, `StreakCalculatorTest`, `ChallengeGeneratorTest` (invariants sur 40 seeds × 40 niveaux, déterminisme), `DatasetTest` (données), `GeometryEngineTest`. ⚠ **écrits mais jamais exécutés** (voir « Blocage build » ci-dessous). Restent : migration Room (test instrumenté), `ScoringEngine` (Trace), VM Sprint avec `TimeSource` factice.
+- [x] **P1 — Logique de jeu dans les ViewModels** (`SprintViewModel` ~490 lignes) : génération de défis, règles de score, timers, badges, persistance, tout dans une classe. → extraire `ChallengeGenerator`, `SprintRules` (score/temps/pénalités) purs + injection d'un `Random` seedable et d'un `Clock`. Prérequis du daily challenge (§4) et des tests.
+  - ✅ extraction dans `domain/sprint` : `ChallengeGenerator` (Random injecté), `Challenge.isSolvedBy`, `SprintRules` (stage, gains, pénalités, points). `SprintViewModel` réduit à l'orchestration ; `Random`, `Clock` et `TimeSource` injectés via `RuntimeModule`. Streak extrait en `StreakCalculator`. Bonus : une tuile ne démarre plus déjà dans le bon ordre.
 - [ ] **P1 — Code mort du moteur de tracé** : `simplifyPolyline` (RDP), `discreteFrechetDistance` (récursif → **StackOverflow** sur ≥ ~5000 points, doit être itératif), `TramLine.geometry` scoring, `pathAccuracyScore` toujours à `0f`… Soit on ré-intègre la précision (§3), soit on supprime pour ne pas laisser croire que c'est actif. Le `ScoreBreakdown` de Trace ignore `playerPaths` (param `playerPaths` inutilisé dans `computeGlobal`).
-- [ ] **P1 — README désynchronisé** : décrit poids 30/35/25/10, snap 150 m, Fréchet 800 m, `LineSelectionScreen`, `StatsViewModel`, pipeline GeoJSON lon/lat + Etalab… Le code : coordonnées **schématiques** (x∈[353,937], y∈[270,740], pas de lon/lat), snap `30.0` unités, poids 50/40/10 · 60/30/10 · 60/20/20, données curées à la main. Réécrire ; source/licence des données à clarifier (provenance des coordonnées "diagramme" ?).
-- [ ] **P2 — `Repositories.kt` dupliqué** (`data/repository` et `domain/repository` portent le même nom de fichier) + plusieurs classes par fichier (`UseCases.kt`, `Models.kt`). Renommer par classe.
-- [ ] **P2 — Use cases anémiques** (`GetLineUseCase`, `GetLineResultsUseCase` : simples délégations, `GetLineUseCase` non utilisé). SprintViewModel injecte **directement** les repositories en plus des use cases → couche domain incohérente. Choisir : soit repos partout, soit use cases partout.
-- [ ] **P2 — `TramLineRepositoryImpl`** : `MutableStateFlow(emptyList())` comme "loading state" est ambigu (vide = pas chargé ou pas de données ?). Modéliser `Loading/Loaded/Error`.
-- [ ] **P2 — `GeoBounds.from` : padding 10% / 25% "pour l'UI" codé dans la util géométrique** → mélange couche présentation/util ; `toNormalized` divise par zéro si une ligne est parfaitement horizontale/verticale (bounds nulles).
+  - ⏸ Fréchet réécrit en itératif (plus de StackOverflow, test à 3000 points). Le reste (scoring Trace ignorant le tracé, RDP/Bézier) est parké avec Trace (§3).
+- [x] **P1 — README désynchronisé** : décrit poids 30/35/25/10, snap 150 m, Fréchet 800 m, `LineSelectionScreen`, `StatsViewModel`, pipeline GeoJSON lon/lat + Etalab… Le code : coordonnées **schématiques** (x∈[353,937], y∈[270,740], pas de lon/lat), snap `30.0` unités, poids 50/40/10 · 60/30/10 · 60/20/20, données curées à la main. Réécrire ; source/licence des données à clarifier (provenance des coordonnées "diagramme" ?).
+  - ✅ README réécrit (Sprint, architecture réelle, données schématiques, build/JDK, scoring). Section Trace réduite à un renvoi vers le TODO ; provenance/licence des données restent à documenter (§5).
+- [x] **P2 — `Repositories.kt` dupliqué** (`data/repository` et `domain/repository` portent le même nom de fichier) + plusieurs classes par fichier (`UseCases.kt`, `Models.kt`). Renommer par classe.
+  - ✅ fichiers scindés : `TramLineRepository(.Impl)`, `GameResultRepository(.Impl)` ; `Models.kt` → `TramNetwork.kt`, `GameMode.kt`, `GameResult.kt`.
+- [x] **P2 — Use cases anémiques** (`GetLineUseCase`, `GetLineResultsUseCase` : simples délégations, `GetLineUseCase` non utilisé). SprintViewModel injecte **directement** les repositories en plus des use cases → couche domain incohérente. Choisir : soit repos partout, soit use cases partout.
+  - ✅ use cases supprimés ; ViewModels injectent directement les repositories (choix : app petite, pas de logique dans les use cases).
+- [x] **P2 — `TramLineRepositoryImpl`** : `MutableStateFlow(emptyList())` comme "loading state" est ambigu (vide = pas chargé ou pas de données ?). Modéliser `Loading/Loaded/Error`.
+  - ✅ `LinesState` Loading/Loaded/Error (fait au §1).
+- [x] **P2 — `GeoBounds.from` : padding 10% / 25% "pour l'UI" codé dans la util géométrique** → mélange couche présentation/util ; `toNormalized` divise par zéro si une ligne est parfaitement horizontale/verticale (bounds nulles).
+  - ✅ padding paramétrable (`padX`, `padY`, défauts inchangés) et `width/height` jamais nuls (plus de division par zéro). Le padding « UI » n'est pas encore déplacé côté présentation.
 - [ ] **P2 — Ratio d'aspect déformé** : la projection normalise x et y indépendamment sur `size.width/height` du canvas → le réseau est **étiré** selon l'écran (distances et angles non conservés). Utiliser un scale uniforme (fit-center) ; impacte aussi le rayon de snap (30 unités ≠ même distance en px selon l'axe).
+  - ⏸ concerne Trace + fond Sprint ; à traiter avec le §3.
 - [ ] **P2 — Dépendances datées** : Kotlin 1.9.23, Compose BOM 2024.05, AGP 8.13.2 (décalage avec Kotlin/Gradle), `compileSdk/targetSdk 34` (Play exige 35 depuis 2025-08), Gson (maintenance mode), Material 2 (roadmap M3 abandonnée en pratique). Planifier bump : Kotlin 2.x + plugin Compose compiler, BOM récent, targetSdk 35/36, `kotlinx.serialization`.
-- [ ] **P2 — Pas de CI / lint** : ajouter GitHub Actions (`./gradlew lintDebug testDebugUnitTest assembleDebug`), ktlint/detekt.
+  - ⏸ non traité volontairement : bump Kotlin 2 / Compose BOM / targetSdk 35 (edge-to-edge forcé) = chantier à part, à faire avec le build vérifiable.
+- [x] **P2 — Pas de CI / lint** : ajouter GitHub Actions (`./gradlew lintDebug testDebugUnitTest assembleDebug`), ktlint/detekt.
+  - ✅ `.github/workflows/ci.yml` (tests + lintDebug + assembleDebug, JDK 17). Reste : ktlint/detekt, lint jamais exécuté localement.
 - [ ] **P2 — Logging / analytics / crash reporting** : rien. Au minimum Crashlytics (ou équivalent respectueux de la vie privée) avant beta.
+  - ⏸ non traité (choix produit : outil, vie privée).
 - [ ] **P3 — Pas de `versionName` / changelog / signature release** planifiés.
 - [ ] **P3 — Perf de démarrage** : parse JSON 32 Ko sur IO, trivial ; RAS. À surveiller si multi-villes (§5) → prévoir parsing lazy par ville et cache.
 - [ ] **P3 — Modularisation** (`:core:model`, `:feature:sprint`, `:feature:trace`) seulement si multi-villes/équipe ; pas prioritaire.

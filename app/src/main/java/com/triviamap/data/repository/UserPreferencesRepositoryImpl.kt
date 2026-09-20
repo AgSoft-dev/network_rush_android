@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import com.triviamap.domain.model.StreakCalculator
 import com.triviamap.domain.repository.UserPreferencesRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -17,10 +18,9 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 
 @Singleton
 class UserPreferencesRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val clock: Clock
 ) : UserPreferencesRepository {
-
-    private val clock: Clock = Clock.systemDefaultZone()
 
     private object Keys {
         val DAILY_STREAK = intPreferencesKey("daily_streak")
@@ -35,7 +35,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     
     override val earnedBadges: Flow<Set<String>> = context.dataStore.data.map { it[Keys.EARNED_BADGES] ?: emptySet() }
 
-    override suspend fun updateStreak() = updateStreak(LocalDate.now(clock))
+    override suspend fun updateStreak(): Unit = updateStreak(LocalDate.now(clock))
 
     /** Calendar-day based: same day = no change, next day = +1, anything else = reset to 1. */
     internal suspend fun updateStreak(today: LocalDate) {
@@ -44,11 +44,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
             val lastEpoch = prefs[Keys.LAST_PLAYED_EPOCH_DAY] ?: -1L
             val currentStreak = prefs[Keys.DAILY_STREAK] ?: 0
 
-            when {
-                lastEpoch == todayEpoch -> Unit
-                lastEpoch >= 0 && todayEpoch - lastEpoch == 1L -> prefs[Keys.DAILY_STREAK] = currentStreak + 1
-                else -> prefs[Keys.DAILY_STREAK] = 1
-            }
+            prefs[Keys.DAILY_STREAK] = StreakCalculator.next(lastEpoch, currentStreak, todayEpoch)
             prefs[Keys.LAST_PLAYED_EPOCH_DAY] = todayEpoch
         }
     }

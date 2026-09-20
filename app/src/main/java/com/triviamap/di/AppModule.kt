@@ -49,3 +49,16 @@ abstract class RepositoryModule {
     @Singleton
     abstract fun bindUserPreferencesRepo(impl: UserPreferencesRepositoryImpl): UserPreferencesRepository
 }
+
+@Module
+@InstallIn(SingletonComponent::class)
+object RuntimeModule {
+    @Provides
+    fun provideRandom(): kotlin.random.Random = kotlin.random.Random.Default
+
+    @Provides
+    fun provideClock(): java.time.Clock = java.time.Clock.systemDefaultZone()
+
+    @Provides
+    fun provideTimeSource(): com.triviamap.util.TimeSource = com.triviamap.util.TimeSource.System
+}

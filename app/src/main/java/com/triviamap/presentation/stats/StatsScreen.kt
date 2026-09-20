@@ -21,7 +21,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.triviamap.domain.model.GameMode
 import com.triviamap.domain.model.GameResult
-import com.triviamap.domain.usecase.GetBestScoresUseCase
+import com.triviamap.domain.repository.GameResultRepository
 import com.triviamap.presentation.common.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -32,9 +32,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class StatsViewModel @Inject constructor(
-    getBestScores: GetBestScoresUseCase
+    resultRepository: GameResultRepository
 ) : ViewModel() {
-    val bestScores = getBestScores()
+    val bestScores = resultRepository.getBestScores()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 }
 

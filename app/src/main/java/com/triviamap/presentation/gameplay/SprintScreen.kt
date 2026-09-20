@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.triviamap.domain.model.Difficulty
+import com.triviamap.domain.sprint.ChallengeType
 import com.triviamap.domain.model.Station
 import com.triviamap.presentation.common.*
 

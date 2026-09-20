@@ -45,6 +45,11 @@ android {
         kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
 
+    testOptions {
+        // android.jar stubs (SystemClock, ...) return defaults instead of throwing in JVM tests
+        unitTests.isReturnDefaultValues = true
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -85,4 +90,6 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.coroutines.android)
     implementation(libs.datastore.preferences)
+
+    testImplementation(libs.junit)
 }

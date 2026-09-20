@@ -1,6 +1,5 @@
 package com.triviamap.presentation.gameplay
 
-import android.os.SystemClock
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,7 +8,12 @@ import com.triviamap.domain.repository.GameResultRepository
 import com.triviamap.domain.repository.LinesState
 import com.triviamap.domain.repository.TramLineRepository
 import com.triviamap.domain.repository.UserPreferencesRepository
-import com.triviamap.domain.usecase.SaveGameResultUseCase
+import com.triviamap.domain.sprint.Challenge
+import com.triviamap.domain.sprint.ChallengeGenerator
+import com.triviamap.domain.sprint.ChallengeType
+import com.triviamap.domain.sprint.Side
+import com.triviamap.domain.sprint.SprintRules
+import com.triviamap.util.TimeSource
 import com.triviamap.util.GeoBounds
 import com.triviamap.util.ScoreBreakdown
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,12 +24,6 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
 import kotlin.math.roundToInt
-
-enum class ChallengeType {
-    REORDER,     // Single line, reorder stations
-    CLASSIFY,    // Two lines, drag left/right/center AND reorder
-    SPEED_BURST  // Rapid fire 3-tile challenge with per-tile timer
-}
 
 data class SprintUiState(
     val phase: GamePhase = GamePhase.Loading,
@@ -77,20 +75,17 @@ data class SprintUiState(
 class SprintViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val lineRepository: TramLineRepository,
-    private val saveResult: SaveGameResultUseCase,
     private val resultRepository: GameResultRepository,
-    private val userPrefs: UserPreferencesRepository
+    private val userPrefs: UserPreferencesRepository,
+    private val generator: ChallengeGenerator,
+    private val time: TimeSource
 ) : ViewModel() {
 
     private val difficulty: Difficulty = Difficulty.valueOf(
         checkNotNull(savedStateHandle["difficulty"])
     )
 
-    private val maxTimeMs: Long = when(difficulty) {
-        Difficulty.EASY -> 60_000L
-        Difficulty.MEDIUM -> 45_000L
-        Difficulty.HARD -> 30_000L
-    }
+    private val maxTimeMs: Long = SprintRules.maxTimeMs(difficulty)
 
     private val _state = MutableStateFlow(SprintUiState(
         difficulty = difficulty,
@@ -101,6 +96,7 @@ class SprintViewModel @Inject constructor(
     private var timerJob: Job? = null
     private var burstTimerJob: Job? = null
     private var allLines: List<TramLine> = emptyList()
+    private var current: Challenge? = null
 
     /** Set once the run is over; every state-mutating entry point bails out afterwards. */
     private var finished = false
@@ -122,7 +118,7 @@ class SprintViewModel @Inject constructor(
                     allLines = loaded.lines.filter { it.stations.size >= 3 }
                     if (allLines.isEmpty()) _state.update { it.copy(loadFailed = true) }
                     else if (!finished && timerJob == null) {
-                        gameStartedAt = SystemClock.elapsedRealtime()
+                        gameStartedAt = time.elapsedMs()
                         generateChallenge()
                     }
                 }
@@ -140,179 +136,54 @@ class SprintViewModel @Inject constructor(
     fun pause() {
         if (finished || paused || timerJob == null) return
         paused = true
-        pausedAt = SystemClock.elapsedRealtime()
+        pausedAt = time.elapsedMs()
         burstTimerJob?.cancel()
     }
 
     fun resume() {
         if (!paused) return
         paused = false
-        val pausedFor = SystemClock.elapsedRealtime() - pausedAt
+        val pausedFor = time.elapsedMs() - pausedAt
         _state.update { it.copy(challengeStartedAt = it.challengeStartedAt + pausedFor) }
         if (_state.value.challengeType == ChallengeType.SPEED_BURST) startBurstTimer()
     }
 
-    private fun getStage(level: Int): Int = when (level) {
-        in 1..5 -> 1
-        in 6..10 -> 2
-        in 11..15 -> 3
-        in 16..20 -> 4
-        else -> 5
-    }
-
     private fun generateChallenge() {
         if (allLines.isEmpty() || finished) return
-        
+
         val level = _state.value.level
-        val stage = getStage(level)
-        
-        var type = when (stage) {
-            1, 2 -> ChallengeType.REORDER
-            3 -> if (level % 4 == 0) ChallengeType.CLASSIFY else ChallengeType.REORDER
-            4 -> if (level % 2 == 0) ChallengeType.CLASSIFY else ChallengeType.REORDER
-            else -> {
-                val rand = (1..10).random()
-                when {
-                    rand > 8 -> ChallengeType.SPEED_BURST
-                    rand > 4 -> ChallengeType.CLASSIFY
-                    else -> ChallengeType.REORDER
-                }
-            }
-        }
+        val challenge = generator.generate(level, allLines)
+        val geometry = challenge.line.geometry.ifEmpty { challenge.line.stations.map { it.position } }
 
-        if (type == ChallengeType.CLASSIFY && allLines.size < 2) type = ChallengeType.REORDER
-
-        when (type) {
-            ChallengeType.REORDER -> generateReorderChallenge(stage)
-            ChallengeType.CLASSIFY -> generateClassifyChallenge(stage)
-            ChallengeType.SPEED_BURST -> generateSpeedBurstChallenge()
+        _state.update {
+            it.copy(
+                challengeType = challenge.type,
+                line = challenge.line,
+                line2 = challenge.line2,
+                bounds = GeoBounds.from(geometry),
+                correctOrder = challenge.correctOrder,
+                currentTiles = challenge.tiles,
+                stationSides = challenge.tiles.associate { s -> s.id to Side.HUB },
+                correctSides = challenge.correctSides,
+                isForward = challenge.isForward,
+                phase = GamePhase.Drawing,
+                challengeStartedAt = time.elapsedMs(),
+                stage = SprintRules.stage(level)
+            )
         }
-        
-        _state.update { it.copy(
-            challengeStartedAt = SystemClock.elapsedRealtime(),
-            stage = stage
-        ) }
-        
+        current = challenge
+
         if (timerJob == null) startTimer()
-
-        if (type == ChallengeType.SPEED_BURST) startBurstTimer() else stopBurstTimer()
-    }
-
-    private fun generateReorderChallenge(stage: Int) {
-        val line = allLines.random()
-        val bounds = GeoBounds.from(line.geometry.ifEmpty { line.stations.map { it.position } })
-        
-        val count = when (stage) {
-            1 -> (3..4).random()
-            2 -> 5
-            3 -> 6
-            4 -> (6..7).random()
-            else -> (7..8).random()
-        }
-
-        val isForward = if (stage == 1) true else (0..1).random() == 0
-        // Stage 1: interchange hubs + terminus only (falls back to the full line if too few)
-        val availableStations = (if (stage == 1) {
-            line.stations.filterIndexed { i, s -> s.lines.size > 1 || i == 0 || i == line.stations.lastIndex }
-        } else line.stations).let { if (it.size >= 3) it else line.stations }
-
-        val sequenceRaw = if (availableStations.size <= count) {
-            availableStations
-        } else {
-            val start = (0..(availableStations.size - count)).random()
-            availableStations.subList(start, start + count)
-        }
-        val correctOrder = if (isForward) sequenceRaw else sequenceRaw.reversed()
-
-        _state.update {
-            it.copy(
-                challengeType = ChallengeType.REORDER,
-                line = line,
-                line2 = null,
-                bounds = bounds,
-                correctOrder = correctOrder,
-                currentTiles = correctOrder.shuffled(),
-                isForward = isForward,
-                phase = GamePhase.Drawing
-            )
-        }
-    }
-
-    private fun generateClassifyChallenge(stage: Int) {
-        val line1 = allLines.random()
-        val intersectingLines = allLines.filter { other ->
-            other.id != line1.id && other.stations.any { s -> line1.stations.any { s1 -> s1.id == s.id } }
-        }
-        val line2 = intersectingLines.randomOrNull() ?: allLines.filter { it.id != line1.id }.random()
-        
-        val totalCount = if (stage <= 4) (5..6).random() else (7..8).random()
-        val maxHubs = if (stage <= 4) 1 else 3
-        
-        val stations1 = line1.stations.filter { s -> line2.stations.none { it.id == s.id } }.shuffled().take(totalCount / 2)
-        val stations2 = line2.stations.filter { s -> line1.stations.none { it.id == s.id } }.shuffled().take(totalCount / 2)
-        val hubs = line1.stations.filter { s1 -> line2.stations.any { s2 -> s2.id == s1.id } }.shuffled().take(maxHubs)
-        
-        val combinedStationsRaw = (stations1 + stations2 + hubs).distinctBy { it.id }.take(totalCount)
-        
-        val isForward = (0..1).random() == 0
-        val correctOrder = combinedStationsRaw.sortedBy { s -> 
-            val idx1 = line1.stations.indexOfFirst { it.id == s.id }.let { if (it == -1) 999 else it }
-            val idx2 = line2.stations.indexOfFirst { it.id == s.id }.let { if (it == -1) 999 else it }
-            minOf(idx1, idx2)
-        }.let { if (isForward) it else it.reversed() }
-
-        val correctSides = correctOrder.associate { station ->
-            val in1 = line1.stations.any { it.id == station.id }
-            val in2 = line2.stations.any { it.id == station.id }
-            val side = when {
-                in1 && in2 -> 0  // HUB -> Center
-                in1 -> -1       // Line 1 -> Left
-                else -> 1       // Line 2 -> Right
-            }
-            station.id to side
-        }
-
-        _state.update {
-            it.copy(
-                challengeType = ChallengeType.CLASSIFY,
-                line = line1,
-                line2 = line2,
-                correctOrder = correctOrder,
-                currentTiles = correctOrder.shuffled(),
-                stationSides = correctOrder.associate { it.id to 0 },
-                correctSides = correctSides,
-                isForward = isForward,
-                phase = GamePhase.Drawing
-            )
-        }
-    }
-
-    private fun generateSpeedBurstChallenge() {
-        val line = allLines.random()
-        val count = 3
-        val start = (0..(line.stations.size - count)).random()
-        val sequence = line.stations.subList(start, start + count)
-        
-        _state.update {
-            it.copy(
-                challengeType = ChallengeType.SPEED_BURST,
-                line = line,
-                line2 = null,
-                correctOrder = sequence,
-                currentTiles = sequence.shuffled(),
-                isForward = true,
-                phase = GamePhase.Drawing
-            )
-        }
+        if (challenge.type == ChallengeType.SPEED_BURST) startBurstTimer() else stopBurstTimer()
     }
 
     private fun startBurstTimer() {
         burstTimerJob?.cancel()
         burstTimerJob = viewModelScope.launch {
-            val limit = 6000L
-            val start = SystemClock.elapsedRealtime()
+            val limit = SprintRules.BURST_LIMIT_MS
+            val start = time.elapsedMs()
             while (true) {
-                val progress = (SystemClock.elapsedRealtime() - start).toFloat() / limit
+                val progress = (time.elapsedMs() - start).toFloat() / limit
                 if (progress >= 1f) {
                     _state.update { it.copy(burstTimer = 1f) }
                     handleBurstTimeout()
@@ -331,7 +202,7 @@ class SprintViewModel @Inject constructor(
 
     private fun handleBurstTimeout() {
         if (finished) return
-        val penalty = 3000L
+        val penalty = SprintRules.BURST_TIMEOUT_PENALTY_MS
         viewModelScope.launch {
             _state.update { it.copy(
                 timeLeftMs = (it.timeLeftMs - penalty).coerceAtLeast(0),
@@ -349,10 +220,10 @@ class SprintViewModel @Inject constructor(
 
     private fun startTimer() {
         timerJob = viewModelScope.launch {
-            var lastUpdate = SystemClock.elapsedRealtime()
+            var lastUpdate = time.elapsedMs()
             while (!finished && _state.value.timeLeftMs > 0) {
                 delay(50)
-                val now = SystemClock.elapsedRealtime()
+                val now = time.elapsedMs()
                 if (paused) { lastUpdate = now; continue }
                 val delta = now - lastUpdate
                 lastUpdate = now
@@ -377,7 +248,7 @@ class SprintViewModel @Inject constructor(
             finalState.correctSubmissions.toFloat() / finalState.totalSubmissions
         } else 0f
         
-        saveResult(GameResult(
+        resultRepository.saveResult(GameResult(
             lineId = "SPRINT",
             mode = GameMode.STATION_SPRINT,
             difficulty = difficulty,
@@ -386,7 +257,7 @@ class SprintViewModel @Inject constructor(
             pathAccuracyScore = 0f,
             completionScore = 0f,
             speedBonusScore = 0f,
-            durationMs = SystemClock.elapsedRealtime() - gameStartedAt,
+            durationMs = time.elapsedMs() - gameStartedAt,
             level = finalState.level,
             maxCombo = finalState.maxCombo,
             accuracy = accuracy
@@ -441,7 +312,7 @@ class SprintViewModel @Inject constructor(
         stopBurstTimer()
         _state.update { it.copy(
             totalSubmissions = it.totalSubmissions + 1,
-            timeLeftMs = (it.timeLeftMs - SKIP_PENALTY_MS).coerceAtLeast(0),
+            timeLeftMs = (it.timeLeftMs - SprintRules.SKIP_PENALTY_MS).coerceAtLeast(0),
             combo = 0
         ) }
         generateChallenge()
@@ -453,19 +324,12 @@ class SprintViewModel @Inject constructor(
 
         _state.update { it.copy(totalSubmissions = it.totalSubmissions + 1) }
         
-        val isVerticalCorrect = currentState.currentTiles == currentState.correctOrder
-        val isHorizontalCorrect = if (currentState.challengeType == ChallengeType.CLASSIFY) {
-            currentState.stationSides == currentState.correctSides
-        } else true
-        
-        val isCorrect = isVerticalCorrect && isHorizontalCorrect
+        val isCorrect = current?.isSolvedBy(currentState.currentTiles, currentState.stationSides) ?: false
         
         if (isCorrect) {
             handleCorrectAnswer()
         } else {
-            val stage = getStage(currentState.level)
-            val basePenalty = 5_000L
-            val timePenalty = basePenalty + (stage - 1) * 1000L
+            val timePenalty = SprintRules.wrongAnswerPenaltyMs(currentState.level)
             
             viewModelScope.launch {
                 _state.update { it.copy(
@@ -484,29 +348,12 @@ class SprintViewModel @Inject constructor(
 
     private fun handleCorrectAnswer() {
         val currentState = _state.value
-        val timeTakenMs = SystemClock.elapsedRealtime() - currentState.challengeStartedAt
+        val timeTakenMs = time.elapsedMs() - currentState.challengeStartedAt
 
         val newCombo = currentState.combo + 1
-        val stage = getStage(currentState.level)
-
-        val baseGain = when(difficulty) {
-            Difficulty.EASY -> 12_000L - (stage - 1) * 1000L
-            Difficulty.MEDIUM -> 10_000L - (stage - 1) * 1000L
-            Difficulty.HARD -> 8_000L - (stage - 1) * 500L
-        }.coerceAtLeast(4000L)
-
-        val comboBonus = (newCombo * 1000L).coerceAtMost(5000L)
-        val typeBonus = when(currentState.challengeType) {
-            ChallengeType.CLASSIFY -> 5000L
-            ChallengeType.SPEED_BURST -> 2000L
-            else -> 0L
-        }
-        val timeGain = baseGain + comboBonus + typeBonus
-
-        val basePoints = (500 + currentState.level * 50) * (if (currentState.challengeType == ChallengeType.CLASSIFY) 2 else 1)
-        val speedFactor = (1.5f - (timeTakenMs / 20_000f)).coerceIn(1.0f, 1.5f)
-        val comboFactor = 1f + (newCombo * 0.1f).coerceAtMost(1.0f)
-        val pointsGain = (basePoints * speedFactor * comboFactor).toInt()
+        val reward = SprintRules.correctAnswerReward(difficulty, currentState.level, currentState.challengeType, newCombo, timeTakenMs)
+        val timeGain = reward.timeGainMs
+        val pointsGain = reward.points
 
         viewModelScope.launch {
             stopBurstTimer()
@@ -536,7 +383,4 @@ class SprintViewModel @Inject constructor(
         }
     }
 
-    private companion object {
-        const val SKIP_PENALTY_MS = 4_000L
-    }
 }

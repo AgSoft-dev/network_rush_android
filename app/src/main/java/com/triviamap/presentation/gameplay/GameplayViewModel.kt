@@ -7,8 +7,8 @@ import com.triviamap.domain.model.Difficulty
 import com.triviamap.domain.model.GeoPoint
 import com.triviamap.domain.model.Station
 import com.triviamap.domain.model.TramLine
-import com.triviamap.domain.usecase.GetAllLinesUseCase
-import com.triviamap.domain.usecase.SaveGameResultUseCase
+import com.triviamap.domain.repository.GameResultRepository
+import com.triviamap.domain.repository.TramLineRepository
 import com.triviamap.domain.model.GameResult
 import com.triviamap.util.GeoBounds
 import com.triviamap.util.ScoreBreakdown
@@ -47,8 +47,8 @@ data class GameplayUiState(
 @HiltViewModel
 class GameplayViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val getAllLines: GetAllLinesUseCase,
-    private val saveResult: SaveGameResultUseCase
+    private val lineRepository: TramLineRepository,
+    private val resultRepository: GameResultRepository
 ) : ViewModel() {
 
     private val difficulty: Difficulty = Difficulty.valueOf(
@@ -66,7 +66,7 @@ class GameplayViewModel @Inject constructor(
     }
 
     private fun loadAllLines() = viewModelScope.launch {
-        getAllLines().collectLatest { lines ->
+        lineRepository.getAllLines().collectLatest { lines ->
             if (lines.isEmpty()) return@collectLatest
             
             val allPoints = lines.flatMap { it.geometry }
@@ -149,7 +149,7 @@ class GameplayViewModel @Inject constructor(
                 difficulty       = state.difficulty
             )
             
-            saveResult(
+            resultRepository.saveResult(
                 GameResult(
                     lineId              = "ALL",
                     difficulty          = state.difficulty,
