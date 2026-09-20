@@ -10,6 +10,7 @@ import com.triviamap.data.local.dao.GameResultDao;
 import com.triviamap.data.local.database.TriviaMapDatabase;
 import com.triviamap.data.repository.GameResultRepositoryImpl;
 import com.triviamap.data.repository.TramLineRepositoryImpl;
+import com.triviamap.data.repository.UserPreferencesRepositoryImpl;
 import com.triviamap.di.DatabaseModule_ProvideDatabaseFactory;
 import com.triviamap.di.DatabaseModule_ProvideGameResultDaoFactory;
 import com.triviamap.domain.usecase.GetAllLinesUseCase;
@@ -19,8 +20,6 @@ import com.triviamap.presentation.gameplay.GameplayViewModel;
 import com.triviamap.presentation.gameplay.GameplayViewModel_HiltModules;
 import com.triviamap.presentation.gameplay.SprintViewModel;
 import com.triviamap.presentation.gameplay.SprintViewModel_HiltModules;
-import com.triviamap.presentation.lineselection.LineSelectionViewModel;
-import com.triviamap.presentation.lineselection.LineSelectionViewModel_HiltModules;
 import com.triviamap.presentation.stats.StatsViewModel;
 import com.triviamap.presentation.stats.StatsViewModel_HiltModules;
 import dagger.hilt.android.ActivityRetainedLifecycle;
@@ -384,7 +383,7 @@ public final class DaggerTriviaMapApp_HiltComponents_SingletonC {
 
     @Override
     public Map<Class<?>, Boolean> getViewModelKeys() {
-      return LazyClassKeyMap.<Boolean>of(MapBuilder.<String, Boolean>newMapBuilder(4).put(LazyClassKeyProvider.com_triviamap_presentation_gameplay_GameplayViewModel, GameplayViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_triviamap_presentation_lineselection_LineSelectionViewModel, LineSelectionViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_triviamap_presentation_gameplay_SprintViewModel, SprintViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_triviamap_presentation_stats_StatsViewModel, StatsViewModel_HiltModules.KeyModule.provide()).build());
+      return LazyClassKeyMap.<Boolean>of(MapBuilder.<String, Boolean>newMapBuilder(3).put(LazyClassKeyProvider.com_triviamap_presentation_gameplay_GameplayViewModel, GameplayViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_triviamap_presentation_gameplay_SprintViewModel, SprintViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_triviamap_presentation_stats_StatsViewModel, StatsViewModel_HiltModules.KeyModule.provide()).build());
     }
 
     @Override
@@ -409,22 +408,17 @@ public final class DaggerTriviaMapApp_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_triviamap_presentation_lineselection_LineSelectionViewModel = "com.triviamap.presentation.lineselection.LineSelectionViewModel";
+      static String com_triviamap_presentation_gameplay_SprintViewModel = "com.triviamap.presentation.gameplay.SprintViewModel";
 
       static String com_triviamap_presentation_stats_StatsViewModel = "com.triviamap.presentation.stats.StatsViewModel";
-
-      static String com_triviamap_presentation_gameplay_SprintViewModel = "com.triviamap.presentation.gameplay.SprintViewModel";
 
       static String com_triviamap_presentation_gameplay_GameplayViewModel = "com.triviamap.presentation.gameplay.GameplayViewModel";
 
       @KeepFieldType
-      LineSelectionViewModel com_triviamap_presentation_lineselection_LineSelectionViewModel2;
+      SprintViewModel com_triviamap_presentation_gameplay_SprintViewModel2;
 
       @KeepFieldType
       StatsViewModel com_triviamap_presentation_stats_StatsViewModel2;
-
-      @KeepFieldType
-      SprintViewModel com_triviamap_presentation_gameplay_SprintViewModel2;
 
       @KeepFieldType
       GameplayViewModel com_triviamap_presentation_gameplay_GameplayViewModel2;
@@ -441,8 +435,6 @@ public final class DaggerTriviaMapApp_HiltComponents_SingletonC {
     private final ViewModelCImpl viewModelCImpl = this;
 
     private Provider<GameplayViewModel> gameplayViewModelProvider;
-
-    private Provider<LineSelectionViewModel> lineSelectionViewModelProvider;
 
     private Provider<SprintViewModel> sprintViewModelProvider;
 
@@ -474,14 +466,13 @@ public final class DaggerTriviaMapApp_HiltComponents_SingletonC {
     private void initialize(final SavedStateHandle savedStateHandleParam,
         final ViewModelLifecycle viewModelLifecycleParam) {
       this.gameplayViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 0);
-      this.lineSelectionViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 1);
-      this.sprintViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 2);
-      this.statsViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 3);
+      this.sprintViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 1);
+      this.statsViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 2);
     }
 
     @Override
     public Map<Class<?>, javax.inject.Provider<ViewModel>> getHiltViewModelMap() {
-      return LazyClassKeyMap.<javax.inject.Provider<ViewModel>>of(MapBuilder.<String, javax.inject.Provider<ViewModel>>newMapBuilder(4).put(LazyClassKeyProvider.com_triviamap_presentation_gameplay_GameplayViewModel, ((Provider) gameplayViewModelProvider)).put(LazyClassKeyProvider.com_triviamap_presentation_lineselection_LineSelectionViewModel, ((Provider) lineSelectionViewModelProvider)).put(LazyClassKeyProvider.com_triviamap_presentation_gameplay_SprintViewModel, ((Provider) sprintViewModelProvider)).put(LazyClassKeyProvider.com_triviamap_presentation_stats_StatsViewModel, ((Provider) statsViewModelProvider)).build());
+      return LazyClassKeyMap.<javax.inject.Provider<ViewModel>>of(MapBuilder.<String, javax.inject.Provider<ViewModel>>newMapBuilder(3).put(LazyClassKeyProvider.com_triviamap_presentation_gameplay_GameplayViewModel, ((Provider) gameplayViewModelProvider)).put(LazyClassKeyProvider.com_triviamap_presentation_gameplay_SprintViewModel, ((Provider) sprintViewModelProvider)).put(LazyClassKeyProvider.com_triviamap_presentation_stats_StatsViewModel, ((Provider) statsViewModelProvider)).build());
     }
 
     @Override
@@ -491,25 +482,20 @@ public final class DaggerTriviaMapApp_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_triviamap_presentation_lineselection_LineSelectionViewModel = "com.triviamap.presentation.lineselection.LineSelectionViewModel";
+      static String com_triviamap_presentation_gameplay_SprintViewModel = "com.triviamap.presentation.gameplay.SprintViewModel";
 
       static String com_triviamap_presentation_stats_StatsViewModel = "com.triviamap.presentation.stats.StatsViewModel";
 
       static String com_triviamap_presentation_gameplay_GameplayViewModel = "com.triviamap.presentation.gameplay.GameplayViewModel";
 
-      static String com_triviamap_presentation_gameplay_SprintViewModel = "com.triviamap.presentation.gameplay.SprintViewModel";
-
       @KeepFieldType
-      LineSelectionViewModel com_triviamap_presentation_lineselection_LineSelectionViewModel2;
+      SprintViewModel com_triviamap_presentation_gameplay_SprintViewModel2;
 
       @KeepFieldType
       StatsViewModel com_triviamap_presentation_stats_StatsViewModel2;
 
       @KeepFieldType
       GameplayViewModel com_triviamap_presentation_gameplay_GameplayViewModel2;
-
-      @KeepFieldType
-      SprintViewModel com_triviamap_presentation_gameplay_SprintViewModel2;
     }
 
     private static final class SwitchingProvider<T> implements Provider<T> {
@@ -536,13 +522,10 @@ public final class DaggerTriviaMapApp_HiltComponents_SingletonC {
           case 0: // com.triviamap.presentation.gameplay.GameplayViewModel 
           return (T) new GameplayViewModel(viewModelCImpl.savedStateHandle, viewModelCImpl.getAllLinesUseCase(), viewModelCImpl.saveGameResultUseCase());
 
-          case 1: // com.triviamap.presentation.lineselection.LineSelectionViewModel 
-          return (T) new LineSelectionViewModel(viewModelCImpl.getAllLinesUseCase());
+          case 1: // com.triviamap.presentation.gameplay.SprintViewModel 
+          return (T) new SprintViewModel(viewModelCImpl.savedStateHandle, singletonCImpl.tramLineRepositoryImplProvider.get(), viewModelCImpl.saveGameResultUseCase(), singletonCImpl.gameResultRepositoryImplProvider.get(), singletonCImpl.userPreferencesRepositoryImplProvider.get());
 
-          case 2: // com.triviamap.presentation.gameplay.SprintViewModel 
-          return (T) new SprintViewModel(viewModelCImpl.savedStateHandle, viewModelCImpl.getAllLinesUseCase(), viewModelCImpl.saveGameResultUseCase());
-
-          case 3: // com.triviamap.presentation.stats.StatsViewModel 
+          case 2: // com.triviamap.presentation.stats.StatsViewModel 
           return (T) new StatsViewModel(viewModelCImpl.getBestScoresUseCase());
 
           default: throw new AssertionError(id);
@@ -631,6 +614,8 @@ public final class DaggerTriviaMapApp_HiltComponents_SingletonC {
 
     private Provider<GameResultRepositoryImpl> gameResultRepositoryImplProvider;
 
+    private Provider<UserPreferencesRepositoryImpl> userPreferencesRepositoryImplProvider;
+
     private SingletonCImpl(ApplicationContextModule applicationContextModuleParam) {
       this.applicationContextModule = applicationContextModuleParam;
       initialize(applicationContextModuleParam);
@@ -646,6 +631,7 @@ public final class DaggerTriviaMapApp_HiltComponents_SingletonC {
       this.tramLineRepositoryImplProvider = DoubleCheck.provider(new SwitchingProvider<TramLineRepositoryImpl>(singletonCImpl, 0));
       this.provideDatabaseProvider = DoubleCheck.provider(new SwitchingProvider<TriviaMapDatabase>(singletonCImpl, 2));
       this.gameResultRepositoryImplProvider = DoubleCheck.provider(new SwitchingProvider<GameResultRepositoryImpl>(singletonCImpl, 1));
+      this.userPreferencesRepositoryImplProvider = DoubleCheck.provider(new SwitchingProvider<UserPreferencesRepositoryImpl>(singletonCImpl, 3));
     }
 
     @Override
@@ -689,6 +675,9 @@ public final class DaggerTriviaMapApp_HiltComponents_SingletonC {
 
           case 2: // com.triviamap.data.local.database.TriviaMapDatabase 
           return (T) DatabaseModule_ProvideDatabaseFactory.provideDatabase(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+
+          case 3: // com.triviamap.data.repository.UserPreferencesRepositoryImpl 
+          return (T) new UserPreferencesRepositoryImpl(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           default: throw new AssertionError(id);
         }

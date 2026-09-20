@@ -4,7 +4,6 @@ import com.triviamap.di.DatabaseModule;
 import com.triviamap.di.RepositoryModule;
 import com.triviamap.presentation.gameplay.GameplayViewModel_HiltModules;
 import com.triviamap.presentation.gameplay.SprintViewModel_HiltModules;
-import com.triviamap.presentation.lineselection.LineSelectionViewModel_HiltModules;
 import com.triviamap.presentation.stats.StatsViewModel_HiltModules;
 import dagger.Binds;
 import dagger.Component;
@@ -161,7 +160,6 @@ public final class TriviaMapApp_HiltComponents {
           GameplayViewModel_HiltModules.KeyModule.class,
           HiltWrapper_ActivityRetainedComponentManager_LifecycleModule.class,
           HiltWrapper_SavedStateHandleModule.class,
-          LineSelectionViewModel_HiltModules.KeyModule.class,
           SprintViewModel_HiltModules.KeyModule.class,
           StatsViewModel_HiltModules.KeyModule.class,
           ActivityCBuilderModule.class,
@@ -203,7 +201,6 @@ public final class TriviaMapApp_HiltComponents {
       modules = {
           GameplayViewModel_HiltModules.BindsModule.class,
           HiltWrapper_HiltViewModelFactory_ViewModelModule.class,
-          LineSelectionViewModel_HiltModules.BindsModule.class,
           SprintViewModel_HiltModules.BindsModule.class,
           StatsViewModel_HiltModules.BindsModule.class
       }

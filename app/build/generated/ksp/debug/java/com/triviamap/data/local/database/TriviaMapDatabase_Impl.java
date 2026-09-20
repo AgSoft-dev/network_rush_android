@@ -33,12 +33,12 @@ public final class TriviaMapDatabase_Impl extends TriviaMapDatabase {
   @Override
   @NonNull
   protected SupportSQLiteOpenHelper createOpenHelper(@NonNull final DatabaseConfiguration config) {
-    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(1) {
+    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(2) {
       @Override
       public void createAllTables(@NonNull final SupportSQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS `game_results` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `lineId` TEXT NOT NULL, `difficulty` TEXT NOT NULL, `score` INTEGER NOT NULL, `stationOrderScore` REAL NOT NULL, `pathAccuracyScore` REAL NOT NULL, `completionScore` REAL NOT NULL, `speedBonusScore` REAL NOT NULL, `durationMs` INTEGER NOT NULL, `timestampMs` INTEGER NOT NULL, `playerPathJson` TEXT NOT NULL)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `game_results` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `lineId` TEXT NOT NULL, `mode` TEXT NOT NULL, `difficulty` TEXT NOT NULL, `score` INTEGER NOT NULL, `stationOrderScore` REAL NOT NULL, `pathAccuracyScore` REAL NOT NULL, `completionScore` REAL NOT NULL, `speedBonusScore` REAL NOT NULL, `durationMs` INTEGER NOT NULL, `timestampMs` INTEGER NOT NULL, `level` INTEGER NOT NULL, `maxCombo` INTEGER NOT NULL, `accuracy` REAL NOT NULL, `playerPathJson` TEXT NOT NULL)");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '29ef239bcea95684a3fe66a7f7d2a619')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4c33be71d31239e3a56d01f48eddee0d')");
       }
 
       @Override
@@ -87,9 +87,10 @@ public final class TriviaMapDatabase_Impl extends TriviaMapDatabase {
       @NonNull
       public RoomOpenHelper.ValidationResult onValidateSchema(
           @NonNull final SupportSQLiteDatabase db) {
-        final HashMap<String, TableInfo.Column> _columnsGameResults = new HashMap<String, TableInfo.Column>(11);
+        final HashMap<String, TableInfo.Column> _columnsGameResults = new HashMap<String, TableInfo.Column>(15);
         _columnsGameResults.put("id", new TableInfo.Column("id", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsGameResults.put("lineId", new TableInfo.Column("lineId", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsGameResults.put("mode", new TableInfo.Column("mode", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsGameResults.put("difficulty", new TableInfo.Column("difficulty", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsGameResults.put("score", new TableInfo.Column("score", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsGameResults.put("stationOrderScore", new TableInfo.Column("stationOrderScore", "REAL", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -98,6 +99,9 @@ public final class TriviaMapDatabase_Impl extends TriviaMapDatabase {
         _columnsGameResults.put("speedBonusScore", new TableInfo.Column("speedBonusScore", "REAL", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsGameResults.put("durationMs", new TableInfo.Column("durationMs", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsGameResults.put("timestampMs", new TableInfo.Column("timestampMs", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsGameResults.put("level", new TableInfo.Column("level", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsGameResults.put("maxCombo", new TableInfo.Column("maxCombo", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsGameResults.put("accuracy", new TableInfo.Column("accuracy", "REAL", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsGameResults.put("playerPathJson", new TableInfo.Column("playerPathJson", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysGameResults = new HashSet<TableInfo.ForeignKey>(0);
         final HashSet<TableInfo.Index> _indicesGameResults = new HashSet<TableInfo.Index>(0);
@@ -110,7 +114,7 @@ public final class TriviaMapDatabase_Impl extends TriviaMapDatabase {
         }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "29ef239bcea95684a3fe66a7f7d2a619", "e1fc67576bf375ceafe98f78dfa60cdc");
+    }, "4c33be71d31239e3a56d01f48eddee0d", "4dd0788937fbd0da86a69e1c49c1449c");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;

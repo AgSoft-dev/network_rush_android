@@ -1,7 +1,9 @@
 package com.triviamap.data.local.dao;
 
 import android.database.Cursor;
+import android.os.CancellationSignal;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.CoroutinesRoom;
 import androidx.room.EntityInsertionAdapter;
 import androidx.room.RoomDatabase;
@@ -13,6 +15,7 @@ import androidx.sqlite.db.SupportSQLiteStatement;
 import com.triviamap.data.local.entity.GameResultEntity;
 import java.lang.Class;
 import java.lang.Exception;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
@@ -41,7 +44,7 @@ public final class GameResultDao_Impl implements GameResultDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR REPLACE INTO `game_results` (`id`,`lineId`,`difficulty`,`score`,`stationOrderScore`,`pathAccuracyScore`,`completionScore`,`speedBonusScore`,`durationMs`,`timestampMs`,`playerPathJson`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?,?,?)";
+        return "INSERT OR REPLACE INTO `game_results` (`id`,`lineId`,`mode`,`difficulty`,`score`,`stationOrderScore`,`pathAccuracyScore`,`completionScore`,`speedBonusScore`,`durationMs`,`timestampMs`,`level`,`maxCombo`,`accuracy`,`playerPathJson`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -49,15 +52,19 @@ public final class GameResultDao_Impl implements GameResultDao {
           @NonNull final GameResultEntity entity) {
         statement.bindLong(1, entity.getId());
         statement.bindString(2, entity.getLineId());
-        statement.bindString(3, entity.getDifficulty());
-        statement.bindLong(4, entity.getScore());
-        statement.bindDouble(5, entity.getStationOrderScore());
-        statement.bindDouble(6, entity.getPathAccuracyScore());
-        statement.bindDouble(7, entity.getCompletionScore());
-        statement.bindDouble(8, entity.getSpeedBonusScore());
-        statement.bindLong(9, entity.getDurationMs());
-        statement.bindLong(10, entity.getTimestampMs());
-        statement.bindString(11, entity.getPlayerPathJson());
+        statement.bindString(3, entity.getMode());
+        statement.bindString(4, entity.getDifficulty());
+        statement.bindLong(5, entity.getScore());
+        statement.bindDouble(6, entity.getStationOrderScore());
+        statement.bindDouble(7, entity.getPathAccuracyScore());
+        statement.bindDouble(8, entity.getCompletionScore());
+        statement.bindDouble(9, entity.getSpeedBonusScore());
+        statement.bindLong(10, entity.getDurationMs());
+        statement.bindLong(11, entity.getTimestampMs());
+        statement.bindLong(12, entity.getLevel());
+        statement.bindLong(13, entity.getMaxCombo());
+        statement.bindDouble(14, entity.getAccuracy());
+        statement.bindString(15, entity.getPlayerPathJson());
       }
     };
     this.__preparedStmtOfClearAll = new SharedSQLiteStatement(__db) {
@@ -126,6 +133,7 @@ public final class GameResultDao_Impl implements GameResultDao {
         try {
           final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
           final int _cursorIndexOfLineId = CursorUtil.getColumnIndexOrThrow(_cursor, "lineId");
+          final int _cursorIndexOfMode = CursorUtil.getColumnIndexOrThrow(_cursor, "mode");
           final int _cursorIndexOfDifficulty = CursorUtil.getColumnIndexOrThrow(_cursor, "difficulty");
           final int _cursorIndexOfScore = CursorUtil.getColumnIndexOrThrow(_cursor, "score");
           final int _cursorIndexOfStationOrderScore = CursorUtil.getColumnIndexOrThrow(_cursor, "stationOrderScore");
@@ -134,6 +142,9 @@ public final class GameResultDao_Impl implements GameResultDao {
           final int _cursorIndexOfSpeedBonusScore = CursorUtil.getColumnIndexOrThrow(_cursor, "speedBonusScore");
           final int _cursorIndexOfDurationMs = CursorUtil.getColumnIndexOrThrow(_cursor, "durationMs");
           final int _cursorIndexOfTimestampMs = CursorUtil.getColumnIndexOrThrow(_cursor, "timestampMs");
+          final int _cursorIndexOfLevel = CursorUtil.getColumnIndexOrThrow(_cursor, "level");
+          final int _cursorIndexOfMaxCombo = CursorUtil.getColumnIndexOrThrow(_cursor, "maxCombo");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
           final int _cursorIndexOfPlayerPathJson = CursorUtil.getColumnIndexOrThrow(_cursor, "playerPathJson");
           final List<GameResultEntity> _result = new ArrayList<GameResultEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
@@ -142,6 +153,8 @@ public final class GameResultDao_Impl implements GameResultDao {
             _tmpId = _cursor.getLong(_cursorIndexOfId);
             final String _tmpLineId;
             _tmpLineId = _cursor.getString(_cursorIndexOfLineId);
+            final String _tmpMode;
+            _tmpMode = _cursor.getString(_cursorIndexOfMode);
             final String _tmpDifficulty;
             _tmpDifficulty = _cursor.getString(_cursorIndexOfDifficulty);
             final int _tmpScore;
@@ -158,9 +171,15 @@ public final class GameResultDao_Impl implements GameResultDao {
             _tmpDurationMs = _cursor.getLong(_cursorIndexOfDurationMs);
             final long _tmpTimestampMs;
             _tmpTimestampMs = _cursor.getLong(_cursorIndexOfTimestampMs);
+            final int _tmpLevel;
+            _tmpLevel = _cursor.getInt(_cursorIndexOfLevel);
+            final int _tmpMaxCombo;
+            _tmpMaxCombo = _cursor.getInt(_cursorIndexOfMaxCombo);
+            final float _tmpAccuracy;
+            _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
             final String _tmpPlayerPathJson;
             _tmpPlayerPathJson = _cursor.getString(_cursorIndexOfPlayerPathJson);
-            _item = new GameResultEntity(_tmpId,_tmpLineId,_tmpDifficulty,_tmpScore,_tmpStationOrderScore,_tmpPathAccuracyScore,_tmpCompletionScore,_tmpSpeedBonusScore,_tmpDurationMs,_tmpTimestampMs,_tmpPlayerPathJson);
+            _item = new GameResultEntity(_tmpId,_tmpLineId,_tmpMode,_tmpDifficulty,_tmpScore,_tmpStationOrderScore,_tmpPathAccuracyScore,_tmpCompletionScore,_tmpSpeedBonusScore,_tmpDurationMs,_tmpTimestampMs,_tmpLevel,_tmpMaxCombo,_tmpAccuracy,_tmpPlayerPathJson);
             _result.add(_item);
           }
           return _result;
@@ -179,13 +198,14 @@ public final class GameResultDao_Impl implements GameResultDao {
   @Override
   public Flow<List<GameResultEntity>> getBestScores() {
     final String _sql = "\n"
-            + "        SELECT * FROM game_results \n"
-            + "        WHERE id IN (\n"
-            + "            SELECT id FROM game_results \n"
-            + "            GROUP BY lineId \n"
-            + "            HAVING MAX(score)\n"
-            + "        )\n"
-            + "        ORDER BY score DESC\n"
+            + "        SELECT r.* FROM game_results r\n"
+            + "        JOIN (\n"
+            + "            SELECT mode, difficulty, MAX(score) AS best\n"
+            + "            FROM game_results\n"
+            + "            GROUP BY mode, difficulty\n"
+            + "        ) m ON r.mode = m.mode AND r.difficulty = m.difficulty AND r.score = m.best\n"
+            + "        GROUP BY r.mode, r.difficulty\n"
+            + "        ORDER BY r.score DESC\n"
             + "    ";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     return CoroutinesRoom.createFlow(__db, false, new String[] {"game_results"}, new Callable<List<GameResultEntity>>() {
@@ -196,6 +216,7 @@ public final class GameResultDao_Impl implements GameResultDao {
         try {
           final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
           final int _cursorIndexOfLineId = CursorUtil.getColumnIndexOrThrow(_cursor, "lineId");
+          final int _cursorIndexOfMode = CursorUtil.getColumnIndexOrThrow(_cursor, "mode");
           final int _cursorIndexOfDifficulty = CursorUtil.getColumnIndexOrThrow(_cursor, "difficulty");
           final int _cursorIndexOfScore = CursorUtil.getColumnIndexOrThrow(_cursor, "score");
           final int _cursorIndexOfStationOrderScore = CursorUtil.getColumnIndexOrThrow(_cursor, "stationOrderScore");
@@ -204,6 +225,9 @@ public final class GameResultDao_Impl implements GameResultDao {
           final int _cursorIndexOfSpeedBonusScore = CursorUtil.getColumnIndexOrThrow(_cursor, "speedBonusScore");
           final int _cursorIndexOfDurationMs = CursorUtil.getColumnIndexOrThrow(_cursor, "durationMs");
           final int _cursorIndexOfTimestampMs = CursorUtil.getColumnIndexOrThrow(_cursor, "timestampMs");
+          final int _cursorIndexOfLevel = CursorUtil.getColumnIndexOrThrow(_cursor, "level");
+          final int _cursorIndexOfMaxCombo = CursorUtil.getColumnIndexOrThrow(_cursor, "maxCombo");
+          final int _cursorIndexOfAccuracy = CursorUtil.getColumnIndexOrThrow(_cursor, "accuracy");
           final int _cursorIndexOfPlayerPathJson = CursorUtil.getColumnIndexOrThrow(_cursor, "playerPathJson");
           final List<GameResultEntity> _result = new ArrayList<GameResultEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
@@ -212,6 +236,8 @@ public final class GameResultDao_Impl implements GameResultDao {
             _tmpId = _cursor.getLong(_cursorIndexOfId);
             final String _tmpLineId;
             _tmpLineId = _cursor.getString(_cursorIndexOfLineId);
+            final String _tmpMode;
+            _tmpMode = _cursor.getString(_cursorIndexOfMode);
             final String _tmpDifficulty;
             _tmpDifficulty = _cursor.getString(_cursorIndexOfDifficulty);
             final int _tmpScore;
@@ -228,9 +254,15 @@ public final class GameResultDao_Impl implements GameResultDao {
             _tmpDurationMs = _cursor.getLong(_cursorIndexOfDurationMs);
             final long _tmpTimestampMs;
             _tmpTimestampMs = _cursor.getLong(_cursorIndexOfTimestampMs);
+            final int _tmpLevel;
+            _tmpLevel = _cursor.getInt(_cursorIndexOfLevel);
+            final int _tmpMaxCombo;
+            _tmpMaxCombo = _cursor.getInt(_cursorIndexOfMaxCombo);
+            final float _tmpAccuracy;
+            _tmpAccuracy = _cursor.getFloat(_cursorIndexOfAccuracy);
             final String _tmpPlayerPathJson;
             _tmpPlayerPathJson = _cursor.getString(_cursorIndexOfPlayerPathJson);
-            _item = new GameResultEntity(_tmpId,_tmpLineId,_tmpDifficulty,_tmpScore,_tmpStationOrderScore,_tmpPathAccuracyScore,_tmpCompletionScore,_tmpSpeedBonusScore,_tmpDurationMs,_tmpTimestampMs,_tmpPlayerPathJson);
+            _item = new GameResultEntity(_tmpId,_tmpLineId,_tmpMode,_tmpDifficulty,_tmpScore,_tmpStationOrderScore,_tmpPathAccuracyScore,_tmpCompletionScore,_tmpSpeedBonusScore,_tmpDurationMs,_tmpTimestampMs,_tmpLevel,_tmpMaxCombo,_tmpAccuracy,_tmpPlayerPathJson);
             _result.add(_item);
           }
           return _result;
@@ -244,6 +276,43 @@ public final class GameResultDao_Impl implements GameResultDao {
         _statement.release();
       }
     });
+  }
+
+  @Override
+  public Object getHighScore(final String mode, final String difficulty,
+      final Continuation<? super Integer> $completion) {
+    final String _sql = "SELECT MAX(score) FROM game_results WHERE mode = ? AND difficulty = ?";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 2);
+    int _argIndex = 1;
+    _statement.bindString(_argIndex, mode);
+    _argIndex = 2;
+    _statement.bindString(_argIndex, difficulty);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Integer>() {
+      @Override
+      @Nullable
+      public Integer call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final Integer _result;
+          if (_cursor.moveToFirst()) {
+            final Integer _tmp;
+            if (_cursor.isNull(0)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getInt(0);
+            }
+            _result = _tmp;
+          } else {
+            _result = null;
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
   }
 
   @NonNull

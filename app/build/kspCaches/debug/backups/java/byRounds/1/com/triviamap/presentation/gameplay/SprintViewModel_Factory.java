@@ -1,7 +1,9 @@
 package com.triviamap.presentation.gameplay;
 
 import androidx.lifecycle.SavedStateHandle;
-import com.triviamap.domain.usecase.GetAllLinesUseCase;
+import com.triviamap.domain.repository.GameResultRepository;
+import com.triviamap.domain.repository.TramLineRepository;
+import com.triviamap.domain.repository.UserPreferencesRepository;
 import com.triviamap.domain.usecase.SaveGameResultUseCase;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
@@ -27,31 +29,42 @@ import javax.inject.Provider;
 public final class SprintViewModel_Factory implements Factory<SprintViewModel> {
   private final Provider<SavedStateHandle> savedStateHandleProvider;
 
-  private final Provider<GetAllLinesUseCase> getAllLinesProvider;
+  private final Provider<TramLineRepository> lineRepositoryProvider;
 
   private final Provider<SaveGameResultUseCase> saveResultProvider;
 
+  private final Provider<GameResultRepository> resultRepositoryProvider;
+
+  private final Provider<UserPreferencesRepository> userPrefsProvider;
+
   public SprintViewModel_Factory(Provider<SavedStateHandle> savedStateHandleProvider,
-      Provider<GetAllLinesUseCase> getAllLinesProvider,
-      Provider<SaveGameResultUseCase> saveResultProvider) {
+      Provider<TramLineRepository> lineRepositoryProvider,
+      Provider<SaveGameResultUseCase> saveResultProvider,
+      Provider<GameResultRepository> resultRepositoryProvider,
+      Provider<UserPreferencesRepository> userPrefsProvider) {
     this.savedStateHandleProvider = savedStateHandleProvider;
-    this.getAllLinesProvider = getAllLinesProvider;
+    this.lineRepositoryProvider = lineRepositoryProvider;
     this.saveResultProvider = saveResultProvider;
+    this.resultRepositoryProvider = resultRepositoryProvider;
+    this.userPrefsProvider = userPrefsProvider;
   }
 
   @Override
   public SprintViewModel get() {
-    return newInstance(savedStateHandleProvider.get(), getAllLinesProvider.get(), saveResultProvider.get());
+    return newInstance(savedStateHandleProvider.get(), lineRepositoryProvider.get(), saveResultProvider.get(), resultRepositoryProvider.get(), userPrefsProvider.get());
   }
 
   public static SprintViewModel_Factory create(Provider<SavedStateHandle> savedStateHandleProvider,
-      Provider<GetAllLinesUseCase> getAllLinesProvider,
-      Provider<SaveGameResultUseCase> saveResultProvider) {
-    return new SprintViewModel_Factory(savedStateHandleProvider, getAllLinesProvider, saveResultProvider);
+      Provider<TramLineRepository> lineRepositoryProvider,
+      Provider<SaveGameResultUseCase> saveResultProvider,
+      Provider<GameResultRepository> resultRepositoryProvider,
+      Provider<UserPreferencesRepository> userPrefsProvider) {
+    return new SprintViewModel_Factory(savedStateHandleProvider, lineRepositoryProvider, saveResultProvider, resultRepositoryProvider, userPrefsProvider);
   }
 
   public static SprintViewModel newInstance(SavedStateHandle savedStateHandle,
-      GetAllLinesUseCase getAllLines, SaveGameResultUseCase saveResult) {
-    return new SprintViewModel(savedStateHandle, getAllLines, saveResult);
+      TramLineRepository lineRepository, SaveGameResultUseCase saveResult,
+      GameResultRepository resultRepository, UserPreferencesRepository userPrefs) {
+    return new SprintViewModel(savedStateHandle, lineRepository, saveResult, resultRepository, userPrefs);
   }
 }

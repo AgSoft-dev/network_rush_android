@@ -120,7 +120,7 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/adrien/.gradle/cache
 	android:icon
 		ADDED from /Users/adrien/PhoneApp/Android/TriviaMap/app/src/main/AndroidManifest.xml:8:9-45
 	android:allowBackup
-		ADDED from /Users/adrien/PhoneApp/Android/TriviaMap/app/src/main/AndroidManifest.xml:6:9-35
+		ADDED from /Users/adrien/PhoneApp/Android/TriviaMap/app/src/main/AndroidManifest.xml:6:9-36
 	android:theme
 		ADDED from /Users/adrien/PhoneApp/Android/TriviaMap/app/src/main/AndroidManifest.xml:12:9-47
 	android:name
