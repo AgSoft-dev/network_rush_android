@@ -162,28 +162,28 @@ private fun SectionTitle(text: String) {
 
 @Composable
 private fun LevelCard(level: PlayerLevel, totalXp: Int) {
-    Surface(shape = RoundedCornerShape(12.dp), color = SurfaceHigh, modifier = Modifier.fillMaxWidth()) {
+    Surface(shape = RoundedCornerShape(20.dp), color = Plate, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    Modifier.size(48.dp).background(Primary.copy(alpha = 0.2f), CircleShape),
+                    Modifier.size(52.dp).background(Ink, CircleShape),
                     contentAlignment = Alignment.Center
-                ) { Text("${level.level}", color = Primary, fontWeight = FontWeight.Black, fontSize = 20.sp) }
+                ) { Text("${level.level}", color = Sun, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp) }
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
-                    Text(level.title, color = OnSurface, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text("$totalXp XP", color = OnSurfaceMed, fontSize = 12.sp)
+                    Text(level.title, color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+                    Text("$totalXp XP", color = InkMed, fontSize = 12.sp)
                 }
             }
             Spacer(Modifier.height(12.dp))
             LinearProgressIndicator(
                 progress = level.progress,
                 modifier = Modifier.fillMaxWidth().height(8.dp),
-                color = Primary,
-                backgroundColor = OnSurface.copy(alpha = 0.1f)
+                color = LineB,
+                backgroundColor = PlateEdge.copy(alpha = 0.5f)
             )
             Spacer(Modifier.height(4.dp))
-            Text("${level.xpIntoLevel} / ${level.xpForNext} XP to level ${level.level + 1}", color = OnSurfaceMed, fontSize = 11.sp)
+            Text("${level.xpIntoLevel} / ${level.xpForNext} XP to level ${level.level + 1}", color = InkMed, fontSize = 11.sp)
         }
     }
 }
@@ -200,7 +200,7 @@ private fun HistoryChart(scores: List<Int>) {
                     val h = size.height * score / max
                     val isLast = i == scores.lastIndex
                     drawRoundRect(
-                        color = if (isLast) Accent else Primary.copy(alpha = 0.7f),
+                        color = if (isLast) Sun else LineB.copy(alpha = 0.8f),
                         topLeft = Offset(i * (barW + gap), size.height - h),
                         size = Size(barW, h.coerceAtLeast(2.dp.toPx())),
                         cornerRadius = CornerRadius(3.dp.toPx())
@@ -218,11 +218,7 @@ private fun HistoryChart(scores: List<Int>) {
 private fun LineMasteryRow(m: LineMastery) {
     val color = Color(m.line.color.toInt())
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        Surface(color = color, shape = RoundedCornerShape(6.dp), modifier = Modifier.size(32.dp)) {
-            Box(contentAlignment = Alignment.Center) {
-                Text(m.line.id, color = Color(m.line.textColor.toInt()), fontWeight = FontWeight.Black)
-            }
-        }
+        LinePill(m.line.id, color, size = 36.dp)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Canvas(Modifier.fillMaxWidth().height(8.dp)) {
@@ -274,7 +270,7 @@ private fun BestScoreCard(result: GameResult) {
     Surface(shape = RoundedCornerShape(12.dp), color = SurfaceHigh, modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
-                Modifier.size(40.dp).background(Primary.copy(alpha = 0.2f), CircleShape),
+                Modifier.size(40.dp).background(Sun, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -283,7 +279,7 @@ private fun BestScoreCard(result: GameResult) {
                         GameMode.DAILY_SPRINT -> "D"
                         GameMode.TRACE_NETWORK -> "T"
                     },
-                    color = Primary, fontWeight = FontWeight.Black
+                    color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold
                 )
             }
             Spacer(Modifier.width(12.dp))
@@ -303,7 +299,7 @@ private fun BestScoreCard(result: GameResult) {
                     color = OnSurfaceMed, fontSize = 11.sp
                 )
             }
-            Text("${result.score}", color = if (result.mode == GameMode.TRACE_NETWORK) Accent else Success, fontWeight = FontWeight.Black, fontSize = 24.sp)
+            Text("${result.score}", color = if (result.mode == GameMode.TRACE_NETWORK) Accent else Success, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 26.sp)
         }
     }
 }

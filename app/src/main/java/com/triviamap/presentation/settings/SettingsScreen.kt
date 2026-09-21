@@ -1,5 +1,6 @@
 package com.triviamap.presentation.settings
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -99,7 +100,7 @@ fun SettingsScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = OnSurface)
                     }
                 },
-                title = { Text("Settings", color = OnSurface, fontWeight = FontWeight.Bold) }
+                title = { Text("Settings", color = OnSurface, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold) }
             )
         }
     ) { padding ->
@@ -138,17 +139,17 @@ fun SettingsScreen(
 
 @Composable
 private fun SettingRow(title: String, description: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Surface(shape = RoundedCornerShape(12.dp), color = SurfaceHigh, modifier = Modifier.fillMaxWidth()) {
+    Surface(shape = RoundedCornerShape(18.dp), color = Surface, border = BorderStroke(2.dp, Border), modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(title, color = OnSurface, fontWeight = FontWeight.SemiBold)
+                Text(title, color = OnSurface, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
                 Text(description, color = OnSurfaceMed, fontSize = 12.sp)
             }
             Spacer(Modifier.width(12.dp))
             Switch(
                 checked = checked,
                 onCheckedChange = onChange,
-                colors = SwitchDefaults.colors(checkedThumbColor = Primary, checkedTrackColor = Primary)
+                colors = SwitchDefaults.colors(checkedThumbColor = Sun, checkedTrackColor = SunEdge, uncheckedThumbColor = OnSurfaceMed, uncheckedTrackColor = Border)
             )
         }
     }
@@ -156,23 +157,24 @@ private fun SettingRow(title: String, description: String, checked: Boolean, onC
 
 @Composable
 private fun SupportSection(offers: List<SupportOffer>, isSupporter: Boolean, onBuy: (SupportTier) -> Unit) {
-    Surface(shape = RoundedCornerShape(12.dp), color = SurfaceHigh, modifier = Modifier.fillMaxWidth()) {
+    Surface(shape = RoundedCornerShape(18.dp), color = Ticket, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Support TriviaMap", color = OnSurface, fontWeight = FontWeight.SemiBold)
+            Text("Support TriviaMap", color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
             Text(
                 if (isSupporter) "You're a supporter, thank you! The banner on the home screen is gone for good."
                 else "A solo project. A tip keeps it going and removes the banner on the home screen. Nothing in the game is locked.",
-                color = OnSurfaceMed, fontSize = 12.sp
+                color = InkMed, fontSize = 12.sp
             )
             if (offers.isEmpty()) {
-                Text("Tips are not available right now (offline, or not published on Google Play yet).", color = OnSurfaceMed, fontSize = 11.sp)
+                Text("Tips are not available right now (offline, or not published on Google Play yet).", color = InkMed, fontSize = 11.sp)
             } else {
                 offers.forEach { offer ->
                     Button(
                         onClick = { onBuy(offer.tier) },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(backgroundColor = Accent, contentColor = Ink)
-                    ) { Text("${offer.tier.emoji}  ${offer.tier.title} · ${offer.price}", fontWeight = FontWeight.Bold) }
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Sun, contentColor = Ink)
+                    ) { Text("${offer.tier.emoji}  ${offer.tier.title} · ${offer.price}", fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold) }
                 }
             }
         }

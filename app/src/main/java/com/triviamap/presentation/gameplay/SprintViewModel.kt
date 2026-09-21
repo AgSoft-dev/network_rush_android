@@ -340,8 +340,10 @@ class SprintViewModel @Inject constructor(
             answerLog = finalState.answerLog
         ))
 
-        userPrefs.updateStreak()
-        val currentStreak = userPrefs.dailyStreak.first()
+        // A run without a single correct answer does not keep the day streak alive
+        val streakCounts = finalState.correctSubmissions > 0
+        if (streakCounts) userPrefs.updateStreak()
+        val currentStreak = if (streakCounts) userPrefs.dailyStreak.first() else 0
 
         // XP and level
         statsWrites.toList().joinAll()

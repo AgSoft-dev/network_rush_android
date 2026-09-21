@@ -3,9 +3,11 @@ package com.triviamap.presentation.results
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -86,8 +88,9 @@ fun ResultsScreen(
                     Text(
                         text = animatedScore.toString(),
                         color = scoreColor(mode, score),
+                        fontFamily = DisplayFont,
                         fontSize = 88.sp,
-                        fontWeight = FontWeight.Black
+                        fontWeight = FontWeight.ExtraBold
                     )
                     Text(
                         text = if (mode == GameMode.TRACE_NETWORK) "/ 1000" else "TOTAL POINTS",
@@ -125,14 +128,15 @@ fun ResultsScreen(
                     Spacer(Modifier.height(16.dp))
                     summary.newBadges.forEach { badge ->
                         Surface(
-                            shape = RoundedCornerShape(12.dp), color = SurfaceHigh,
+                            shape = RoundedCornerShape(18.dp), color = Surface,
+                            border = BorderStroke(2.dp, Sun),
                             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                         ) {
                             Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.EmojiEvents, null, tint = Accent, modifier = Modifier.size(28.dp))
                                 Spacer(Modifier.width(12.dp))
                                 Column {
-                                    Text("Badge unlocked: ${badge.title}", color = OnSurface, fontWeight = FontWeight.Bold)
+                                    Text("Badge unlocked: ${badge.title}", color = OnSurface, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold)
                                     Text(badge.description, color = OnSurfaceMed, fontSize = 12.sp)
                                 }
                             }
@@ -166,7 +170,7 @@ fun ResultsScreen(
                         ))
                     },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
-                    shape = RoundedCornerShape(26.dp),
+                    shape = RoundedCornerShape(18.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Sun, contentColor = Ink)
                 ) {
                     Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(20.dp))
@@ -181,7 +185,7 @@ fun ResultsScreen(
                 Button(
                     onClick = { onRetry(summary) },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
-                    shape = RoundedCornerShape(26.dp),
+                    shape = RoundedCornerShape(18.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Surface, contentColor = OnSurface)
                 ) {
                     Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(20.dp))
@@ -194,7 +198,7 @@ fun ResultsScreen(
             OutlinedButton(
                 onClick = onHome,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
-                shape = RoundedCornerShape(26.dp),
+                shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = OnSurface)
             ) {
                 Icon(Icons.Default.Home, contentDescription = null, modifier = Modifier.size(20.dp))
@@ -209,26 +213,30 @@ fun ResultsScreen(
 private fun XpCard(summary: RunSummary) {
     val after = summary.levelAfter
     val leveledUp = after.level > summary.levelBefore.level
-    Surface(shape = RoundedCornerShape(12.dp), color = SurfaceHigh, modifier = Modifier.fillMaxWidth()) {
+    Surface(shape = RoundedCornerShape(20.dp), color = Plate, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(48.dp).background(Ink, CircleShape), contentAlignment = Alignment.Center) {
+                    Text("${after.level}", color = Sun, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
+                }
+                Spacer(Modifier.width(12.dp))
                 Text(
-                    "LEVEL ${after.level} · ${after.title.uppercase()}",
-                    color = OnSurface, fontWeight = FontWeight.Black, fontSize = 13.sp, modifier = Modifier.weight(1f)
+                    after.title.uppercase(),
+                    color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, modifier = Modifier.weight(1f)
                 )
-                Text("+${summary.xpEarned} XP", color = Accent, fontWeight = FontWeight.Black)
+                Text("+${summary.xpEarned} XP", color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
             }
             Spacer(Modifier.height(8.dp))
             LinearProgressIndicator(
                 progress = after.progress,
                 modifier = Modifier.fillMaxWidth().height(8.dp),
-                color = Primary,
-                backgroundColor = OnSurface.copy(alpha = 0.1f)
+                color = LineB,
+                backgroundColor = PlateEdge.copy(alpha = 0.5f)
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 if (leveledUp) "LEVEL UP!" else "${after.xpIntoLevel} / ${after.xpForNext} XP to next level",
-                color = if (leveledUp) Accent else OnSurfaceMed,
+                color = if (leveledUp) SunEdge else InkMed,
                 fontSize = 11.sp, fontWeight = FontWeight.Bold
             )
         }
@@ -239,9 +247,9 @@ private fun XpCard(summary: RunSummary) {
 private fun NewRecordBadge(modifier: Modifier = Modifier) {
     Surface(color = Accent, shape = RoundedCornerShape(12.dp), modifier = modifier) {
         Row(Modifier.padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Star, null, tint = Color.Black, modifier = Modifier.size(14.dp))
+            Icon(Icons.Default.Star, null, tint = Ink, modifier = Modifier.size(14.dp))
             Spacer(Modifier.width(4.dp))
-            Text("NEW RECORD", color = Color.Black, fontWeight = FontWeight.Black, fontSize = 10.sp)
+            Text("NEW RECORD", color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp)
         }
     }
 }
@@ -250,7 +258,7 @@ private fun NewRecordBadge(modifier: Modifier = Modifier) {
 private fun StatItem(label: String, value: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(label, color = OnSurfaceMed, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-        Text(value, color = OnSurface, fontSize = 20.sp, fontWeight = FontWeight.Black)
+        Text(value, color = OnSurface, fontFamily = DisplayFont, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
     }
 }
 
@@ -263,6 +271,7 @@ private fun scoreColor(mode: GameMode, score: Int) = when {
 
 private fun scoreLabel(mode: GameMode, score: Int) = when {
     mode != GameMode.TRACE_NETWORK -> when {
+        score <= 0 -> "TRY AGAIN"
         score > 5000 -> "LEGENDARY"
         score > 2500 -> "ELITE"
         score > 1000 -> "SPEEDSTER"

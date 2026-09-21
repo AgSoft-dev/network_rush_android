@@ -237,12 +237,13 @@ private fun DifficultyPickerDialog(
         onDismissRequest = onDismiss,
         backgroundColor = Surface,
         contentColor = OnSurface,
-        title = { Text("Select Difficulty", fontWeight = FontWeight.Bold) },
+        shape = RoundedCornerShape(24.dp),
+        title = { Text("Select difficulty", fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                DifficultyOption("Easy", "60 s clock · +12 s per correct answer", Success) { onSelect(Difficulty.EASY) }
-                DifficultyOption("Medium", "45 s clock · +10 s per correct answer", Accent) { onSelect(Difficulty.MEDIUM) }
-                DifficultyOption("Hard", "30 s clock · +8 s per correct answer", Error) { onSelect(Difficulty.HARD) }
+                DifficultyOption("Easy", "60 s clock · the most time back per answer", Success) { onSelect(Difficulty.EASY) }
+                DifficultyOption("Medium", "45 s clock · balanced", Sun) { onSelect(Difficulty.MEDIUM) }
+                DifficultyOption("Hard", "30 s clock · reversed lines, gaps, less time back", Error) { onSelect(Difficulty.HARD) }
             }
         },
         buttons = {
@@ -255,14 +256,14 @@ private fun DifficultyPickerDialog(
 
 @Composable
 private fun DifficultyOption(title: String, desc: String, color: Color, onClick: () -> Unit) {
-    Surface(shape = RoundedCornerShape(12.dp), color = SurfaceHigh, modifier = Modifier.fillMaxWidth()) {
+    Surface(shape = RoundedCornerShape(18.dp), color = Plate, modifier = Modifier.fillMaxWidth()) {
         TextButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
             Row(Modifier.fillMaxWidth().padding(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(12.dp).background(color, CircleShape))
+                Box(Modifier.size(14.dp).background(color, CircleShape))
                 Spacer(Modifier.width(12.dp))
                 Column(horizontalAlignment = Alignment.Start) {
-                    Text(title, color = OnSurface, fontWeight = FontWeight.SemiBold)
-                    Text(desc, color = OnSurfaceMed, fontSize = 11.sp)
+                    Text(title, color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
+                    Text(desc, color = InkMed, fontSize = 11.sp)
                 }
             }
         }
@@ -309,7 +310,7 @@ private fun DevSprintDialog(
                     contentPadding = PaddingValues(horizontal = 6.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
                         backgroundColor = if (on) Accent else Color.Transparent,
-                        contentColor = if (on) Color.White else OnSurface
+                        contentColor = if (on) Ink else OnSurface
                     ),
                     modifier = Modifier.weight(1f)
                 ) { Text(text, fontSize = 11.sp, maxLines = 1) }
@@ -321,7 +322,8 @@ private fun DevSprintDialog(
         onDismissRequest = onDismiss,
         backgroundColor = Surface,
         contentColor = OnSurface,
-        title = { Text("Dev · Sprint variants", fontWeight = FontWeight.Bold) },
+        shape = RoundedCornerShape(24.dp),
+        title = { Text("Dev · Sprint variants", fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold) },
         text = {
             Column {
                 Choices("Challenge type", listOf("Auto" to "", "Reorder" to "REORDER", "Classify" to "CLASSIFY", "Burst" to "SPEED_BURST"), force) { force = it }
