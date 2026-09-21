@@ -15,7 +15,17 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.app.Activity
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.platform.LocalContext
+import com.triviamap.domain.monetization.AdsController
+import com.triviamap.domain.monetization.SupportEvent
+import com.triviamap.domain.monetization.SupportOffer
+import com.triviamap.domain.monetization.SupportRepository
+import com.triviamap.domain.monetization.SupportTier
 import com.triviamap.domain.repository.UserPreferencesRepository
+import com.triviamap.util.findActivity
 import com.triviamap.presentation.common.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,8 +35,19 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val prefs: UserPreferencesRepository
+    private val prefs: UserPreferencesRepository,
+    private val support: SupportRepository,
+    private val ads: AdsController
 ) : ViewModel() {
+    val offers = support.offers
+    val supportEvents = support.events
+    val privacyOptionsRequired = ads.privacyOptionsRequired
+    val isSupporter = prefs.isSupporter
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+    fun buy(activity: Activity, tier: SupportTier) = support.purchase(activity, tier)
+    fun showPrivacyOptions(activity: Activity) = ads.showPrivacyOptions(activity)
+
     val leftHanded = prefs.leftHanded
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
@@ -49,8 +70,25 @@ fun SettingsScreen(
 ) {
     val leftHanded by vm.leftHanded.collectAsState()
     val haptics by vm.haptics.collectAsState()
+    val offers by vm.offers.collectAsState()
+    val isSupporter by vm.isSupporter.collectAsState()
+    val privacyRequired by vm.privacyOptionsRequired.collectAsState()
+    val activity = LocalContext.current.findActivity()
+    val scaffoldState = rememberScaffoldState()
+
+    LaunchedEffect(Unit) {
+        vm.supportEvents.collect { event ->
+            scaffoldState.snackbarHostState.showSnackbar(
+                when (event) {
+                    is SupportEvent.Thanks -> "Thank you so much! \u2665"
+                    SupportEvent.Failed -> "Purchase unavailable right now, please try again later."
+                }
+            )
+        }
+    }
 
     Scaffold(
+        scaffoldState = scaffoldState,
         backgroundColor = Background,
         topBar = {
             TopAppBar(
@@ -66,7 +104,7 @@ fun SettingsScreen(
         }
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             SettingRow(
@@ -81,6 +119,19 @@ fun SettingsScreen(
                 checked = haptics,
                 onChange = vm::setHaptics
             )
+
+            SupportSection(
+                offers = offers,
+                isSupporter = isSupporter,
+                onBuy = { tier -> activity?.let { vm.buy(it, tier) } }
+            )
+
+            if (privacyRequired) {
+                OutlinedButton(
+                    onClick = { activity?.let(vm::showPrivacyOptions) },
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Privacy choices (ads)", color = OnSurfaceMed) }
+            }
         }
     }
 }
@@ -99,6 +150,31 @@ private fun SettingRow(title: String, description: String, checked: Boolean, onC
                 onCheckedChange = onChange,
                 colors = SwitchDefaults.colors(checkedThumbColor = Primary, checkedTrackColor = Primary)
             )
+        }
+    }
+}
+
+@Composable
+private fun SupportSection(offers: List<SupportOffer>, isSupporter: Boolean, onBuy: (SupportTier) -> Unit) {
+    Surface(shape = RoundedCornerShape(12.dp), color = SurfaceHigh, modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Support TriviaMap", color = OnSurface, fontWeight = FontWeight.SemiBold)
+            Text(
+                if (isSupporter) "You're a supporter, thank you! The banner on the home screen is gone for good."
+                else "A solo project. A tip keeps it going and removes the banner on the home screen. Nothing in the game is locked.",
+                color = OnSurfaceMed, fontSize = 12.sp
+            )
+            if (offers.isEmpty()) {
+                Text("Tips are not available right now (offline, or not published on Google Play yet).", color = OnSurfaceMed, fontSize = 11.sp)
+            } else {
+                offers.forEach { offer ->
+                    Button(
+                        onClick = { onBuy(offer.tier) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Accent, contentColor = androidx.compose.ui.graphics.Color.White)
+                    ) { Text("${offer.tier.emoji}  ${offer.tier.title} · ${offer.price}", fontWeight = FontWeight.Bold) }
+                }
+            }
         }
     }
 }

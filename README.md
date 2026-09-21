@@ -57,6 +57,10 @@ CI (`.github/workflows/ci.yml`) runs tests, lint and a debug build.
 - **Progression:** XP, levels, badges, per-line knowledge and most-missed stations on the Progress screen.
 - Rules live in `domain/sprint/SprintRules.kt`; balance is checked by `SprintEconomyTest`.
 
+## Monetization
+
+Non-intrusive: an AdMob banner on the home screen only (after GDPR consent) and optional tips through Google Play Billing (a tip also removes the banner). Setup and pre-publication checklist: [docs/MONETIZATION.md](docs/MONETIZATION.md). Debug and default builds use Google's test ad ids.
+
 ## Credits
 
 Strasbourg tram network © Eurométropole de Strasbourg / CTS.

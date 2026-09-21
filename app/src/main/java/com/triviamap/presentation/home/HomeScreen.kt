@@ -79,6 +79,7 @@ fun HomeScreen(
             Spacer(Modifier.height(16.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
+                if (ui.isSupporter) Text("\u2665 ", color = Accent, fontSize = 12.sp, fontWeight = FontWeight.Black)
                 Text(
                     "LV ${ui.level.level} · ${ui.level.title.uppercase()}",
                     color = Primary, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp
@@ -172,14 +173,19 @@ fun HomeScreen(
             }
         }
 
-        Text(
-            text = "v0.3 · Station Sprint Edition",
-            color = OnSurfaceMed.copy(alpha = 0.4f),
-            fontSize = 10.sp,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp)
-        )
+        Column(
+            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "v0.3 · Station Sprint Edition",
+                color = OnSurfaceMed.copy(alpha = 0.4f),
+                fontSize = 10.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            // Only place ads appear in the whole app; never during a run
+            if (ui.showBanner) AdBanner()
+        }
     }
 
     if (BuildConfig.DEBUG && showDev) {

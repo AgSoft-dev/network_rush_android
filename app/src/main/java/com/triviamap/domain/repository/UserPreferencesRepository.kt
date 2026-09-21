@@ -13,10 +13,13 @@ interface UserPreferencesRepository {
     val hapticsEnabled: Flow<Boolean>
     /** Accumulated experience points. */
     val xp: Flow<Int>
+    /** True once the player has tipped at least once (hides the home banner). */
+    val isSupporter: Flow<Boolean>
     
     suspend fun updateStreak()
     suspend fun earnBadge(badgeId: String)
     suspend fun setLeftHanded(enabled: Boolean)
     suspend fun setHapticsEnabled(enabled: Boolean)
+    suspend fun setSupporter(value: Boolean)
     suspend fun addXp(amount: Int)
 }

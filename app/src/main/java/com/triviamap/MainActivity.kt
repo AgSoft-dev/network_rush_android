@@ -19,6 +19,8 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var tramLineRepository: TramLineRepository
+    @Inject lateinit var adsController: com.triviamap.domain.monetization.AdsController
+    @Inject lateinit var supportRepository: com.triviamap.domain.monetization.SupportRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +30,10 @@ class MainActivity : ComponentActivity() {
 
         // Pre-load tram data from assets (ViewModels also trigger load(); it is idempotent)
         lifecycleScope.launch { tramLineRepository.load() }
+
+        // Consent form (if required) then AdMob; Play Billing for the optional tips
+        adsController.gatherConsent(this)
+        supportRepository.connect()
 
         setContent {
             TriviaMapTheme {

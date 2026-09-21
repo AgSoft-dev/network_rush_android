@@ -205,7 +205,7 @@ Analyse statique de `TileList` (`SprintScreen.kt` ~l.324-460) et de `SprintViewM
 - [x] **P2 — Stats** : afficher évolution, taux d'erreur par ligne/station, stations les plus ratées (donnée disponible si on journalise les réponses).
   - ✅ 2026-09-21 : Statistiques par station persistées (`station_stats`, Room v3) ; écran Progress : niveau/XP, historique des 20 derniers runs, connaissance par ligne (maîtrisées/vues), stations les plus ratées (≥ 3 essais), badges, meilleurs scores par mode.
 - [ ] **P3 — Multi / social** : ghost replays, classement (Firebase) → nécessite anti-triche (score calculé côté client aujourd'hui).
-- [ ] **P3 — Monétisation** : non abordée ; pas d'impact technique avant la beta.
+- [~] **P3 — Monétisation** : A (bannière accueil) et B2 (tips Play Billing) **implémentés côté code** (2026-09-21), reste la configuration store : voir `docs/MONETIZATION.md`. Autres options ci-dessous.
 - [ ] **P3 — Store** : icône (`ic_launcher.xml` unique, pas d'adaptive icon ni monochrome), captures, politique de confidentialité si analytics.
 
 ---
@@ -219,6 +219,53 @@ Analyse statique de `TileList` (`SprintScreen.kt` ~l.324-460) et de `SprintViewM
 - [ ] **P2 — Le daily dépend du jeu de données** : modifier `strasbourg_stations.json` change les défis du jour (l'ordre/ID des stations entre dans la graine). Versionner les données ou figer la graine par version.
 - [ ] **P2 — Une statistique par station, pas par ligne** : une correspondance partage les stats entre ses lignes (voulu). Ne distingue pas un sens de parcours ; à affiner si besoin.
 - [ ] **P3 — Stats : évolution limitée** aux 20 derniers runs Sprint/daily ; ajouter filtres (mode/difficulté) et graphe de maîtrise dans le temps (nécessite d'historiser `station_stats`).
+
+### Monétisation — options ouvertes (2026-09-21)
+
+Principe retenu : **non intrusif**. Jamais de pub pendant une partie (le chrono et le drag & drop sont le coeur du jeu), rien qui bloque la progression. Piste préférée : **bannière discrète sur l'accueil + don « offre-moi un café / un ticket de tram »**, éventuellement complétés par « supprimer la pub ».
+
+**A. Bannière sur l'écran d'accueil (AdMob)**
+- [ ] Bannière adaptative en bas de l'accueil uniquement (pas dans Sprint, ni Results, ni Progress).
+- Revenu faible (quelques €/1000 affichages), croît avec le nombre de sessions ; le Daily Challenge fait revenir chaque jour.
+- Coûts : SDK Google Mobile Ads (poids, temps de démarrage), formulaire de consentement RGPD/UMP obligatoire (public européen), déclaration « Data safety » Play Store, fiche « pub » dans la politique de confidentialité, pubs de test en debug (jamais en `BuildConfig.DEBUG` réel).
+- Alternative sans SDK tiers : encart maison / partenaire local (CTS, offices de tourisme, commerces) — plus de travail commercial, aucun tracking.
+
+**B. Don « Buy me a coffee / a tram ticket »**
+- [ ] Écran ou bouton « Soutenir » dans Settings (et sur Results après un bon run, sans pop-up).
+- Option B1, lien externe (Ko-fi, Buy Me a Coffee, Liberapay, PayPal.me) : zéro code de facturation, mais **la politique Play interdit de contourner Google Play Billing pour du contenu numérique dans l'app** ; un don sans contrepartie est toléré s'il est clairement présenté comme tel, à vérifier au moment de publier (risque de refus).
+- Option B2, achat in-app consommable via Google Play Billing : « Un café » (~2 €), « Un ticket de tram » (~1,60 €, clin d'oeil au tarif CTS), « Un abonnement mensuel » (~10 €). Conforme aux règles Play, commission 15 % (première tranche de 1 M$/an), demande la bibliothèque Play Billing + écran de remerciement.
+- Contrepartie symbolique possible (non bloquante) : badge « Supporter », titre spécial, thème de couleur.
+
+**C. Achat unique « Sans pub » / Supporter**
+- [ ] Achat non consommable (~2-3 €) : retire la bannière et donne le badge Supporter. Combine A et B2 avec un seul produit Billing. Recommandé si A est retenue.
+
+**D. Contenu premium (plus tard, multi-villes)**
+- [ ] Packs de villes (Lyon, Paris, Bordeaux…) payants ou premier pack gratuit + suivants payants. Cohérent avec l'abstraction multi-villes (§5) ; à décider seulement une fois le pilote Strasbourg validé.
+- [ ] Modes/entraînements supplémentaires (révision ciblée des stations ratées, statistiques avancées) en « Plus » ; à ne pas coupler au Daily, qui doit rester gratuit.
+
+**E. Pubs récompensées (optionnel, volontaires uniquement)**
+- [ ] « Regarder une pub pour une seconde chance / +1 skip ». Plus rentable mais plus intrusif et casse l'équilibre du chrono (à éviter au départ, ou limiter à un usage hors-run).
+
+**F. Partenariats / sponsoring**
+- [ ] Mention ou défi sponsorisé (office de tourisme, CTS, événements) ; pas de SDK, revenu incertain mais cohérent avec un jeu local.
+
+**Écartés (trop intrusif)** : interstitiels entre les parties, pubs vidéo forcées, vies/énergie payantes, timers d'attente, bannière pendant le jeu.
+
+**Prérequis techniques communs**
+- [ ] Compte développeur Play, politique de confidentialité, écran de consentement RGPD (si pubs), formulaire Data safety.
+- [ ] Abstraire derrière une interface `Monetization` (ads on/off, `isSupporter`) stockée dans DataStore pour ne rien coder en dur dans l'UI.
+- [ ] Ne rien activer avant que la boucle de rétention (daily, streak) soit validée avec de vrais joueurs : sans audience, la monétisation ne rapporte rien.
+
+**État d'implémentation (A + B2)**
+- [x] Bannière AdMob adaptative sur l'accueil uniquement, derrière consentement UMP ; ids de test par défaut, réels via `gradle.properties` (`admobAppId`, `admobBannerId`), kill switch `adsEnabled=false`.
+- [x] Tips « café » / « ticket de tram » (consommables Play Billing), section « Support » dans Settings, badge cœur sur l'accueil, un supporter ne voit plus la bannière.
+- [x] Bouton « Privacy choices » (Settings) quand UMP l'exige ; `MonetizationPolicy` testé (`MonetizationPolicyTest`).
+- [ ] Config store : compte AdMob + message RGPD, produits `support_coffee` / `support_tram_ticket`, Data safety, politique de confidentialité, déclaration de pubs (checklist dans `docs/MONETIZATION.md`).
+- [ ] Tester un vrai achat (testeurs de licence) et le refus de consentement ; la bannière met ~20 s à apparaître sur émulateur (aller-retour UMP).
+- [ ] Vérification serveur des achats non faite (inutile tant que rien de précieux n'est débloqué).
+- [ ] Ajouter éventuellement un rappel discret sur Results après un bon run (non fait, pour rester peu intrusif).
+
+**Recommandation** : A (bannière accueil) + C (achat unique « Sans pub / Supporter », qui sert aussi de « buy me a coffee » conforme Play), avec un lien de don B1 uniquement si la politique Play le permet à la publication. D en phase multi-villes.
 
 ## 6. Ordre de traitement suggéré
 

@@ -15,6 +15,14 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0"
+
+        // AdMob ids: Google's public TEST ids unless real ones are provided, in ~/.gradle/gradle.properties or with -P:
+        //   admobAppId=ca-app-pub-XXXX~YYYY   admobBannerId=ca-app-pub-XXXX/ZZZZ   adsEnabled=false (kill switch)
+        val testAppId = "ca-app-pub-3940256099942544~3347511713"
+        val testBannerId = "ca-app-pub-3940256099942544/9214589741"
+        manifestPlaceholders["admobAppId"] = providers.gradleProperty("admobAppId").getOrElse(testAppId)
+        buildConfigField("String", "ADMOB_BANNER_ID", "\"${providers.gradleProperty("admobBannerId").getOrElse(testBannerId)}\"")
+        buildConfigField("boolean", "ADS_ENABLED", providers.gradleProperty("adsEnabled").getOrElse("true"))
     }
 
     buildTypes {
@@ -89,6 +97,9 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.coroutines.android)
     implementation(libs.datastore.preferences)
+
+    implementation(libs.play.services.ads)
+    implementation(libs.billing.ktx)
 
     testImplementation(libs.junit)
 }

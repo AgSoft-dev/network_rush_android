@@ -29,6 +29,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         val EARNED_BADGES = stringSetPreferencesKey("earned_badges")
         val LEFT_HANDED = booleanPreferencesKey("left_handed")
         val HAPTICS = booleanPreferencesKey("haptics_enabled")
+        val SUPPORTER = booleanPreferencesKey("supporter")
         val XP = intPreferencesKey("xp")
     }
 
@@ -39,6 +40,12 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override val earnedBadges: Flow<Set<String>> = context.dataStore.data.map { it[Keys.EARNED_BADGES] ?: emptySet() }
 
     override val leftHanded: Flow<Boolean> = context.dataStore.data.map { it[Keys.LEFT_HANDED] ?: false }
+
+    override val isSupporter: Flow<Boolean> = context.dataStore.data.map { it[Keys.SUPPORTER] ?: false }
+
+    override suspend fun setSupporter(value: Boolean) {
+        context.dataStore.edit { it[Keys.SUPPORTER] = value }
+    }
 
     override val hapticsEnabled: Flow<Boolean> = context.dataStore.data.map { it[Keys.HAPTICS] ?: true }
 

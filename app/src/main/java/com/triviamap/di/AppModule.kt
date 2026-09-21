@@ -55,6 +55,14 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindUserPreferencesRepo(impl: UserPreferencesRepositoryImpl): UserPreferencesRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSupportRepo(impl: com.triviamap.data.monetization.BillingSupportRepository): com.triviamap.domain.monetization.SupportRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAdsController(impl: com.triviamap.data.monetization.AdsControllerImpl): com.triviamap.domain.monetization.AdsController
 }
 
 @Module

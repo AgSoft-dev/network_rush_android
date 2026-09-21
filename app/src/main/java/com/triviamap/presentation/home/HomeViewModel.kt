@@ -25,7 +25,9 @@ data class HomeUiState(
     val streak: Int = 0,
     val epochDay: Long = 0L,
     /** First daily-challenge result of today, if the player already played it. */
-    val dailyToday: GameResult? = null
+    val dailyToday: GameResult? = null,
+    val isSupporter: Boolean = false,
+    val showBanner: Boolean = false
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -33,6 +35,7 @@ data class HomeUiState(
 class HomeViewModel @Inject constructor(
     prefs: UserPreferencesRepository,
     results: GameResultRepository,
+    ads: com.triviamap.domain.monetization.AdsController,
     clock: Clock
 ) : ViewModel() {
 
@@ -44,7 +47,7 @@ class HomeViewModel @Inject constructor(
         }
     }.distinctUntilChanged()
 
-    val state = combine(
+    private val progress = combine(
         prefs.xp,
         prefs.dailyStreak,
         prefs.lastPlayedEpochDay,
@@ -53,5 +56,12 @@ class HomeViewModel @Inject constructor(
         // A streak whose last day is older than yesterday is already broken, even if not yet reset on disk
         val liveStreak = if (lastDay >= 0 && day - lastDay <= 1) streak else 0
         HomeUiState(Progression.levelFor(xp), liveStreak, day, daily)
+    }
+
+    val state = combine(progress, prefs.isSupporter, ads.canRequestAds) { ui, supporter, canAds ->
+        ui.copy(
+            isSupporter = supporter,
+            showBanner = com.triviamap.domain.monetization.MonetizationPolicy.shouldShowBanner(supporter, canAds)
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 }
