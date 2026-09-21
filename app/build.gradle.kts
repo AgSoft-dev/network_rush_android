@@ -9,6 +9,9 @@ android {
     namespace = "com.triviamap"
     compileSdk = 37
 
+    val testAppId = "ca-app-pub-3940256099942544~3347511713"
+    val testBannerId = "ca-app-pub-3940256099942544/9214589741"
+
     defaultConfig {
         applicationId = "com.agsoft.networkrush"
         minSdk = 28
@@ -16,17 +19,20 @@ android {
         versionCode = 1
         versionName = "0.1.0"
 
-        // AdMob ids: Google's public TEST ids unless real ones are provided, in ~/.gradle/gradle.properties or with -P:
+        // AdMob: Google's public TEST ids. Release builds use the real ids from ~/.gradle/gradle.properties (or -P):
         //   admobAppId=ca-app-pub-XXXX~YYYY   admobBannerId=ca-app-pub-XXXX/ZZZZ   adsEnabled=false (kill switch)
-        val testAppId = "ca-app-pub-3940256099942544~3347511713"
-        val testBannerId = "ca-app-pub-3940256099942544/9214589741"
-        manifestPlaceholders["admobAppId"] = providers.gradleProperty("admobAppId").getOrElse(testAppId)
-        buildConfigField("String", "ADMOB_BANNER_ID", "\"${providers.gradleProperty("admobBannerId").getOrElse(testBannerId)}\"")
+        // Debug builds always keep the test ids: clicking your own live ads can get the AdMob account suspended.
+        manifestPlaceholders["admobAppId"] = testAppId
+        buildConfigField("String", "ADMOB_BANNER_ID", "\"$testBannerId\"")
         buildConfigField("boolean", "ADS_ENABLED", providers.gradleProperty("adsEnabled").getOrElse("true"))
     }
 
     buildTypes {
         release {
+            providers.gradleProperty("admobAppId").orNull?.let { manifestPlaceholders["admobAppId"] = it }
+            providers.gradleProperty("admobBannerId").orNull?.let {
+                buildConfigField("String", "ADMOB_BANNER_ID", "\"$it\"")
+            }
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

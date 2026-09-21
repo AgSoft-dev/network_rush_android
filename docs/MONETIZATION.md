@@ -15,7 +15,7 @@ Implemented: **A** (AdMob banner on the home screen only) and **B2** (tips throu
    admobAppId=ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY
    admobBannerId=ca-app-pub-XXXXXXXXXXXXXXXX/ZZZZZZZZZZ
    ```
-   Without them, builds use Google's public **test** ids (test ads only, zero revenue). `adsEnabled=false` disables ads entirely (kill switch).
+   Only **release** builds use them; debug and builds without them use Google's public **test** ids (test ads only, zero revenue). `adsEnabled=false` disables ads entirely (kill switch).
 2. **AdMob > Privacy & messaging**: create the GDPR message (UMP) for the app, otherwise no consent form is shown and EEA users get no ads.
 3. **Play Console > Monetize > In-app products**: create two *consumable* products, ids exactly `support_coffee` (~2 EUR) and `support_tram_ticket` (~1.60 EUR), and activate them. The app must be uploaded to an internal/closed testing track for Billing to return products; add license testers to try purchases without paying.
 4. **Data safety form + privacy policy**: declare advertising ID / device identifiers collected by AdMob and purchase history (Play Billing); publish a privacy policy URL.
