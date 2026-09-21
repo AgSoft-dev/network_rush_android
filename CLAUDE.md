@@ -14,3 +14,4 @@ Android game (Kotlin, Jetpack Compose, Hilt, Room) to learn the Strasbourg tram 
 
 ## Build and test
 `./gradlew testDebugUnitTest lintDebug assembleDebug` (run `assembleRelease` separately from lint). JDK 21 comes from the Gradle daemon JVM setting; if the shell JDK is unsuitable, point `JAVA_HOME` at Android Studio's bundled JBR.
+Room migration tests are instrumented (`MigrationTest`, needs a running emulator/device): `./gradlew connectedDebugAndroidTest`. Set `ANDROID_HOME` if `local.properties` is missing.

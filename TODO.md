@@ -213,7 +213,8 @@ Analyse statique de `TileList` (`SprintScreen.kt` ~l.324-460) et de `SprintViewM
 
 ### Suivi technique de la session 2026-09-21 (Sprint P0-P2 + progression)
 
-- [ ] **P1 — Tester la migration Room 1→2→3 sur appareil** (schémas `2.json` et `3.json` exportés ; ajouter un test instrumenté `MigrationTestHelper`). Nouveautés v3 : colonne `game_results.answerLog`, table `station_stats`.
+- [x] **P1 — Tester la migration Room 1→2→3 sur appareil** (schémas `2.json` et `3.json` exportés ; ajouter un test instrumenté `MigrationTestHelper`). Nouveautés v3 : colonne `game_results.answerLog`, table `station_stats`.
+  - ✅ 2026-09-21 : `MigrationTest` instrumenté (5 tests verts sur émulateur API 35) : 1→2 (lignes SPRINT/TRACE, cas où `mode` existe déjà), 2→3, 1→2→3 chaîné, ouverture Room finale + DAOs. v1 recréé en SQL brut (pas de `1.json`). Aucun bug de migration trouvé.
 - [ ] **P1 — Valider au doigt** : détection des colonnes CLASSIFY (zone de poignée avec tuile décalée, mode gaucher), drag avec 8-10 tuiles, marques vert/rouge, haptique.
 - [ ] **P2 — Retuner l'économie avec des parties réelles** : les modèles de joueur de `SprintEconomyTest` (temps de résolution 2 s + 1.3 s/tuile, précision 75/85/95 %) sont des hypothèses. Journaliser durée par question et taux d'erreur réels.
 - [ ] **P2 — Le daily est « une tentative par jour » mais non protégé** (données locales : réinstaller ou effacer les données permet de rejouer). Suffisant sans classement ; à revoir avec un classement en ligne.
@@ -289,7 +290,7 @@ Principe retenu : **non intrusif**. Jamais de pub pendant une partie (le chrono 
 - [~] **Conformité Play** : brouillons prêts dans `docs/legal/` (politique de confidentialité fr/en, conditions d'utilisation, attribution des données, réponses Data safety / pubs / classification, fiche fr/en). Reste : remplir les `[PLACEHOLDERS]` (éditeur, adresse, email, date), héberger la politique en HTTPS puis renseigner `res/values/legal.xml` (`privacy_policy_url`, `terms_url`), statut « trader » DSA, captures et visuels, relecture par un juriste.
 - [x] **Données Etalab** : source confirmée (jeu « Stations de tram », data.strasbourg.eu, accès le 2026-09-21, mise à jour du jeu le 2026-06-17) ; mention datée dans Settings > Legal et `docs/legal/DATA_ATTRIBUTION.md`. À refaire (date) si le jeu est actualisé. Reste : l'ordre des stations par ligne et les coordonnées schématiques sont notre adaptation (déjà indiquée) ; vérifier l'exactitude des ordres (fourches A/D, E/F) vs la carte CTS.
 - [~] **Données** : provenance et licence documentées (Etalab, 2026-09-21). Reste la validation des ordres de stations (fourches A/D, E/F, lignes G/H) vs la carte CTS.
-- [ ] **Test de migration Room 1→2→3** (`MigrationTestHelper`) : perte de scores = inacceptable en prod.
+- [x] **Test de migration Room 1→2→3** (`MigrationTestHelper`) : perte de scores = inacceptable en prod.
 - [ ] **Test sur appareil réel** : drag & drop (CLASSIFY, mode gaucher, 8-10 tuiles), perf, contraste tuiles teintées (lignes F/G).
 
 **Fortement recommandés**

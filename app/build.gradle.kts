@@ -18,6 +18,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // AdMob: Google's public TEST ids. Release builds use the real ids from ~/.gradle/gradle.properties (or -P):
         //   admobAppId=ca-app-pub-XXXX~YYYY   admobBannerId=ca-app-pub-XXXX/ZZZZ   adsEnabled=false (kill switch)
@@ -56,6 +57,9 @@ android {
         unitTests.isReturnDefaultValues = true
     }
 
+    // Exported Room schemas are read by MigrationTestHelper
+    sourceSets.getByName("androidTest").assets.directories.add("$projectDir/schemas")
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -71,6 +75,15 @@ kotlin {
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+// room-testing needs kotlinx-serialization >= 1.8 at runtime; the Kotlin toolchain pins 1.7.3 (AbstractMethodError)
+configurations.matching { it.name.contains("AndroidTest", ignoreCase = true) && it.name.contains("Runtime") }.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlinx" && requested.name.startsWith("kotlinx-serialization-")) {
+            useVersion("1.8.1")
+        }
+    }
 }
 
 dependencies {
@@ -108,4 +121,7 @@ dependencies {
     implementation(libs.billing.ktx)
 
     testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.room.testing)
 }
