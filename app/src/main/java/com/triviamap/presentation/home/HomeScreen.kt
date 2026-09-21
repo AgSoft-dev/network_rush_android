@@ -9,7 +9,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.ElectricBolt
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,17 +26,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.triviamap.BuildConfig
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.triviamap.domain.model.Difficulty
+import com.triviamap.domain.progress.ShareText
+import com.triviamap.util.shareText
 import com.triviamap.domain.model.GameMode
 import com.triviamap.presentation.common.*
 
 @Composable
 fun HomeScreen(
     onPlay: (GameMode, Difficulty) -> Unit,
+    onDevSprint: (Difficulty, Int, String) -> Unit,
     onStats: () -> Unit,
-    onSettings: () -> Unit
+    onSettings: () -> Unit,
+    vm: HomeViewModel = hiltViewModel()
 ) {
+    val ui by vm.state.collectAsState()
+    val context = LocalContext.current
     var pendingMode by remember { mutableStateOf<GameMode?>(null) }
+    var showDev by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -64,7 +76,21 @@ fun HomeScreen(
                 letterSpacing = 2.sp
             )
 
-            Spacer(Modifier.height(48.dp))
+            Spacer(Modifier.height(16.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "LV ${ui.level.level} · ${ui.level.title.uppercase()}",
+                    color = Primary, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp
+                )
+                if (ui.streak > 0) {
+                    Spacer(Modifier.width(12.dp))
+                    Icon(Icons.Default.Whatshot, null, tint = Accent, modifier = Modifier.size(16.dp))
+                    Text("${ui.streak}", color = Accent, fontSize = 12.sp, fontWeight = FontWeight.Black)
+                }
+            }
+
+            Spacer(Modifier.height(32.dp))
 
             // Trace Network is parked until its scoring is reworked: dev builds only
             if (BuildConfig.DEBUG) {
@@ -76,6 +102,12 @@ fun HomeScreen(
                 )
 
                 Spacer(Modifier.height(16.dp))
+                OutlinedButton(
+                    onClick = { showDev = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp)
+                ) { Text("DEV · SPRINT VARIANTS", color = Accent, fontWeight = FontWeight.Bold, letterSpacing = 1.sp) }
+                Spacer(Modifier.height(16.dp))
             }
 
             ModeButton(
@@ -84,6 +116,38 @@ fun HomeScreen(
                 color = Accent,
                 onClick = { pendingMode = GameMode.STATION_SPRINT }
             )
+
+            Spacer(Modifier.height(16.dp))
+
+            val daily = ui.dailyToday
+            if (daily == null) {
+                ModeButton(
+                    title = "DAILY CHALLENGE",
+                    icon = Icons.Default.CalendarToday,
+                    color = Success,
+                    onClick = { onPlay(GameMode.DAILY_SPRINT, Difficulty.MEDIUM) }
+                )
+                Text(
+                    "Same puzzles for everyone, one attempt a day",
+                    color = OnSurfaceMed, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp)
+                )
+            } else {
+                Surface(shape = RoundedCornerShape(20.dp), color = SurfaceHigh, modifier = Modifier.fillMaxWidth()) {
+                    Row(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text("TODAY'S DAILY · DONE", color = Success, fontWeight = FontWeight.Black, fontSize = 12.sp, letterSpacing = 1.sp)
+                            Text("${daily.score} pts · level ${daily.level}", color = OnSurface, fontWeight = FontWeight.Bold)
+                            Text("Come back tomorrow for a new one", color = OnSurfaceMed, fontSize = 11.sp)
+                        }
+                        IconButton(onClick = {
+                            shareText(context, ShareText.build(
+                                isDaily = true, difficultyName = daily.difficulty.name, epochDay = ui.epochDay,
+                                level = daily.level, score = daily.score, maxCombo = daily.maxCombo, answerLog = daily.answerLog
+                            ))
+                        }) { Icon(Icons.Default.Share, contentDescription = "Share", tint = Accent) }
+                    }
+                }
+            }
 
             Spacer(Modifier.height(32.dp))
 
@@ -98,7 +162,7 @@ fun HomeScreen(
                 ),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = OnSurface)
             ) {
-                Text("STATISTICS", fontWeight = FontWeight.Medium, letterSpacing = 2.sp)
+                Text("PROGRESS", fontWeight = FontWeight.Medium, letterSpacing = 2.sp)
             }
 
             Spacer(Modifier.height(12.dp))
@@ -115,6 +179,13 @@ fun HomeScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 16.dp)
+        )
+    }
+
+    if (BuildConfig.DEBUG && showDev) {
+        DevSprintDialog(
+            onStart = { d, l, f -> showDev = false; onDevSprint(d, l, f) },
+            onDismiss = { showDev = false }
         )
     }
 
@@ -210,4 +281,55 @@ private fun AnimatedBackground() {
             drawLine(color = color, start = Offset(-offset, y), end = Offset(size.width - offset + 100f, y), strokeWidth = 3f, cap = StrokeCap.Round)
         }
     }
+}
+
+/** Debug-only: launch a Sprint with a forced challenge type and starting level (stages: 1, 6, 11, 16, 21+). */
+@Composable
+private fun DevSprintDialog(
+    onStart: (Difficulty, Int, String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var difficulty by remember { mutableStateOf(Difficulty.MEDIUM) }
+    var level by remember { mutableStateOf(1) }
+    var force by remember { mutableStateOf("") }
+
+    @Composable
+    fun <T> Choices(label: String, options: List<Pair<String, T>>, selected: T, onPick: (T) -> Unit) {
+        Text(label, color = OnSurfaceMed, fontSize = 11.sp, modifier = Modifier.padding(top = 8.dp))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            options.forEach { (text, value) ->
+                val on = value == selected
+                OutlinedButton(
+                    onClick = { onPick(value) },
+                    contentPadding = PaddingValues(horizontal = 6.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        backgroundColor = if (on) Accent else Color.Transparent,
+                        contentColor = if (on) Color.White else OnSurface
+                    ),
+                    modifier = Modifier.weight(1f)
+                ) { Text(text, fontSize = 11.sp, maxLines = 1) }
+            }
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        backgroundColor = Surface,
+        contentColor = OnSurface,
+        title = { Text("Dev · Sprint variants", fontWeight = FontWeight.Bold) },
+        text = {
+            Column {
+                Choices("Challenge type", listOf("Auto" to "", "Reorder" to "REORDER", "Classify" to "CLASSIFY", "Burst" to "SPEED_BURST"), force) { force = it }
+                Choices("Start level (tiles / stage)", listOf("1" to 1, "6" to 6, "11" to 11, "16" to 16, "21" to 21, "40" to 40), level) { level = it }
+                Choices("Difficulty", listOf("Easy" to Difficulty.EASY, "Medium" to Difficulty.MEDIUM, "Hard" to Difficulty.HARD), difficulty) { difficulty = it }
+                Text("Runs still count toward stats/XP.", color = OnSurfaceMed, fontSize = 10.sp, modifier = Modifier.padding(top = 8.dp))
+            }
+        },
+        buttons = {
+            Row(Modifier.fillMaxWidth().padding(8.dp), horizontalArrangement = Arrangement.End) {
+                TextButton(onClick = onDismiss) { Text("Cancel", color = OnSurfaceMed) }
+                TextButton(onClick = { onStart(difficulty, level, force) }) { Text("START", color = Accent, fontWeight = FontWeight.Black) }
+            }
+        }
+    )
 }

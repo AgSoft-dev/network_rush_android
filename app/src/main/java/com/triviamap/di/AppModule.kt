@@ -26,11 +26,14 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext ctx: Context): TriviaMapDatabase =
         Room.databaseBuilder(ctx, TriviaMapDatabase::class.java, "triviamap.db")
-            .addMigrations(TriviaMapDatabase.MIGRATION_1_2)
+            .addMigrations(TriviaMapDatabase.MIGRATION_1_2, TriviaMapDatabase.MIGRATION_2_3)
             .build()
 
     @Provides
     fun provideGameResultDao(db: TriviaMapDatabase): GameResultDao = db.gameResultDao()
+
+    @Provides
+    fun provideStationStatsDao(db: TriviaMapDatabase): com.triviamap.data.local.dao.StationStatsDao = db.stationStatsDao()
 }
 
 @Module
@@ -44,6 +47,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindGameResultRepo(impl: GameResultRepositoryImpl): GameResultRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindStationStatsRepo(impl: com.triviamap.data.repository.StationStatsRepositoryImpl): com.triviamap.domain.repository.StationStatsRepository
 
     @Binds
     @Singleton

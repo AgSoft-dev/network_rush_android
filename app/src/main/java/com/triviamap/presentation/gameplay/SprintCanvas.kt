@@ -66,32 +66,8 @@ fun SprintCanvas(
                 }
             }
 
-            // 2. Draw stations
-            line.stations.forEach { station ->
-                val norm = station.position.toNormalized(bounds)
-                val sx = norm.first * size.width
-                val sy = norm.second * size.height
-                
-                val isVisited = visitedStations.any { it.id == station.id }
-                val isTarget = targetStation?.id == station.id
-                
-                // Ring
-                drawCircle(
-                    color = if (isVisited) lineColor else if (isTarget) Color.White else OnSurfaceMed.copy(alpha = 0.2f),
-                    radius = if (isTarget) stationRadius * 1.5f else stationRadius,
-                    center = Offset(sx, sy),
-                    style = Stroke(width = 3f)
-                )
-                
-                // Fill
-                if (isVisited) {
-                    drawCircle(
-                        color = lineColor.copy(alpha = 0.4f),
-                        radius = stationRadius - 3f,
-                        center = Offset(sx, sy)
-                    )
-                }
-            }
+            // The current line's stations are deliberately NOT drawn: their layout would give
+            // the answer away. Only the path of previously solved segments is shown.
         }
     }
 }

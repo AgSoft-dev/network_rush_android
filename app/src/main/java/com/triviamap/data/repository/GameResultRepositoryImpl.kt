@@ -15,7 +15,8 @@ import javax.inject.Singleton
 
 @Singleton
 class GameResultRepositoryImpl @Inject constructor(
-    private val dao: GameResultDao
+    private val dao: GameResultDao,
+    private val clock: java.time.Clock
 ) : GameResultRepository {
 
     private val gson = Gson()
@@ -25,6 +26,17 @@ class GameResultRepositoryImpl @Inject constructor(
 
     override fun getBestScores(): Flow<List<GameResult>> =
         dao.getBestScores().map { list -> list.map { it.toDomain(gson) } }
+
+    override fun recentSprintResults(limit: Int): Flow<List<GameResult>> =
+        dao.recent(listOf(GameMode.STATION_SPRINT.name, GameMode.DAILY_SPRINT.name), limit)
+            .map { list -> list.map { it.toDomain(gson) } }
+
+    override fun dailyResult(epochDay: Long): Flow<GameResult?> {
+        val zone = clock.zone
+        val from = java.time.LocalDate.ofEpochDay(epochDay).atStartOfDay(zone).toInstant().toEpochMilli()
+        val to = java.time.LocalDate.ofEpochDay(epochDay + 1).atStartOfDay(zone).toInstant().toEpochMilli()
+        return dao.firstBetween(GameMode.DAILY_SPRINT.name, from, to).map { it?.toDomain(gson) }
+    }
 
     override suspend fun getHighScore(mode: GameMode, difficulty: Difficulty): Int =
         dao.getHighScore(mode.name, difficulty.name) ?: 0
@@ -60,7 +72,8 @@ class GameResultRepositoryImpl @Inject constructor(
             playerPath = path,
             level = level,
             maxCombo = maxCombo,
-            accuracy = accuracy
+            accuracy = accuracy,
+            answerLog = answerLog
         )
     }
 
@@ -79,6 +92,7 @@ class GameResultRepositoryImpl @Inject constructor(
         level = level,
         maxCombo = maxCombo,
         accuracy = accuracy,
+        answerLog = answerLog,
         playerPathJson = gson.toJson(playerPath.map { GeoPointDto(it.x, it.y) })
     )
 

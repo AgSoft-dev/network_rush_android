@@ -25,6 +25,12 @@ interface GameResultDao {
     """)
     fun getBestScores(): Flow<List<GameResultEntity>>
 
+    @Query("SELECT * FROM game_results WHERE mode IN (:modes) ORDER BY timestampMs DESC LIMIT :limit")
+    fun recent(modes: List<String>, limit: Int): Flow<List<GameResultEntity>>
+
+    @Query("SELECT * FROM game_results WHERE mode = :mode AND timestampMs >= :fromMs AND timestampMs < :toMs ORDER BY timestampMs ASC LIMIT 1")
+    fun firstBetween(mode: String, fromMs: Long, toMs: Long): Flow<GameResultEntity?>
+
     @Query("SELECT MAX(score) FROM game_results WHERE mode = :mode AND difficulty = :difficulty")
     suspend fun getHighScore(mode: String, difficulty: String): Int?
 

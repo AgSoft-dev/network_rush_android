@@ -32,6 +32,42 @@ class ChallengeGeneratorTest {
         }
     }
 
+    @Test fun everyDifficultyAndLevelProducesSolvableChallenges() {
+        for (d in com.triviamap.domain.model.Difficulty.values()) {
+            val gen = ChallengeGenerator(Random(11))
+            for (level in 1..80) {
+                val c = gen.generate(level, lines, d)
+                assertTrue(c.isSolvedBy(c.correctOrder, c.correctSides))
+                assertTrue(c.tiles.size in 2..10)
+                c.directions.forEach { assertTrue(it.toward.isNotBlank()) }
+                if (c.type == ChallengeType.CLASSIFY) {
+                    val cols = c.columnOrders.values.flatten().map { it.id }
+                    assertEquals(c.correctOrder.map { it.id }.sorted(), cols.sorted())
+                }
+            }
+        }
+    }
+
+    @Test fun weightedStationsComeUpMoreOften() {
+        val target = lines.first { it.id == "A" }.stations[10].id
+        val weights = mapOf(target to 200.0)
+        fun hits(w: Map<String, Double>): Int {
+            val gen = ChallengeGenerator(Random(3))
+            return (0 until 400).count { i ->
+                val c = gen.generate(8, lines.filter { it.id == "A" }, com.triviamap.domain.model.Difficulty.MEDIUM, w, Random(i), avoidRepeats = false)
+                c.tiles.any { it.id == target }
+            }
+        }
+        assertTrue(hits(weights) > hits(emptyMap()) + 100)
+    }
+
+    @Test fun consecutiveChallengesAreRarelyIdentical() {
+        val gen = ChallengeGenerator(Random(5))
+        val keys = (0 until 60).map { i -> gen.generate(8, lines, com.triviamap.domain.model.Difficulty.MEDIUM).let { "${it.line.id}${it.correctOrder.map { s -> s.id }}" } }
+        val repeats = keys.zipWithNext().count { (a, b) -> a == b }
+        assertEquals(0, repeats)
+    }
+
     @Test fun sameSeedGivesSameChallenge() {
         val a = ChallengeGenerator(Random(7)).generate(12, lines)
         val b = ChallengeGenerator(Random(7)).generate(12, lines)

@@ -13,15 +13,16 @@ Android game (Kotlin, Jetpack Compose) to learn the Strasbourg tram network.
 ```
 app/src/main/java/com/triviamap/
 ├── data/
-│   ├── local/        Room (GameResult, schema v2, migrations, exported to app/schemas/)
+│   ├── local/        Room (game results + per-station stats, schema v3, migrations, exported to app/schemas/)
 │   ├── model/        GeoJsonParser — parses assets/strasbourg_stations.json
 │   └── repository/   TramLineRepositoryImpl (Loading/Loaded/Error), GameResultRepositoryImpl, UserPreferencesRepositoryImpl (DataStore)
 ├── di/               Hilt modules (DB, repositories, Random / Clock / TimeSource)
 ├── domain/
 │   ├── model/        TramNetwork (GeoPoint, Station, TramLine), GameMode, GameResult, StreakCalculator
+│   ├── progress/     StationStat, Progression (XP/levels), Badges, ProgressStats, ShareText, RunSummary
 │   ├── repository/   Interfaces
-│   └── sprint/       ChallengeGenerator, Challenge, SprintRules — pure Kotlin, unit-tested
-├── presentation/     Compose screens + ViewModels (home, gameplay, results, stats)
+│   └── sprint/       ChallengeGenerator, Challenge, SprintRules, DailyChallenge — pure Kotlin, unit-tested
+├── presentation/     Compose screens + ViewModels (home, gameplay, results, progress, settings)
 └── util/             GeometryEngine, ScoringEngine (Trace), TimeSource
 ```
 
@@ -45,12 +46,16 @@ Gradle 9.7 + AGP 9.4 + Kotlin 2.3, compileSdk 37 / targetSdk 35. `gradle/gradle-
 
 CI (`.github/workflows/ci.yml`) runs tests, lint and a debug build.
 
-## Scoring (Sprint)
+## Game design (Sprint)
 
-- Points: `(500 + 50·level) × (2 if CLASSIFY) × speedFactor(1.0–1.5) × comboFactor(1.0–2.0)`
-- Time: +8…12 s base by difficulty (decreasing with stage) + combo bonus (≤ 5 s) + type bonus; wrong answer −5…9 s; skip −4 s and combo reset.
-- Clock: 60 / 45 / 30 s (easy / medium / hard), capped at its initial value.
-- Details: `domain/sprint/SprintRules.kt`.
+- **Challenges:** reorder the stations of a line, sort stations into two lines + shared hub columns (then order each column), or rapid-fire 3 tiles. Direction is shown as "line → terminus".
+- **Clock:** 60 / 45 / 30 s (easy / medium / hard). A correct answer gives time proportional to the puzzle size, decaying with the level down to a floor, so every run ends. A wrong answer or a skip (3 per run) costs time; almost-right answers cost less.
+- **Score:** `(500 + 50·level) × (2 if sorting) × speed factor (1–2, relative to puzzle size) × combo factor (1–3)`.
+- **Difficulty** also changes content: hard mixes reverse direction and non-contiguous station sets early.
+- **Spaced repetition:** stations you miss (or never saw) are drawn more often; a station is *mastered* after 3 correct placements in a row.
+- **Daily challenge:** same puzzles for everybody (seeded by day), one attempt per day, shareable Wordle-style recap.
+- **Progression:** XP, levels, badges, per-line knowledge and most-missed stations on the Progress screen.
+- Rules live in `domain/sprint/SprintRules.kt`; balance is checked by `SprintEconomyTest`.
 
 ## Credits
 

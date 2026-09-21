@@ -1,0 +1,163 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "ea039c4448a3f4441082088237d93a5c",
+    "entities": [
+      {
+        "tableName": "game_results",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `lineId` TEXT NOT NULL, `mode` TEXT NOT NULL, `difficulty` TEXT NOT NULL, `score` INTEGER NOT NULL, `stationOrderScore` REAL NOT NULL, `pathAccuracyScore` REAL NOT NULL, `completionScore` REAL NOT NULL, `speedBonusScore` REAL NOT NULL, `durationMs` INTEGER NOT NULL, `timestampMs` INTEGER NOT NULL, `level` INTEGER NOT NULL, `maxCombo` INTEGER NOT NULL, `accuracy` REAL NOT NULL, `answerLog` TEXT NOT NULL, `playerPathJson` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lineId",
+            "columnName": "lineId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mode",
+            "columnName": "mode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "difficulty",
+            "columnName": "difficulty",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "score",
+            "columnName": "score",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stationOrderScore",
+            "columnName": "stationOrderScore",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pathAccuracyScore",
+            "columnName": "pathAccuracyScore",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completionScore",
+            "columnName": "completionScore",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "speedBonusScore",
+            "columnName": "speedBonusScore",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "durationMs",
+            "columnName": "durationMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestampMs",
+            "columnName": "timestampMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxCombo",
+            "columnName": "maxCombo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "accuracy",
+            "columnName": "accuracy",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "answerLog",
+            "columnName": "answerLog",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "playerPathJson",
+            "columnName": "playerPathJson",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "station_stats",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`stationId` TEXT NOT NULL, `attempts` INTEGER NOT NULL, `correct` INTEGER NOT NULL, `streak` INTEGER NOT NULL, `lastSeenMs` INTEGER NOT NULL, PRIMARY KEY(`stationId`))",
+        "fields": [
+          {
+            "fieldPath": "stationId",
+            "columnName": "stationId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attempts",
+            "columnName": "attempts",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "correct",
+            "columnName": "correct",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "streak",
+            "columnName": "streak",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSeenMs",
+            "columnName": "lastSeenMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "stationId"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ea039c4448a3f4441082088237d93a5c')"
+    ]
+  }
+}

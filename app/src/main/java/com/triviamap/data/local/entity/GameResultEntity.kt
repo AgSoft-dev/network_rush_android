@@ -19,5 +19,6 @@ data class GameResultEntity(
     val level: Int = 0,
     val maxCombo: Int = 0,
     val accuracy: Float = 0f,
+    val answerLog: String = "",
     val playerPathJson: String       // JSON-encoded List<GeoPoint>
 )

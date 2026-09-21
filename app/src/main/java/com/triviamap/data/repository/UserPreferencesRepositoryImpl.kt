@@ -28,6 +28,8 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         val LAST_PLAYED_EPOCH_DAY = longPreferencesKey("last_played_epoch_day")
         val EARNED_BADGES = stringSetPreferencesKey("earned_badges")
         val LEFT_HANDED = booleanPreferencesKey("left_handed")
+        val HAPTICS = booleanPreferencesKey("haptics_enabled")
+        val XP = intPreferencesKey("xp")
     }
 
     override val dailyStreak: Flow<Int> = context.dataStore.data.map { it[Keys.DAILY_STREAK] ?: 0 }
@@ -37,6 +39,19 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override val earnedBadges: Flow<Set<String>> = context.dataStore.data.map { it[Keys.EARNED_BADGES] ?: emptySet() }
 
     override val leftHanded: Flow<Boolean> = context.dataStore.data.map { it[Keys.LEFT_HANDED] ?: false }
+
+    override val hapticsEnabled: Flow<Boolean> = context.dataStore.data.map { it[Keys.HAPTICS] ?: true }
+
+    override val xp: Flow<Int> = context.dataStore.data.map { it[Keys.XP] ?: 0 }
+
+    override suspend fun setHapticsEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.HAPTICS] = enabled }
+    }
+
+    override suspend fun addXp(amount: Int) {
+        if (amount <= 0) return
+        context.dataStore.edit { it[Keys.XP] = (it[Keys.XP] ?: 0) + amount }
+    }
 
     override suspend fun setLeftHanded(enabled: Boolean) {
         context.dataStore.edit { it[Keys.LEFT_HANDED] = enabled }

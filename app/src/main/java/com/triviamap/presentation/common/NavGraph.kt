@@ -20,19 +20,12 @@ sealed class Route(val path: String) {
     object Gameplay       : Route("gameplay/{difficulty}") {
         fun build(difficulty: Difficulty) = "gameplay/${difficulty.name}"
     }
-    object Sprint         : Route("sprint/{difficulty}") {
-        fun build(difficulty: Difficulty) = "sprint/${difficulty.name}"
+    object Sprint         : Route("sprint/{difficulty}?daily={daily}&startLevel={startLevel}&force={force}") {
+        fun build(difficulty: Difficulty, daily: Boolean = false, startLevel: Int = 1, force: String = "") =
+            "sprint/${difficulty.name}?daily=$daily&startLevel=$startLevel&force=$force"
     }
-    object Results        : Route("results/{mode}/{score}?accuracy={accuracy}&level={level}&maxCombo={maxCombo}&isNewRecord={isNewRecord}&streak={streak}") {
-        fun build(
-            mode: GameMode, 
-            score: Int, 
-            accuracy: Float = 0f, 
-            level: Int = 0, 
-            maxCombo: Int = 0, 
-            isNewRecord: Boolean = false,
-            streak: Int = 0
-        ) = "results/${mode.name}/$score?accuracy=$accuracy&level=$level&maxCombo=$maxCombo&isNewRecord=$isNewRecord&streak=$streak"
+    object Results        : Route("results/{mode}/{score}") {
+        fun build(mode: GameMode, score: Int) = "results/${mode.name}/$score"
     }
     object Stats          : Route("stats")
     object Settings       : Route("settings")
@@ -45,10 +38,14 @@ fun TriviaMapNavGraph(navController: NavHostController) {
         composable(Route.Home.path) {
             HomeScreen(
                 onPlay = { mode, difficulty ->
-                    when(mode) {
+                    when (mode) {
                         GameMode.TRACE_NETWORK -> navController.navigate(Route.Gameplay.build(difficulty))
                         GameMode.STATION_SPRINT -> navController.navigate(Route.Sprint.build(difficulty))
+                        GameMode.DAILY_SPRINT -> navController.navigate(Route.Sprint.build(Difficulty.MEDIUM, daily = true))
                     }
+                },
+                onDevSprint = { difficulty, level, force ->
+                    navController.navigate(Route.Sprint.build(difficulty, startLevel = level, force = force))
                 },
                 onStats = { navController.navigate(Route.Stats.path) },
                 onSettings = { navController.navigate(Route.Settings.path) }
@@ -73,23 +70,18 @@ fun TriviaMapNavGraph(navController: NavHostController) {
 
         composable(
             route = Route.Sprint.path,
-            arguments = listOf(navArgument("difficulty") { type = NavType.StringType })
+            arguments = listOf(
+                navArgument("difficulty") { type = NavType.StringType },
+                navArgument("daily") { type = NavType.BoolType; defaultValue = false },
+                navArgument("startLevel") { type = NavType.IntType; defaultValue = 1 },
+                navArgument("force") { type = NavType.StringType; defaultValue = "" }
+            )
         ) { backStack ->
             val difficulty = Difficulty.valueOf(backStack.arguments?.getString("difficulty") ?: Difficulty.MEDIUM.name)
             SprintScreen(
                 difficulty = difficulty,
-                onFinished = { score, accuracy, level, maxCombo, isNewRecord, streak ->
-                    navController.navigate(
-                        Route.Results.build(
-                            GameMode.STATION_SPRINT, 
-                            score, 
-                            accuracy, 
-                            level, 
-                            maxCombo, 
-                            isNewRecord, 
-                            streak
-                        )
-                    ) {
+                onFinished = { mode, score ->
+                    navController.navigate(Route.Results.build(mode, score)) {
                         popUpTo(Route.Home.path)
                     }
                 },
@@ -101,32 +93,25 @@ fun TriviaMapNavGraph(navController: NavHostController) {
             route = Route.Results.path,
             arguments = listOf(
                 navArgument("mode")  { type = NavType.StringType },
-                navArgument("score") { type = NavType.IntType },
-                navArgument("accuracy") { type = NavType.FloatType; defaultValue = 0f },
-                navArgument("level") { type = NavType.IntType; defaultValue = 0 },
-                navArgument("maxCombo") { type = NavType.IntType; defaultValue = 0 },
-                navArgument("isNewRecord") { type = NavType.BoolType; defaultValue = false },
-                navArgument("streak") { type = NavType.IntType; defaultValue = 0 }
+                navArgument("score") { type = NavType.IntType }
             )
         ) { backStack ->
             val mode  = GameMode.valueOf(backStack.arguments?.getString("mode") ?: GameMode.TRACE_NETWORK.name)
             val score = backStack.arguments?.getInt("score") ?: 0
-            val accuracy = backStack.arguments?.getFloat("accuracy") ?: 0f
-            val level = backStack.arguments?.getInt("level") ?: 0
-            val maxCombo = backStack.arguments?.getInt("maxCombo") ?: 0
-            val isNewRecord = backStack.arguments?.getBoolean("isNewRecord") ?: false
-            val streak = backStack.arguments?.getInt("streak") ?: 0
-            
+
             ResultsScreen(
                 mode = mode,
-                score  = score,
-                accuracy = accuracy,
-                level = level,
-                maxCombo = maxCombo,
-                isNewRecord = isNewRecord,
-                streak = streak,
-                onHome  = { navController.navigate(Route.Home.path) { popUpTo(Route.Home.path) } },
-                onRetry = { navController.navigate(Route.Home.path) { popUpTo(Route.Home.path) } }
+                score = score,
+                onHome = { navController.navigate(Route.Home.path) { popUpTo(Route.Home.path) } },
+                onRetry = { summary ->
+                    // Replay with the same rules as the run that just ended
+                    val target = when {
+                        mode == GameMode.TRACE_NETWORK -> Route.Home.path
+                        summary != null -> Route.Sprint.build(summary.difficulty)
+                        else -> Route.Home.path
+                    }
+                    navController.navigate(target) { popUpTo(Route.Home.path) }
+                }
             )
         }
 

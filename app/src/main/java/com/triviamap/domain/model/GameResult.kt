@@ -21,5 +21,7 @@ data class GameResult(
     /** Sprint: best combo streak. */
     val maxCombo: Int = 0,
     /** Sprint: correct submissions / total submissions (0..1). */
-    val accuracy: Float = 0f
+    val accuracy: Float = 0f,
+    /** Sprint: one char per answer (G correct, R wrong, S skipped) for the shareable recap. */
+    val answerLog: String = ""
 )

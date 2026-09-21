@@ -30,6 +30,13 @@ class SettingsViewModel @Inject constructor(
     val leftHanded = prefs.leftHanded
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
+    val haptics = prefs.hapticsEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+
+    fun setHaptics(enabled: Boolean) {
+        viewModelScope.launch { prefs.setHapticsEnabled(enabled) }
+    }
+
     fun setLeftHanded(enabled: Boolean) {
         viewModelScope.launch { prefs.setLeftHanded(enabled) }
     }
@@ -41,6 +48,7 @@ fun SettingsScreen(
     vm: SettingsViewModel = hiltViewModel()
 ) {
     val leftHanded by vm.leftHanded.collectAsState()
+    val haptics by vm.haptics.collectAsState()
 
     Scaffold(
         backgroundColor = Background,
@@ -61,27 +69,36 @@ fun SettingsScreen(
             modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Surface(shape = RoundedCornerShape(12.dp), color = SurfaceHigh, modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text("Left-handed mode", color = OnSurface, fontWeight = FontWeight.SemiBold)
-                        Text(
-                            "Puts the drag handles on the left edge of the tiles in Station Sprint.",
-                            color = OnSurfaceMed,
-                            fontSize = 12.sp
-                        )
-                    }
-                    Spacer(Modifier.width(12.dp))
-                    Switch(
-                        checked = leftHanded,
-                        onCheckedChange = vm::setLeftHanded,
-                        colors = SwitchDefaults.colors(checkedThumbColor = Primary, checkedTrackColor = Primary)
-                    )
-                }
+            SettingRow(
+                title = "Left-handed mode",
+                description = "Puts the drag handles on the left edge of the tiles in Station Sprint.",
+                checked = leftHanded,
+                onChange = vm::setLeftHanded
+            )
+            SettingRow(
+                title = "Vibrations",
+                description = "Feedback when dragging tiles and on correct / wrong answers.",
+                checked = haptics,
+                onChange = vm::setHaptics
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingRow(title: String, description: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Surface(shape = RoundedCornerShape(12.dp), color = SurfaceHigh, modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(title, color = OnSurface, fontWeight = FontWeight.SemiBold)
+                Text(description, color = OnSurfaceMed, fontSize = 12.sp)
             }
+            Spacer(Modifier.width(12.dp))
+            Switch(
+                checked = checked,
+                onCheckedChange = onChange,
+                colors = SwitchDefaults.colors(checkedThumbColor = Primary, checkedTrackColor = Primary)
+            )
         }
     }
 }
