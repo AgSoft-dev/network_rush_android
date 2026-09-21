@@ -64,9 +64,10 @@ fun HomeScreen(
             Text(
                 text = "TRIVIAMAP",
                 color = OnSurface,
+                fontFamily = DisplayFont,
                 fontSize = 36.sp,
-                fontWeight = FontWeight.Black,
-                letterSpacing = 8.sp
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 6.sp
             )
             Spacer(Modifier.height(4.dp))
             Text(
@@ -82,7 +83,7 @@ fun HomeScreen(
                 if (ui.isSupporter) Text("\u2665 ", color = Accent, fontSize = 12.sp, fontWeight = FontWeight.Black)
                 Text(
                     "LV ${ui.level.level} · ${ui.level.title.uppercase()}",
-                    color = Primary, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp
+                    color = OnSurfaceMed, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp
                 )
                 if (ui.streak > 0) {
                     Spacer(Modifier.width(12.dp))
@@ -98,7 +99,8 @@ fun HomeScreen(
                 ModeButton(
                     title = "TRACE NETWORK (DEV)",
                     icon = Icons.Default.Map,
-                    color = Primary,
+                    color = Surface,
+                    contentColor = OnSurface,
                     onClick = { pendingMode = GameMode.TRACE_NETWORK }
                 )
 
@@ -111,12 +113,7 @@ fun HomeScreen(
                 Spacer(Modifier.height(16.dp))
             }
 
-            ModeButton(
-                title = "STATION SPRINT",
-                icon = Icons.Default.ElectricBolt,
-                color = Accent,
-                onClick = { pendingMode = GameMode.STATION_SPRINT }
-            )
+            SprintHero(onGo = { pendingMode = GameMode.STATION_SPRINT })
 
             Spacer(Modifier.height(16.dp))
 
@@ -125,7 +122,8 @@ fun HomeScreen(
                 ModeButton(
                     title = "DAILY CHALLENGE",
                     icon = Icons.Default.CalendarToday,
-                    color = Success,
+                    color = Surface,
+                    contentColor = OnSurface,
                     onClick = { onPlay(GameMode.DAILY_SPRINT, Difficulty.MEDIUM) }
                 )
                 Text(
@@ -133,19 +131,19 @@ fun HomeScreen(
                     color = OnSurfaceMed, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp)
                 )
             } else {
-                Surface(shape = RoundedCornerShape(20.dp), color = SurfaceHigh, modifier = Modifier.fillMaxWidth()) {
+                Surface(shape = RoundedCornerShape(20.dp), color = Ticket, modifier = Modifier.fillMaxWidth()) {
                     Row(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
-                            Text("TODAY'S DAILY · DONE", color = Success, fontWeight = FontWeight.Black, fontSize = 12.sp, letterSpacing = 1.sp)
-                            Text("${daily.score} pts · level ${daily.level}", color = OnSurface, fontWeight = FontWeight.Bold)
-                            Text("Come back tomorrow for a new one", color = OnSurfaceMed, fontSize = 11.sp)
+                            Text("TODAY'S DAILY · VALIDATED", color = Color(0xFF008A2E), fontWeight = FontWeight.Black, fontSize = 12.sp, letterSpacing = 1.sp)
+                            Text("${daily.score} pts · level ${daily.level}", color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                            Text("Come back tomorrow for a new one", color = InkMed, fontSize = 11.sp)
                         }
                         IconButton(onClick = {
                             shareText(context, ShareText.build(
                                 isDaily = true, difficultyName = daily.difficulty.name, epochDay = ui.epochDay,
                                 level = daily.level, score = daily.score, maxCombo = daily.maxCombo, answerLog = daily.answerLog
                             ))
-                        }) { Icon(Icons.Default.Share, contentDescription = "Share", tint = Accent) }
+                        }) { Icon(Icons.Default.Share, contentDescription = "Share", tint = Ink) }
                     }
                 }
             }
@@ -159,7 +157,7 @@ fun HomeScreen(
                     .height(56.dp),
                 shape = RoundedCornerShape(28.dp),
                 border = ButtonDefaults.outlinedBorder.copy(
-                    brush = Brush.horizontalGradient(listOf(Primary, Accent))
+                    brush = Brush.horizontalGradient(listOf(LineB, LineA, LineD))
                 ),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = OnSurface)
             ) {
@@ -212,19 +210,20 @@ private fun ModeButton(
     title: String,
     icon: ImageVector,
     color: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    contentColor: Color = Ink
 ) {
     Button(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth().height(72.dp),
         shape = RoundedCornerShape(20.dp),
-        colors = ButtonDefaults.buttonColors(backgroundColor = color, contentColor = Color.White),
+        colors = ButtonDefaults.buttonColors(backgroundColor = color, contentColor = contentColor),
         elevation = ButtonDefaults.elevation(4.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp))
             Spacer(Modifier.width(16.dp))
-            Text(title, fontWeight = FontWeight.Black, letterSpacing = 2.sp, fontSize = 16.sp)
+            Text(title, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp, fontSize = 16.sp)
         }
     }
 }
@@ -338,4 +337,36 @@ private fun DevSprintDialog(
             }
         }
     )
+}
+
+/** Main entry: a white signage plate with the route dots and the sun-yellow "go" bar. */
+@Composable
+private fun SprintHero(onGo: () -> Unit) {
+    Surface(shape = RoundedCornerShape(26.dp), color = Plate, modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(18.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                listOf(LineA, LineB, LineD).forEachIndexed { i, c ->
+                    if (i > 0) Box(Modifier.width(22.dp).height(4.dp).background(Border, RoundedCornerShape(2.dp)))
+                    Box(Modifier.size(14.dp).background(c, CircleShape))
+                }
+                Box(Modifier.width(22.dp).height(4.dp).background(Border, RoundedCornerShape(2.dp)))
+                Box(Modifier.size(14.dp).background(Ink, CircleShape))
+            }
+            Spacer(Modifier.height(10.dp))
+            Text("Station Sprint", color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 26.sp)
+            Text("Put the stops back in order before the terminus.", color = InkMed, fontSize = 14.sp)
+            Spacer(Modifier.height(14.dp))
+            Button(
+                onClick = onGo,
+                modifier = Modifier.fillMaxWidth().height(64.dp),
+                shape = RoundedCornerShape(18.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Sun, contentColor = Ink),
+                elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp)
+            ) {
+                Text("GO", fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, letterSpacing = 2.sp)
+                Spacer(Modifier.width(12.dp))
+                Icon(Icons.Default.ElectricBolt, null, modifier = Modifier.size(26.dp))
+            }
+        }
+    }
 }

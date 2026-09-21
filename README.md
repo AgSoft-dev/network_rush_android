@@ -57,6 +57,10 @@ CI (`.github/workflows/ci.yml`) runs tests, lint and a debug build.
 - **Progression:** XP, levels, badges, per-line knowledge and most-missed stations on the Progress screen.
 - Rules live in `domain/sprint/SprintRules.kt`; balance is checked by `SprintEconomyTest`.
 
+## Visual identity
+
+"Terminus" (tram signage): ink-blue station night, white plates for tiles and the main card, solid round line pills in the official CTS colours, one sun-yellow action colour. Bricolage Grotesque (headlines, plates, buttons) and DM Sans (body), bundled in `res/font` (SIL OFL). Tokens live in `presentation/common/Theme.kt`; the adaptive launcher icon is the three-colour "S" line (`res/drawable/ic_launcher_*`). The app name is still "TriviaMap" (`strings.xml`); a rename only touches the display name, while `applicationId` must be settled before the first Play release.
+
 ## Monetization
 
 Non-intrusive: an AdMob banner on the home screen only (after GDPR consent) and optional tips through Google Play Billing (a tip also removes the banner). Setup and pre-publication checklist: [docs/MONETIZATION.md](docs/MONETIZATION.md). Debug and default builds use Google's test ad ids.

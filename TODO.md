@@ -267,6 +267,13 @@ Principe retenu : **non intrusif**. Jamais de pub pendant une partie (le chrono 
 
 **Recommandation** : A (bannière accueil) + C (achat unique « Sans pub / Supporter », qui sert aussi de « buy me a coffee » conforme Play), avec un lien de don B1 uniquement si la politique Play le permet à la publication. D en phase multi-villes.
 
+### Identité visuelle « Terminus » (2026-09-21)
+- [x] Thème (palette, polices Bricolage Grotesque + DM Sans embarquées), pastilles de ligne, tuiles Sprint en plaques blanches (drag : liseré jaune, légère rotation), carte héros Accueil, ticket du défi validé, icône adaptative (+ monochrome).
+- [ ] Restent au style précédent ou intermédiaire : Results (cartes XP/badges/partage en ticket), Progress (jauge de maîtrise en pastilles de ligne), Settings, dialogues, écran Trace (dev). Descriptions du sélecteur de difficulté à réaligner sur l'économie actuelle.
+- [ ] Fonctionnalités de la maquette non faites : carte de validation hebdomadaire (perforations), cigogne (emblème de niveau/badges), filtre de lignes, sons/haptique signature.
+- [ ] **Nom de l'app** : décider avant la 1re publication (« Terminus » jugé trop générique) ; vérifier Play Store, INPI/EUIPO, domaine ; `applicationId` irréversible après publication.
+- [ ] Contraste à vérifier sur tuiles teintées (Classify) avec les couleurs de ligne claires (F, G).
+
 ## 6. Ordre de traitement suggéré
 
 1. Hygiène repo : `git rm --cached app/build`, supprimer fichiers morts, réécrire README (§1 P0, §2).

@@ -167,7 +167,7 @@ fun ResultsScreen(
                     },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                     shape = RoundedCornerShape(26.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Accent, contentColor = Color.Black)
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Sun, contentColor = Ink)
                 ) {
                     Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(8.dp))
@@ -182,7 +182,7 @@ fun ResultsScreen(
                     onClick = { onRetry(summary) },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                     shape = RoundedCornerShape(26.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Primary, contentColor = Color.White)
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Surface, contentColor = OnSurface)
                 ) {
                     Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(8.dp))

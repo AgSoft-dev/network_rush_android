@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -146,7 +148,7 @@ fun SprintScreen(
                         Column(Modifier.align(Alignment.Center).padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("Couldn't load the network data.", color = OnSurface, fontWeight = FontWeight.Bold)
                             Spacer(Modifier.height(16.dp))
-                            Button(onClick = vm::retryLoad, colors = ButtonDefaults.buttonColors(backgroundColor = Primary, contentColor = Color.White)) {
+                            Button(onClick = vm::retryLoad, colors = ButtonDefaults.buttonColors(backgroundColor = Sun, contentColor = Ink)) {
                                 Text("RETRY")
                             }
                         }
@@ -282,7 +284,7 @@ private fun SprintTopBar(score: Int, stage: Int, skipsLeft: Int, isDaily: Boolea
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(if (isDaily) "DAILY · SCORE (STAGE $stage)" else "SCORE (STAGE $stage)", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = OnSurfaceMed)
-            Text(score.toString(), fontSize = 22.sp, fontWeight = FontWeight.Black, color = OnSurface)
+            Text(score.toString(), fontFamily = DisplayFont, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = OnSurface)
         }
         TextButton(onClick = onSkipShortcut, enabled = skipsLeft > 0) {
             Icon(Icons.Default.SkipNext, null, tint = OnSurfaceMed, modifier = Modifier.size(18.dp))
@@ -327,7 +329,7 @@ private fun MetroTimerBar(
             progress = progress,
             modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
             color = color,
-            backgroundColor = OnSurface.copy(alpha = 0.1f)
+            backgroundColor = Surface
         )
     }
 }
@@ -338,12 +340,7 @@ private fun DirectionHints(directions: List<Direction>, isForward: Boolean) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 4.dp)) {
         directions.forEach { d ->
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 1.dp)) {
-                Surface(color = Color(d.color), shape = RoundedCornerShape(4.dp)) {
-                    Text(
-                        d.lineId, color = Color.White, fontWeight = FontWeight.Black, fontSize = 11.sp,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
-                    )
-                }
+                LinePill(d.lineId, Color(d.color), size = 22.dp)
                 Spacer(Modifier.width(6.dp))
                 Icon(Icons.Default.ArrowDownward, null, tint = Accent, modifier = Modifier.size(12.dp))
                 Spacer(Modifier.width(4.dp))
@@ -579,19 +576,20 @@ private fun TileList(
                 val checked = misplacedIds.isNotEmpty()
                 val isWrong = station.id in misplacedIds
                 val targetColor = when (side) {
-                    -1 -> l1Color.copy(alpha = 0.6f)
-                    1 -> l2Color.copy(alpha = 0.6f)
-                    else -> Surface
+                    -1 -> lerp(Plate, l1Color, 0.3f)
+                    1 -> lerp(Plate, l2Color, 0.3f)
+                    else -> Plate
                 }
-                val tileColor by animateColorAsState(if (isDragging) Primary.copy(alpha = 0.9f) else targetColor, label = "color")
+                val tileColor by animateColorAsState(if (isDragging) Plate else targetColor, label = "color")
 
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Card(
-                        elevation = if (isDragging) 8.dp else 2.dp,
-                        shape = RoundedCornerShape(12.dp),
+                        elevation = if (isDragging) 12.dp else 0.dp,
+                        shape = RoundedCornerShape(18.dp),
                         backgroundColor = tileColor,
                         border = when {
-                            checked && !isDragging -> BorderStroke(2.dp, if (isWrong) Error else Success)
+                            isDragging -> BorderStroke(3.dp, Sun)
+                            checked -> BorderStroke(3.dp, if (isWrong) Error else Success)
                             side != 0 && !isDragging -> BorderStroke(1.5.dp, if (side == -1) l1Color else l2Color)
                             else -> null
                         },
@@ -600,30 +598,38 @@ private fun TileList(
                             .offset(x = cascadeOffset)
                             .graphicsLayer {
                                 translationY = if (isDragging) dragOffsetY else 0f
+                                rotationZ = if (isDragging) -2f else 0f
                                 translationX = if (isDragging) dragOffsetX else slideX.value
                             }
                             .zIndex(if (isDragging) 1f else 0f)
+                            // Signage plate "thickness"
+                            .drawBehind {
+                                if (!isDragging) drawRoundRect(
+                                    PlateEdge, topLeft = Offset(0f, 4.dp.toPx()), size = size,
+                                    cornerRadius = CornerRadius(18.dp.toPx())
+                                )
+                            }
                             // The dragged tile follows the finger: animating its placement would fight the drag offset
                             .then(if (isDragging) Modifier else Modifier.animateItem())
                     ) {
                         val handle = @Composable {
                             Icon(
                                 Icons.Default.DragHandle, null,
-                                tint = OnSurfaceMed.copy(alpha = if (isSuccessState) 0f else 0.5f)
+                                tint = Ink.copy(alpha = if (isSuccessState) 0f else 0.45f)
                             )
                         }
                         val direction = @Composable {
                             Icon(
                                 imageVector = if (isForward) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
-                                contentDescription = null, tint = OnSurface.copy(alpha = 0.1f), modifier = Modifier.size(20.dp)
+                                contentDescription = null, tint = Ink.copy(alpha = 0.15f), modifier = Modifier.size(20.dp)
                             )
                         }
-                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Row(modifier = Modifier.heightIn(min = 64.dp).padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                             if (leftHanded) handle() else direction()
                             Spacer(Modifier.width(12.dp))
                             Text(
                                 text = station.name, modifier = Modifier.weight(1f),
-                                fontWeight = FontWeight.Bold, color = OnSurface,
+                                fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, color = Ink,
                                 maxLines = 1, overflow = TextOverflow.Ellipsis
                             )
                             if (leftHanded) direction() else handle()
@@ -641,10 +647,10 @@ private fun SubmitSection(onSubmit: () -> Unit) {
         Button(
             onClick = onSubmit,
             modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(28.dp),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Primary, contentColor = Color.White)
+            shape = RoundedCornerShape(18.dp),
+            colors = ButtonDefaults.buttonColors(backgroundColor = Sun, contentColor = Ink)
         ) {
-            Text("CHECK ORDER", fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+            Text("CHECK ORDER", fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, letterSpacing = 1.sp)
         }
     }
 }
@@ -673,23 +679,16 @@ private fun FeedbackOverlay(isCorrect: Boolean, timeGain: Int, timePenalty: Int,
 
 @Composable
 private fun ComboBadge(combo: Int) {
-    Surface(color = Accent, shape = RoundedCornerShape(12.dp), elevation = 4.dp) {
+    Surface(color = Sun, shape = RoundedCornerShape(12.dp), elevation = 4.dp) {
         Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Whatshot, null, tint = Color.White, modifier = Modifier.size(14.dp))
+            Icon(Icons.Default.Whatshot, null, tint = Ink, modifier = Modifier.size(14.dp))
             Spacer(Modifier.width(4.dp))
-            Text("x$combo", color = Color.White, fontWeight = FontWeight.Black, fontSize = 12.sp)
+            Text("x$combo", color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
         }
     }
 }
 
 @Composable
 private fun HeaderLineBadge(name: String, color: Long) {
-    Surface(
-        color = Color(color), shape = RoundedCornerShape(6.dp),
-        modifier = Modifier.widthIn(min = 40.dp).height(32.dp)
-    ) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 8.dp)) {
-            Text(text = name, color = Color.White, fontWeight = FontWeight.Black, fontSize = 14.sp)
-        }
-    }
+    LinePill(name, Color(color), size = 36.dp)
 }

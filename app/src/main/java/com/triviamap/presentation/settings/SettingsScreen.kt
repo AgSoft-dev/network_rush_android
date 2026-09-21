@@ -171,7 +171,7 @@ private fun SupportSection(offers: List<SupportOffer>, isSupporter: Boolean, onB
                     Button(
                         onClick = { onBuy(offer.tier) },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(backgroundColor = Accent, contentColor = androidx.compose.ui.graphics.Color.White)
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Accent, contentColor = Ink)
                     ) { Text("${offer.tier.emoji}  ${offer.tier.title} · ${offer.price}", fontWeight = FontWeight.Bold) }
                 }
             }
