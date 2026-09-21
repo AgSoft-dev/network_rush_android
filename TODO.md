@@ -5,7 +5,7 @@ Priorités : **P0** bug bloquant / perte de données · **P1** important · **P2
 Références au format `fichier:ligne` quand pertinent (lignes indicatives, à re-vérifier).
 
 > **Périmètre actuel (2026-09-20)** : on se concentre sur **Station Sprint**. **Trace Network** est parké : bouton visible uniquement en build debug (`BuildConfig.DEBUG`, libellé "TRACE NETWORK (DEV)"), ses items restent listés (§3) pour la prochaine étape.
-> **Avancement §1** : P0 et P1 Sprint traités (compilation debug + release/R8 OK, **aucun test exécuté** ni sur appareil). Restent §1 : `Accessibilité`, `i18n`, et les items marqués ⏸.
+> **Avancement (2026-09-21)** : §1 P0/P1 Sprint, §2 (tests, extraction domaine, deps), §4 Sprint, progression/daily, monétisation (code) et identité Terminus sont faits ; 53 tests unitaires OK, lint + release/R8 OK, vérifié sur émulateur. Reste avant publication : voir **« Checklist avant mise en production »** ci-dessous.
 
 
 ---
@@ -206,7 +206,7 @@ Analyse statique de `TileList` (`SprintScreen.kt` ~l.324-460) et de `SprintViewM
   - ✅ 2026-09-21 : Statistiques par station persistées (`station_stats`, Room v3) ; écran Progress : niveau/XP, historique des 20 derniers runs, connaissance par ligne (maîtrisées/vues), stations les plus ratées (≥ 3 essais), badges, meilleurs scores par mode.
 - [ ] **P3 — Multi / social** : ghost replays, classement (Firebase) → nécessite anti-triche (score calculé côté client aujourd'hui).
 - [~] **P3 — Monétisation** : A (bannière accueil) et B2 (tips Play Billing) **implémentés côté code** (2026-09-21), reste la configuration store : voir `docs/MONETIZATION.md`. Autres options ci-dessous.
-- [ ] **P3 — Store** : icône (`ic_launcher.xml` unique, pas d'adaptive icon ni monochrome), captures, politique de confidentialité si analytics.
+- [~] **P3 — Store** : icône adaptative + monochrome faite (Terminus). Reste : captures, fiche Play, politique de confidentialité (obligatoire avec pubs).
 
 ---
 
@@ -276,6 +276,30 @@ Principe retenu : **non intrusif**. Jamais de pub pendant une partie (le chrono 
 - [ ] Fonctionnalités de la maquette non faites : carte de validation hebdomadaire (perforations), cigogne (emblème de niveau/badges), filtre de lignes, sons/haptique signature.
 - [ ] **Nom de l'app** : décider avant la 1re publication (« Terminus » jugé trop générique) ; vérifier Play Store, INPI/EUIPO, domaine ; `applicationId` irréversible après publication.
 - [ ] Contraste à vérifier sur tuiles teintées (Classify) avec les couleurs de ligne claires (F, G).
+
+## Checklist avant mise en production (2026-09-21)
+
+**Bloquants**
+- [ ] **Nom + `applicationId`** : trancher, vérifier Play Store / INPI / EUIPO / domaine (l'id est irréversible après publication).
+- [ ] **targetSdk** : Play exige un niveau récent (probablement 36 depuis août 2026, à vérifier dans la console) ; passer de 35 à 36, tester edge-to-edge.
+- [ ] **Signature release** : keystore + Play App Signing, `versionCode/versionName`, build AAB (`bundleRelease`), tester le build R8 sur appareil (pas seulement compilé).
+- [ ] **Monétisation store** : compte AdMob + ids réels (`gradle.properties`, jamais commités), message RGPD UMP, produits `support_coffee` / `support_tram_ticket`, test d'achat (testeurs de licence) et du refus de consentement (`docs/MONETIZATION.md`).
+- [ ] **Conformité Play** : politique de confidentialité hébergée (pubs/AdID), Data safety, déclaration de pubs, classification de contenu, fiche (captures, description fr/en).
+- [ ] **Données** : provenance/licence des données CTS documentée (§5 P1) et validation des stations/ordres (lignes, fourches).
+- [ ] **Test de migration Room 1→2→3** (`MigrationTestHelper`) : perte de scores = inacceptable en prod.
+- [ ] **Test sur appareil réel** : drag & drop (CLASSIFY, mode gaucher, 8-10 tuiles), perf, contraste tuiles teintées (lignes F/G).
+
+**Fortement recommandés**
+- [ ] **i18n fr/en** (§1) : toute l'UI est en anglais, public cible francophone.
+- [ ] **Crash reporting** respectueux de la vie privée (§2), au moins Play Console vitals.
+- [ ] **Accessibilité minimale** : `contentDescription`, boutons monter/descendre (§4 P3), `fontScale`.
+- [ ] **Process death** : l'état de partie est perdu (§1 P1) ; au minimum ne pas crasher au retour.
+- [ ] **Test fermé Play** (12 testeurs / 14 jours si compte perso récent) avant la production.
+
+**Peut attendre après la sortie**
+- Trace Network, multi-villes, classement en ligne, sons, carte hebdo/cigogne, retuning de l'économie avec de vraies parties, Material 3, `kotlinx.serialization`, ktlint/detekt.
+
+---
 
 ## 6. Ordre de traitement suggéré
 
