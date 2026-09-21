@@ -20,6 +20,10 @@ import android.app.Activity
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import android.content.Intent
+import android.net.Uri
+import com.triviamap.R
 import com.triviamap.domain.monetization.AdsController
 import com.triviamap.domain.monetization.SupportEvent
 import com.triviamap.domain.monetization.SupportOffer
@@ -133,6 +137,8 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) { Text("Privacy choices (ads)", color = OnSurfaceMed) }
             }
+
+            LegalSection()
         }
     }
 }
@@ -176,6 +182,35 @@ private fun SupportSection(offers: List<SupportOffer>, isSupporter: Boolean, onB
                         colors = ButtonDefaults.buttonColors(backgroundColor = Sun, contentColor = Ink)
                     ) { Text("${offer.tier.emoji}  ${offer.tier.title} · ${offer.price}", fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold) }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LegalSection() {
+    val context = LocalContext.current
+    val privacyUrl = stringResource(R.string.privacy_policy_url)
+    val termsUrl = stringResource(R.string.terms_url)
+    val dataUrl = stringResource(R.string.open_data_url)
+    fun open(url: String) = context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+
+    Surface(shape = RoundedCornerShape(18.dp), color = Surface, border = BorderStroke(2.dp, Border), modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Legal", color = OnSurface, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+            Text(
+                "Station data: \u00ab Stations de tram \u00bb, Ville et Eurom\u00e9tropole de Strasbourg, Licence Ouverte v2.0 (Etalab), data.strasbourg.eu. " +
+                    "Data adapted (station order per line, schematic coordinates).",
+                color = OnSurfaceMed, fontSize = 12.sp
+            )
+            Text(
+                "Unofficial app, not affiliated with the CTS or the Eurom\u00e9tropole de Strasbourg. Do not use it to plan a trip.",
+                color = OnSurfaceMed, fontSize = 12.sp
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = { open(dataUrl) }) { Text("Data source", color = Sun) }
+                if (privacyUrl.isNotBlank()) TextButton(onClick = { open(privacyUrl) }) { Text("Privacy policy", color = Sun) }
+                if (termsUrl.isNotBlank()) TextButton(onClick = { open(termsUrl) }) { Text("Terms", color = Sun) }
             }
         }
     }

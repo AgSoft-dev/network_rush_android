@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Public URL of the hosted privacy policy (docs/legal). Leave empty until it is published: the link is then hidden. -->
+    <string name="privacy_policy_url" translatable="false"></string>
+    <string name="terms_url" translatable="false"></string>
+    <string name="open_data_url" translatable="false">https://data.strasbourg.eu/explore/dataset/stations_tram/</string>
+</resources>
