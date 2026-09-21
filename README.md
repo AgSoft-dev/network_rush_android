@@ -53,7 +53,7 @@ CI (`.github/workflows/ci.yml`) runs tests, lint and a debug build.
 - **Score:** `(500 + 50·level) × (2 if sorting) × speed factor (1–2, relative to puzzle size) × combo factor (1–3)`.
 - **Difficulty** also changes content: hard mixes reverse direction and non-contiguous station sets early.
 - **Spaced repetition:** stations you miss (or never saw) are drawn more often; a station is *mastered* after 3 correct placements in a row.
-- **Daily challenge:** same puzzles for everybody (seeded by day), one attempt per day, shareable Wordle-style recap.
+- **Daily challenge:** 8 puzzles, same for everybody (seeded by day + question index), one attempt per puzzle (a wrong answer reveals the solution and moves on), difficulty ramping up from question to question, no countdown (the elapsed time only breaks ties), one shareable square per question.
 - **Progression:** XP, levels, badges, per-line knowledge and most-missed stations on the Progress screen.
 - Rules live in `domain/sprint/SprintRules.kt`; balance is checked by `SprintEconomyTest`.
 

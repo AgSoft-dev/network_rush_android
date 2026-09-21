@@ -3,9 +3,9 @@
     <string name="app_tagline">Straßburger Tram-Challenge</string>
     <string name="home_level">LV %1$d · %2$s</string>
     <string name="home_daily_title">TAGESRÄTSEL</string>
-    <string name="home_daily_hint">Dieselben Rätsel für alle, ein Versuch pro Tag</string>
+    <string name="home_daily_hint">Dieselben 8 Rätsel für alle, jeweils ein Versuch, eines pro Tag</string>
     <string name="home_daily_done">TAGESRÄTSEL · GESCHAFFT</string>
-    <string name="home_daily_result">%1$d Pkt. · Level %2$d</string>
+    <string name="home_daily_result">%1$d/%2$d · %3$s</string>
     <string name="home_daily_back">Komm morgen für ein neues wieder</string>
     <string name="share">Teilen</string>
     <string name="back">Zurück</string>
@@ -118,4 +118,8 @@
     <string name="level_3">Schaffner</string>
     <string name="level_4">Linienchef</string>
     <string name="level_5">Netzmeister</string>
+    <string name="share_daily_stats">🚇 %1$d/%2$d · %3$s</string>
+    <string name="results_correct">RICHTIG</string>
+    <string name="results_time">ZEIT</string>
+    <string name="daily_question">TAGESRÄTSEL · FRAGE %1$d/%2$d</string>
 </resources>

@@ -8,6 +8,7 @@ import com.triviamap.R
 import com.triviamap.domain.model.Difficulty
 import com.triviamap.domain.monetization.SupportTier
 import com.triviamap.domain.progress.ShareText
+import com.triviamap.domain.sprint.SprintRules
 import java.text.NumberFormat
 import java.time.LocalDate
 
@@ -75,13 +76,24 @@ fun buildShareMessage(
     level: Int,
     score: Int,
     maxCombo: Int,
-    answerLog: String
+    answerLog: String,
+    durationMs: Long = 0L
 ): String {
     val header = if (isDaily) context.getString(R.string.share_daily, LocalDate.ofEpochDay(epochDay).toString())
     else context.getString(
         R.string.share_sprint,
         context.getString(difficultyLabelRes(Difficulty.valueOf(difficultyName))).lowercase()
     )
-    val stats = context.getString(R.string.share_stats, level, NumberFormat.getIntegerInstance().format(score), maxCombo)
+    val stats = if (isDaily) {
+        context.getString(R.string.share_daily_stats, answerLog.count { it == 'G' }, SprintRules.DAILY_QUESTIONS, formatDuration(durationMs))
+    } else {
+        context.getString(R.string.share_stats, level, NumberFormat.getIntegerInstance().format(score), maxCombo)
+    }
     return ShareText.build(header, stats, answerLog)
+}
+
+/** m:ss, e.g. 2:14. */
+fun formatDuration(ms: Long): String {
+    val total = ms / 1000
+    return "%d:%02d".format(total / 60, total % 60)
 }

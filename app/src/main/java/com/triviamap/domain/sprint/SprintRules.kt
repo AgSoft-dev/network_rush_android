@@ -14,6 +14,13 @@ object SprintRules {
 
     const val SKIP_PENALTY_MS = 4_000L
     const val MAX_SKIPS = 3
+
+    /** Daily challenge: fixed number of questions, one attempt each, difficulty ramps up question by question. */
+    const val DAILY_QUESTIONS = 8
+    private const val DAILY_LEVEL_STEP = 3
+
+    /** Generator level of the daily question at [index] (0-based): stages 1,1,2,2,3,4,4,5. */
+    fun dailyLevel(index: Int): Int = 1 + DAILY_LEVEL_STEP * index
     const val BURST_TIMEOUT_PENALTY_MS = 3_000L
 
     private const val LEVEL_DECAY = 0.03

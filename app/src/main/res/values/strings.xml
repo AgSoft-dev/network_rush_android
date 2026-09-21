@@ -4,9 +4,9 @@
     <string name="app_tagline">Strasbourg Tram Challenge</string>
     <string name="home_level">LV %1$d · %2$s</string>
     <string name="home_daily_title">DAILY CHALLENGE</string>
-    <string name="home_daily_hint">Same puzzles for everyone, one attempt a day</string>
+    <string name="home_daily_hint">Same 8 puzzles for everyone, one attempt each, one a day</string>
     <string name="home_daily_done">TODAY\'S DAILY · VALIDATED</string>
-    <string name="home_daily_result">%1$d pts · level %2$d</string>
+    <string name="home_daily_result">%1$d/%2$d · %3$s</string>
     <string name="home_daily_back">Come back tomorrow for a new one</string>
     <string name="share">Share</string>
     <string name="back">Back</string>
@@ -119,4 +119,8 @@
     <string name="level_3">Conductor</string>
     <string name="level_4">Line Chief</string>
     <string name="level_5">Network Master</string>
+    <string name="share_daily_stats">🚇 %1$d/%2$d · %3$s</string>
+    <string name="results_correct">CORRECT</string>
+    <string name="results_time">TIME</string>
+    <string name="daily_question">DAILY · QUESTION %1$d/%2$d</string>
 </resources>

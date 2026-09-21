@@ -52,6 +52,10 @@ data class SprintUiState(
     val bounds: GeoBounds? = null,
     val score: Int = 0,
     val timeLeftMs: Long = 0,
+    /** Daily only: time spent so far (tie-breaker, never ends the run). */
+    val elapsedMs: Long = 0,
+    /** Daily only: 0-based index of the current question. */
+    val dailyIndex: Int = 0,
     val level: Int = 1,
     val stage: Int = 1,
     val difficulty: Difficulty = Difficulty.MEDIUM,
@@ -209,8 +213,9 @@ class SprintViewModel @Inject constructor(
 
         val level = _state.value.level
         val challenge = if (isDaily) {
-            // Same seed for everybody: challenge depends only on (day, level, skips used)
-            generator.generate(level, allLines, difficulty, emptyMap(), DailyChallenge.random(epochDay, level * 4 + skipsUsed))
+            // Same seed for everybody: challenge depends only on (day, question index)
+            val index = _state.value.dailyIndex
+            generator.generate(SprintRules.dailyLevel(index), allLines, difficulty, emptyMap(), DailyChallenge.random(epochDay, index))
         } else {
             generator.generate(level, allLines, difficulty, weights, forceType = devForcedType)
         }
@@ -231,7 +236,7 @@ class SprintViewModel @Inject constructor(
                 misplacedIds = emptySet(),
                 phase = GamePhase.Drawing,
                 challengeStartedAt = time.elapsedMs(),
-                stage = SprintRules.stage(level)
+                stage = SprintRules.stage(if (isDaily) SprintRules.dailyLevel(it.dailyIndex) else level)
             )
         }
         current = challenge
@@ -243,7 +248,8 @@ class SprintViewModel @Inject constructor(
     private fun startBurstTimer() {
         burstTimerJob?.cancel()
         burstTimerJob = viewModelScope.launch {
-            val limit = SprintRules.burstLimitMs(_state.value.level)
+            val s = _state.value
+            val limit = SprintRules.burstLimitMs(if (isDaily) SprintRules.dailyLevel(s.dailyIndex) else s.level)
             val start = time.elapsedMs()
             while (true) {
                 val progress = (time.elapsedMs() - start).toFloat() / limit
@@ -265,7 +271,7 @@ class SprintViewModel @Inject constructor(
 
     private fun handleBurstTimeout() {
         if (finished) return
-        val penalty = SprintRules.BURST_TIMEOUT_PENALTY_MS
+        val penalty = if (isDaily) 0L else SprintRules.BURST_TIMEOUT_PENALTY_MS
         recordOutcomes(current, allCorrect = false)
         viewModelScope.launch {
             _state.update { it.copy(
@@ -283,6 +289,17 @@ class SprintViewModel @Inject constructor(
             ) }
             delay(700)
             _state.update { it.copy(showFeedback = false) }
+            if (isDaily) nextDailyQuestion() else generateChallenge()
+        }
+    }
+
+    /** Daily: moves to the next question, or ends the run after the last one. */
+    private fun nextDailyQuestion() {
+        val next = _state.value.dailyIndex + 1
+        if (next >= SprintRules.DAILY_QUESTIONS) {
+            endGame()
+        } else {
+            _state.update { it.copy(dailyIndex = next) }
             generateChallenge()
         }
     }
@@ -290,13 +307,15 @@ class SprintViewModel @Inject constructor(
     private fun startTimer() {
         timerJob = viewModelScope.launch {
             var lastUpdate = time.elapsedMs()
-            while (!finished && _state.value.timeLeftMs > 0) {
+            while (!finished && (isDaily || _state.value.timeLeftMs > 0)) {
                 delay(50)
                 val now = time.elapsedMs()
                 if (paused) { lastUpdate = now; continue }
                 val delta = now - lastUpdate
                 lastUpdate = now
-                _state.update { it.copy(timeLeftMs = (it.timeLeftMs - delta).coerceAtLeast(0)) }
+                // Daily: the clock only counts up (tie-breaker); Sprint: it counts down and ends the run
+                if (isDaily) _state.update { it.copy(elapsedMs = it.elapsedMs + delta) }
+                else _state.update { it.copy(timeLeftMs = (it.timeLeftMs - delta).coerceAtLeast(0)) }
             }
             endGame()
         }
@@ -313,6 +332,9 @@ class SprintViewModel @Inject constructor(
         if (finished) return@launch
         finished = true
         val finalState = _state.value
+        // Daily: 'level' means the number of correct answers; keeps high-level badges out of the daily
+        val levelReached = if (isDaily) finalState.correctSubmissions else finalState.level
+        val durationMs = if (isDaily) finalState.elapsedMs else time.elapsedMs() - gameStartedAt
         stopBurstTimer()
         _state.update { it.copy(phase = GamePhase.Validating, showFeedback = false) }
 
@@ -333,8 +355,8 @@ class SprintViewModel @Inject constructor(
             pathAccuracyScore = 0f,
             completionScore = 0f,
             speedBonusScore = 0f,
-            durationMs = time.elapsedMs() - gameStartedAt,
-            level = finalState.level,
+            durationMs = durationMs,
+            level = levelReached,
             maxCombo = finalState.maxCombo,
             accuracy = accuracy,
             answerLog = finalState.answerLog
@@ -357,7 +379,7 @@ class SprintViewModel @Inject constructor(
         val nowBadges = Badges.evaluate(Badges.Context(
             classifySolved = finalState.correctClassifyCount,
             maxCombo = finalState.maxCombo,
-            level = finalState.level,
+            level = if (isDaily) 1 else finalState.level,
             streak = currentStreak,
             hourOfDay = LocalDateTime.now(clock).hour,
             isDaily = isDaily,
@@ -371,7 +393,8 @@ class SprintViewModel @Inject constructor(
             mode = mode,
             difficulty = difficulty,
             score = finalState.score,
-            level = finalState.level,
+            level = levelReached,
+            durationMs = durationMs,
             maxCombo = finalState.maxCombo,
             accuracy = accuracy,
             isNewRecord = isNewRecord,
@@ -418,7 +441,7 @@ class SprintViewModel @Inject constructor(
     /** Skipping costs time and the combo, and is limited per run: never better than answering. */
     fun skipQuestion() {
         val s = _state.value
-        if (finished || paused || s.showFeedback || s.phase !is GamePhase.Drawing || s.skipsLeft <= 0) return
+        if (isDaily || finished || paused || s.showFeedback || s.phase !is GamePhase.Drawing || s.skipsLeft <= 0) return
         stopBurstTimer()
         recordOutcomes(current, allCorrect = false)
         skipsUsed++
@@ -447,6 +470,29 @@ class SprintViewModel @Inject constructor(
             val fraction = misplaced.size.toFloat() / challenge.tiles.size
             val timePenalty = SprintRules.wrongAnswerPenaltyMs(currentState.level, fraction)
 
+            if (isDaily) {
+                // No second chance: reveal the solution for a moment, then go to the next question
+                viewModelScope.launch {
+                    stopBurstTimer()
+                    _state.update { it.copy(
+                        combo = 0,
+                        answerLog = it.answerLog + 'R',
+                        showFeedback = true,
+                        isCorrectFeedback = false,
+                        currentTiles = challenge.correctOrder,
+                        stationSides = challenge.correctSides,
+                        misplacedIds = emptySet(),
+                        placedCount = challenge.tiles.size - misplaced.size,
+                        tileCount = challenge.tiles.size,
+                        lastTimePenalty = 0,
+                        feedbackTrigger = it.feedbackTrigger + 1
+                    ) }
+                    delay(DAILY_REVEAL_MS)
+                    _state.update { it.copy(showFeedback = false) }
+                    nextDailyQuestion()
+                }
+                return
+            }
             viewModelScope.launch {
                 _state.update { it.copy(
                     timeLeftMs = (it.timeLeftMs - timePenalty).coerceAtLeast(0),
@@ -472,21 +518,21 @@ class SprintViewModel @Inject constructor(
 
         val newCombo = currentState.combo + 1
         val reward = SprintRules.correctAnswerReward(
-            difficulty, currentState.level, challenge.type, challenge.tiles.size, newCombo, timeTakenMs
+            difficulty, if (isDaily) SprintRules.dailyLevel(currentState.dailyIndex) else currentState.level, challenge.type, challenge.tiles.size, newCombo, timeTakenMs
         )
         answersXp += Progression.xpForCorrectAnswer(currentState.stage, newCombo)
 
         viewModelScope.launch {
             stopBurstTimer()
             _state.update { state ->
-                val newTimeLeft = (state.timeLeftMs + reward.timeGainMs).coerceAtMost(maxTimeMs)
+                val newTimeLeft = if (isDaily) state.timeLeftMs else (state.timeLeftMs + reward.timeGainMs).coerceAtMost(maxTimeMs)
                 val actualGainMs = newTimeLeft - state.timeLeftMs
 
                 state.copy(
                     score = state.score + reward.points,
                     timeLeftMs = newTimeLeft,
                     lastTimeGain = (actualGainMs / 1000f).roundToInt(),
-                    level = state.level + 1,
+                    level = if (isDaily) state.level else state.level + 1,
                     combo = newCombo,
                     maxCombo = maxOf(state.maxCombo, newCombo),
                     correctSubmissions = state.correctSubmissions + 1,
@@ -503,7 +549,11 @@ class SprintViewModel @Inject constructor(
             }
             delay(700)
             _state.update { it.copy(showFeedback = false) }
-            generateChallenge()
+            if (isDaily) nextDailyQuestion() else generateChallenge()
         }
+    }
+
+    private companion object {
+        const val DAILY_REVEAL_MS = 1800L
     }
 }

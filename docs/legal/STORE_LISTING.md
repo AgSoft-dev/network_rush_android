@@ -19,7 +19,7 @@ Remets les stations dans le bon ordre avant la fin du chrono. Chaque bonne répo
 • Speed burst : 3 stations, quelques secondes
 
 📅 DÉFI DU JOUR
-Les mêmes puzzles pour tout le monde, une tentative par jour. Partage ton résultat façon 🟩🟥⬜.
+Les mêmes 8 puzzles pour tout le monde, une chance par question, un défi par jour. Partage ton résultat façon 🟩🟥.
 
 📈 PROGRESSION
 Niveaux, badges, série de jours, stations maîtrisées par ligne et stations que tu rates le plus : le jeu te fait revoir ce que tu connais mal.
@@ -42,7 +42,7 @@ Put the stations in the right order before the clock runs out. Correct answers e
 • Speed burst: 3 stations, a few seconds
 
 📅 DAILY CHALLENGE
-Same puzzles for everyone, one try a day. Share your result 🟩🟥⬜.
+Same 8 puzzles for everyone, one try per question, one challenge a day. Share your result 🟩🟥.
 
 📈 PROGRESSION
 Levels, badges, day streak, mastery per line and the stations you miss most: the game brings back what you don't know yet.
@@ -68,7 +68,7 @@ Bring die Haltestellen in die richtige Reihenfolge, bevor die Zeit abläuft. Ric
 • Speed Burst: 3 Haltestellen, wenige Sekunden
 
 📅 TAGESRÄTSEL
-Dieselben Rätsel für alle, ein Versuch pro Tag. Teile dein Ergebnis 🟩🟥⬜.
+Dieselben 8 Rätsel für alle, ein Versuch pro Frage, ein Tagesrätsel pro Tag. Teile dein Ergebnis 🟩🟥.
 
 📈 FORTSCHRITT
 Level, Abzeichen, Serie, gemeisterte Haltestellen pro Linie und die am häufigsten verfehlten Haltestellen.

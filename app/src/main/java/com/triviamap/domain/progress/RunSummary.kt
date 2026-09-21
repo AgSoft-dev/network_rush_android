@@ -23,7 +23,9 @@ data class RunSummary(
     val levelAfter: PlayerLevel,
     val newBadges: List<Badge>,
     val answerLog: String,
-    val epochDay: Long
+    val epochDay: Long,
+    /** Run duration (the daily's tie-breaker). */
+    val durationMs: Long = 0L
 )
 
 /** In-memory hand-off between the game screen and the results screen. */

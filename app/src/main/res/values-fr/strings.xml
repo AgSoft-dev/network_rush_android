@@ -3,9 +3,9 @@
     <string name="app_tagline">Le défi du tram de Strasbourg</string>
     <string name="home_level">NIV %1$d · %2$s</string>
     <string name="home_daily_title">DÉFI DU JOUR</string>
-    <string name="home_daily_hint">Les mêmes puzzles pour tous, une tentative par jour</string>
+    <string name="home_daily_hint">Les mêmes 8 puzzles pour tous, une chance chacun, un défi par jour</string>
     <string name="home_daily_done">DÉFI DU JOUR · VALIDÉ</string>
-    <string name="home_daily_result">%1$d pts · niveau %2$d</string>
+    <string name="home_daily_result">%1$d/%2$d · %3$s</string>
     <string name="home_daily_back">Reviens demain pour un nouveau</string>
     <string name="share">Partager</string>
     <string name="back">Retour</string>
@@ -118,4 +118,8 @@
     <string name="level_3">Conducteur</string>
     <string name="level_4">Chef de ligne</string>
     <string name="level_5">Maître du réseau</string>
+    <string name="share_daily_stats">🚇 %1$d/%2$d · %3$s</string>
+    <string name="results_correct">RÉUSSIES</string>
+    <string name="results_time">TEMPS</string>
+    <string name="daily_question">DÉFI · QUESTION %1$d/%2$d</string>
 </resources>

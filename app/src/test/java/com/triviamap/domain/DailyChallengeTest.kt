@@ -4,6 +4,7 @@ import com.triviamap.data.model.GeoJsonParser
 import com.triviamap.domain.model.Difficulty
 import com.triviamap.domain.sprint.ChallengeGenerator
 import com.triviamap.domain.sprint.DailyChallenge
+import com.triviamap.domain.sprint.SprintRules
 import org.junit.Assert.*
 import org.junit.Test
 import java.io.File
@@ -22,5 +23,18 @@ class DailyChallengeTest {
     @Test fun differentDaysGiveDifferentChallenges() {
         val distinct = (20_000L..20_030L).map { daily(it, 7, 28).correctOrder.map { s -> s.id } }.toSet()
         assertTrue("only ${distinct.size} distinct challenges over 31 days", distinct.size > 20)
+    }
+
+    @Test fun dailyDifficultyRampsUpWithoutGoingBackwards() {
+        val stages = (0 until SprintRules.DAILY_QUESTIONS).map { SprintRules.stage(SprintRules.dailyLevel(it)) }
+        assertEquals(stages.sorted(), stages)
+        assertEquals(1, stages.first())
+        assertTrue("daily should reach at least stage 4, got ${stages.last()}", stages.last() >= 4)
+    }
+
+    @Test fun dailyQuestionsAreStableAndDependOnlyOnDayAndIndex() {
+        val run1 = (0 until SprintRules.DAILY_QUESTIONS).map { daily(20_000, SprintRules.dailyLevel(it), it).correctOrder.map { s -> s.id } }
+        val run2 = (0 until SprintRules.DAILY_QUESTIONS).map { daily(20_000, SprintRules.dailyLevel(it), it).correctOrder.map { s -> s.id } }
+        assertEquals(run1, run2)
     }
 }

@@ -56,6 +56,7 @@ import com.triviamap.domain.model.GameMode
 import com.triviamap.domain.sprint.Direction
 import com.triviamap.domain.sprint.ChallengeType
 import com.triviamap.domain.model.Station
+import com.triviamap.domain.sprint.SprintRules
 import com.triviamap.presentation.common.*
 
 @Composable
@@ -110,17 +111,32 @@ fun SprintScreen(
                     stage = state.stage,
                     skipsLeft = state.skipsLeft,
                     isDaily = state.isDaily,
+                    dailyIndex = state.dailyIndex,
+                    elapsedMs = state.elapsedMs,
                     onBack = onBack,
                     onSkipShortcut = vm::skipQuestion
                 )
-                MetroTimerBar(
-                    timeLeftMs = state.timeLeftMs,
-                    difficulty = state.difficulty,
-                    combo = state.combo,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 4.dp)
-                )
+                if (state.isDaily) {
+                    LinearProgressIndicator(
+                        progress = state.dailyIndex / SprintRules.DAILY_QUESTIONS.toFloat(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 4.dp)
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(4.dp)),
+                        color = Accent,
+                        backgroundColor = Surface
+                    )
+                } else {
+                    MetroTimerBar(
+                        timeLeftMs = state.timeLeftMs,
+                        difficulty = state.difficulty,
+                        combo = state.combo,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 4.dp)
+                    )
+                }
             }
         },
         bottomBar = {
@@ -256,6 +272,7 @@ fun SprintScreen(
                     isCorrect = state.isCorrectFeedback,
                     timeGain = state.lastTimeGain,
                     timePenalty = state.lastTimePenalty,
+                    showTime = !state.isDaily,
                     placedCount = state.placedCount,
                     tileCount = state.tileCount,
                     combo = state.combo
@@ -276,7 +293,7 @@ fun SprintScreen(
 }
 
 @Composable
-private fun SprintTopBar(score: Int, stage: Int, skipsLeft: Int, isDaily: Boolean, onBack: () -> Unit, onSkipShortcut: () -> Unit) {
+private fun SprintTopBar(score: Int, stage: Int, skipsLeft: Int, isDaily: Boolean, dailyIndex: Int, elapsedMs: Long, onBack: () -> Unit, onSkipShortcut: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -285,13 +302,20 @@ private fun SprintTopBar(score: Int, stage: Int, skipsLeft: Int, isDaily: Boolea
             Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = OnSurface)
         }
         Column(modifier = Modifier.weight(1f)) {
-            Text(if (isDaily) "DAILY · SCORE (STAGE $stage)" else "SCORE (STAGE $stage)", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = OnSurfaceMed)
-            Text(score.toString(), fontFamily = DisplayFont, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = OnSurface)
+            if (isDaily) {
+                Text(stringResource(R.string.daily_question, dailyIndex + 1, SprintRules.DAILY_QUESTIONS), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = OnSurfaceMed)
+                Text(formatDuration(elapsedMs), fontFamily = DisplayFont, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = OnSurface)
+            } else {
+                Text("SCORE (STAGE $stage)", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = OnSurfaceMed)
+                Text(score.toString(), fontFamily = DisplayFont, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = OnSurface)
+            }
         }
-        TextButton(onClick = onSkipShortcut, enabled = skipsLeft > 0) {
-            Icon(Icons.Default.SkipNext, null, tint = OnSurfaceMed, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(4.dp))
-            Text(stringResource(R.string.skip, skipsLeft), color = OnSurfaceMed, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        if (!isDaily) {
+            TextButton(onClick = onSkipShortcut, enabled = skipsLeft > 0) {
+                Icon(Icons.Default.SkipNext, null, tint = OnSurfaceMed, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(4.dp))
+                Text(stringResource(R.string.skip, skipsLeft), color = OnSurfaceMed, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
@@ -658,7 +682,7 @@ private fun SubmitSection(onSubmit: () -> Unit) {
 }
 
 @Composable
-private fun FeedbackOverlay(isCorrect: Boolean, timeGain: Int, timePenalty: Int, placedCount: Int, tileCount: Int, combo: Int) {
+private fun FeedbackOverlay(isCorrect: Boolean, timeGain: Int, timePenalty: Int, showTime: Boolean, placedCount: Int, tileCount: Int, combo: Int) {
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = if (isCorrect) Success else Error,
@@ -674,7 +698,9 @@ private fun FeedbackOverlay(isCorrect: Boolean, timeGain: Int, timePenalty: Int,
             if (isCorrect && combo >= 3) {
                 Text(stringResource(R.string.combo, combo), color = Color.White.copy(alpha = 0.9f), fontWeight = FontWeight.ExtraBold)
             }
-            Text(if (isCorrect) "+${timeGain}s" else "-${timePenalty}s", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            if (showTime) {
+                Text(if (isCorrect) "+${timeGain}s" else "-${timePenalty}s", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }

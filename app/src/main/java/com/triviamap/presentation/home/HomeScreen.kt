@@ -36,6 +36,7 @@ import com.triviamap.domain.model.Difficulty
 import com.triviamap.domain.progress.ShareText
 import com.triviamap.util.shareText
 import com.triviamap.domain.model.GameMode
+import com.triviamap.domain.sprint.SprintRules
 import com.triviamap.presentation.common.*
 
 @Composable
@@ -145,13 +146,14 @@ fun HomeScreen(
                     Row(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
                             Text(stringResource(R.string.home_daily_done), color = Color(0xFF008A2E), fontWeight = FontWeight.Black, fontSize = 12.sp, letterSpacing = 1.sp)
-                            Text(stringResource(R.string.home_daily_result, daily.score, daily.level), color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                            Text(stringResource(R.string.home_daily_result, daily.answerLog.count { it == 'G' }, SprintRules.DAILY_QUESTIONS, formatDuration(daily.durationMs)), color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
                             Text(stringResource(R.string.home_daily_back), color = InkMed, fontSize = 11.sp)
                         }
                         IconButton(onClick = {
                             shareText(context, buildShareMessage(
                                 context, isDaily = true, difficultyName = daily.difficulty.name, epochDay = ui.epochDay,
-                                level = daily.level, score = daily.score, maxCombo = daily.maxCombo, answerLog = daily.answerLog
+                                level = daily.level, score = daily.score, maxCombo = daily.maxCombo, answerLog = daily.answerLog,
+                                durationMs = daily.durationMs
                             ))
                         }) { Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share), tint = Ink) }
                     }

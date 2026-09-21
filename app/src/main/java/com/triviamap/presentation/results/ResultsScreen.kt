@@ -34,6 +34,7 @@ import com.triviamap.domain.model.GameMode
 import com.triviamap.domain.progress.RunSummary
 import com.triviamap.domain.progress.RunSummaryHolder
 import com.triviamap.domain.progress.ShareText
+import com.triviamap.domain.sprint.SprintRules
 import com.triviamap.presentation.common.*
 import com.triviamap.util.shareText
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -119,9 +120,16 @@ fun ResultsScreen(
             if (summary != null) {
                 Spacer(Modifier.height(28.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    StatItem(stringResource(R.string.results_levels), summary.level.toString())
+                    if (summary.mode == GameMode.DAILY_SPRINT) {
+                        StatItem(stringResource(R.string.results_correct), "${summary.level}/${SprintRules.DAILY_QUESTIONS}")
+                        StatItem(stringResource(R.string.results_time), formatDuration(summary.durationMs))
+                    } else {
+                        StatItem(stringResource(R.string.results_levels), summary.level.toString())
+                    }
                     StatItem(stringResource(R.string.results_max_combo), summary.maxCombo.toString())
-                    StatItem(stringResource(R.string.results_accuracy), "${(summary.accuracy * 100).roundToInt()}%")
+                    if (summary.mode != GameMode.DAILY_SPRINT) {
+                        StatItem(stringResource(R.string.results_accuracy), "${(summary.accuracy * 100).roundToInt()}%")
+                    }
                 }
 
                 Spacer(Modifier.height(24.dp))
@@ -169,7 +177,8 @@ fun ResultsScreen(
                             level = summary.level,
                             score = summary.score,
                             maxCombo = summary.maxCombo,
-                            answerLog = summary.answerLog
+                            answerLog = summary.answerLog,
+                            durationMs = summary.durationMs
                         ))
                     },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
