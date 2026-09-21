@@ -1,5 +1,7 @@
 package com.triviamap.presentation.gameplay
 
+import com.triviamap.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
@@ -146,10 +148,10 @@ fun SprintScreen(
                 GamePhase.Loading -> {
                     if (state.loadFailed) {
                         Column(Modifier.align(Alignment.Center).padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Couldn't load the network data.", color = OnSurface, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.sprint_load_failed), color = OnSurface, fontWeight = FontWeight.Bold)
                             Spacer(Modifier.height(16.dp))
                             Button(onClick = vm::retryLoad, colors = ButtonDefaults.buttonColors(backgroundColor = Sun, contentColor = Ink)) {
-                                Text("RETRY")
+                                Text(stringResource(R.string.retry))
                             }
                         }
                     } else {
@@ -167,7 +169,7 @@ fun SprintScreen(
                                 modifier = Modifier.align(Alignment.Center)
                             ) {
                                 Text(
-                                    "Stage ${state.stage}",
+                                    stringResource(R.string.sprint_stage, state.stage),
                                     color = Primary,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Black
@@ -175,9 +177,9 @@ fun SprintScreen(
                                 
                                 Text(
                                     when (state.challengeType) {
-                                        ChallengeType.REORDER -> "Reorder the stations"
-                                        ChallengeType.CLASSIFY -> "Sort & Reorder"
-                                        ChallengeType.SPEED_BURST -> "RAPID FIRE!"
+                                        ChallengeType.REORDER -> stringResource(R.string.type_reorder)
+                                        ChallengeType.CLASSIFY -> stringResource(R.string.type_classify)
+                                        ChallengeType.SPEED_BURST -> stringResource(R.string.type_burst)
                                     },
                                     color = OnSurface,
                                     fontSize = 18.sp,
@@ -216,7 +218,7 @@ fun SprintScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 HeaderLineBadge(state.line?.id ?: "", state.line?.color ?: 0xFF000000L)
-                                Text("HUB", color = OnSurfaceMed, fontSize = 10.sp, fontWeight = FontWeight.Black)
+                                Text(stringResource(R.string.hub), color = OnSurfaceMed, fontSize = 10.sp, fontWeight = FontWeight.Black)
                                 HeaderLineBadge(state.line2?.id ?: "", state.line2?.color ?: 0xFF000000L)
                             }
                         }
@@ -265,7 +267,7 @@ fun SprintScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         CircularProgressIndicator(color = Color.White)
                         Spacer(Modifier.height(16.dp))
-                        Text("TIME'S UP!", color = Color.White, fontWeight = FontWeight.Black, fontSize = 24.sp)
+                        Text(stringResource(R.string.times_up), color = Color.White, fontWeight = FontWeight.Black, fontSize = 24.sp)
                     }
                 }
             }
@@ -289,7 +291,7 @@ private fun SprintTopBar(score: Int, stage: Int, skipsLeft: Int, isDaily: Boolea
         TextButton(onClick = onSkipShortcut, enabled = skipsLeft > 0) {
             Icon(Icons.Default.SkipNext, null, tint = OnSurfaceMed, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(4.dp))
-            Text("SKIP ($skipsLeft) -4s", color = OnSurfaceMed, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.skip, skipsLeft), color = OnSurfaceMed, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -345,14 +347,14 @@ private fun DirectionHints(directions: List<Direction>, isForward: Boolean) {
                 Icon(Icons.Default.ArrowDownward, null, tint = Accent, modifier = Modifier.size(12.dp))
                 Spacer(Modifier.width(4.dp))
                 Text(
-                    "toward ${d.toward}",
+                    stringResource(R.string.toward, d.toward),
                     color = OnSurface, fontSize = 12.sp, fontWeight = FontWeight.Bold,
                     maxLines = 1, overflow = TextOverflow.Ellipsis
                 )
             }
         }
         Text(
-            "first station on top",
+            stringResource(R.string.first_on_top),
             color = OnSurfaceMed, fontSize = 10.sp
         )
     }
@@ -650,7 +652,7 @@ private fun SubmitSection(onSubmit: () -> Unit) {
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = Sun, contentColor = Ink)
         ) {
-            Text("CHECK ORDER", fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, letterSpacing = 1.sp)
+            Text(stringResource(R.string.check_order), fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, letterSpacing = 1.sp)
         }
     }
 }
@@ -665,12 +667,12 @@ private fun FeedbackOverlay(isCorrect: Boolean, timeGain: Int, timePenalty: Int,
         Column(modifier = Modifier.padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(if (isCorrect) Icons.Default.CheckCircle else Icons.Default.Warning, null, tint = Color.White, modifier = Modifier.size(48.dp))
             Spacer(Modifier.height(16.dp))
-            Text(if (isCorrect) "CORRECT!" else "WRONG!", color = Color.White, fontWeight = FontWeight.Black, fontSize = 24.sp)
+            Text(if (isCorrect) stringResource(R.string.correct) else stringResource(R.string.wrong), color = Color.White, fontWeight = FontWeight.Black, fontSize = 24.sp)
             if (!isCorrect && tileCount > 0) {
-                Text("$placedCount / $tileCount in place", color = Color.White.copy(alpha = 0.9f), fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.in_place, placedCount, tileCount), color = Color.White.copy(alpha = 0.9f), fontWeight = FontWeight.Bold)
             }
             if (isCorrect && combo >= 3) {
-                Text("x$combo COMBO!", color = Color.White.copy(alpha = 0.9f), fontWeight = FontWeight.ExtraBold)
+                Text(stringResource(R.string.combo, combo), color = Color.White.copy(alpha = 0.9f), fontWeight = FontWeight.ExtraBold)
             }
             Text(if (isCorrect) "+${timeGain}s" else "-${timePenalty}s", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }

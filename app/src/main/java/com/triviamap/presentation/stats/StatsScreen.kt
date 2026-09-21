@@ -1,5 +1,7 @@
 package com.triviamap.presentation.stats
 
+import com.triviamap.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -102,10 +104,10 @@ fun StatsScreen(
                 elevation = 0.dp,
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = OnSurface)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = OnSurface)
                     }
                 },
-                title = { Text("Progress", color = OnSurface, fontWeight = FontWeight.Bold) }
+                title = { Text(stringResource(R.string.progress_title), color = OnSurface, fontWeight = FontWeight.Bold) }
             )
         }
     ) { padding ->
@@ -117,15 +119,15 @@ fun StatsScreen(
             item { LevelCard(ui.level, ui.totalXp) }
 
             if (ui.history.isNotEmpty()) {
-                item { SectionTitle("Latest runs") }
+                item { SectionTitle(stringResource(R.string.stats_latest)) }
                 item { HistoryChart(ui.history) }
             }
 
             if (ui.lineMastery.isNotEmpty()) {
-                item { SectionTitle("Network knowledge") }
+                item { SectionTitle(stringResource(R.string.stats_knowledge)) }
                 item {
                     Text(
-                        "A station is mastered after 3 correct placements in a row.",
+                        stringResource(R.string.stats_mastered_hint),
                         color = OnSurfaceMed, fontSize = 11.sp
                     )
                 }
@@ -133,21 +135,21 @@ fun StatsScreen(
             }
 
             if (ui.mostMissed.isNotEmpty()) {
-                item { SectionTitle("Most missed stations") }
+                item { SectionTitle(stringResource(R.string.stats_missed)) }
                 items(ui.mostMissed.size) { MissedRow(ui.mostMissed[it]) }
             }
 
-            item { SectionTitle("Badges (${ui.earnedBadges.count { Badges.byId(it) != null }}/${Badges.all.size})") }
+            item { SectionTitle(stringResource(R.string.stats_badges, ui.earnedBadges.count { Badges.byId(it) != null }, Badges.all.size)) }
             items(Badges.all.size) { i ->
                 val badge = Badges.all[i]
-                BadgeRow(badge.title, badge.description, badge.id in ui.earnedBadges)
+                BadgeRow(badgeTitle(badge.id), badgeDescription(badge.id), badge.id in ui.earnedBadges)
             }
 
             if (ui.bestScores.isNotEmpty()) {
-                item { SectionTitle("Best scores") }
+                item { SectionTitle(stringResource(R.string.stats_best)) }
                 items(ui.bestScores.size) { BestScoreCard(ui.bestScores[it]) }
             } else {
-                item { Text("No games yet: play a run to fill this screen!", color = OnSurfaceMed, modifier = Modifier.padding(top = 8.dp)) }
+                item { Text(stringResource(R.string.stats_empty), color = OnSurfaceMed, modifier = Modifier.padding(top = 8.dp)) }
             }
         }
     }
@@ -172,7 +174,7 @@ private fun LevelCard(level: PlayerLevel, totalXp: Int) {
                 ) { Text("${level.level}", color = Sun, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp) }
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
-                    Text(level.title, color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+                    Text(levelTitle(level.titleIndex), color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
                     Text("$totalXp XP", color = InkMed, fontSize = 12.sp)
                 }
             }
@@ -184,7 +186,7 @@ private fun LevelCard(level: PlayerLevel, totalXp: Int) {
                 backgroundColor = PlateEdge.copy(alpha = 0.5f)
             )
             Spacer(Modifier.height(4.dp))
-            Text("${level.xpIntoLevel} / ${level.xpForNext} XP to level ${level.level + 1}", color = InkMed, fontSize = 11.sp)
+            Text(stringResource(R.string.stats_xp_to_level, level.xpIntoLevel, level.xpForNext, level.level + 1), color = InkMed, fontSize = 11.sp)
         }
     }
 }
@@ -210,7 +212,7 @@ private fun HistoryChart(scores: List<Int>) {
             }
             Spacer(Modifier.height(6.dp))
             val avg = scores.average().roundToInt()
-            Text("Best $max · average $avg · latest ${scores.last()}", color = OnSurfaceMed, fontSize = 11.sp)
+            Text(stringResource(R.string.stats_chart, max, avg, scores.last()), color = OnSurfaceMed, fontSize = 11.sp)
         }
     }
 }
@@ -228,7 +230,7 @@ private fun LineMasteryRow(m: LineMastery) {
                 drawRoundRect(color, size = Size(size.width * m.masteredFraction, size.height), cornerRadius = CornerRadius(4.dp.toPx()))
             }
             Spacer(Modifier.height(2.dp))
-            Text("${m.mastered}/${m.total} mastered · ${m.seen} seen", color = OnSurfaceMed, fontSize = 11.sp)
+            Text(stringResource(R.string.stats_mastery, m.mastered, m.total, m.seen), color = OnSurfaceMed, fontSize = 11.sp)
         }
     }
 }
@@ -239,10 +241,10 @@ private fun MissedRow(m: MissedStation) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(m.station.name, color = OnSurface, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text("Line ${m.lines.joinToString(", ")}", color = OnSurfaceMed, fontSize = 11.sp)
+                Text(stringResource(R.string.stats_line, m.lines.joinToString(", ")), color = OnSurfaceMed, fontSize = 11.sp)
             }
             Text(
-                "${(m.stat.accuracy * 100).roundToInt()}% of ${m.stat.attempts}",
+                stringResource(R.string.stats_accuracy, (m.stat.accuracy * 100).roundToInt(), m.stat.attempts),
                 color = if (m.stat.accuracy < 0.5f) Error else Accent, fontWeight = FontWeight.Bold
             )
         }
@@ -288,14 +290,14 @@ private fun BestScoreCard(result: GameResult) {
                 Text(
                     when (result.mode) {
                         GameMode.STATION_SPRINT -> "Station Sprint"
-                        GameMode.DAILY_SPRINT -> "Daily Challenge"
+                        GameMode.DAILY_SPRINT -> stringResource(R.string.stats_mode_daily)
                         GameMode.TRACE_NETWORK -> "Trace Network"
                     },
                     color = OnSurface, fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    result.difficulty.name.lowercase().replaceFirstChar { it.uppercase() } +
-                        (if (result.mode != GameMode.TRACE_NETWORK) " · level ${result.level}" else "") +
+                    difficultyLabel(result.difficulty) +
+                        (if (result.mode != GameMode.TRACE_NETWORK) " · " + stringResource(R.string.stats_level, result.level) else "") +
                         " · " + SimpleDateFormat("dd/MM/yyyy", locale).format(Date(result.timestampMs)),
                     color = OnSurfaceMed, fontSize = 11.sp
                 )

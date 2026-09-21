@@ -71,7 +71,7 @@ Constats principaux :
 - [ ] **P2 — Collision de labels** : Medium affiche **tous** les noms (~150 stations sur 7 lignes) sans anti-collision (déjà en roadmap v0.2). Illisible sans zoom.
   - ⏸ spécifique à Trace (parké, dev-only) → à traiter avec le §3.
 - [ ] **P2 — Accessibilité** : `contentDescription = null` sur la plupart des icônes, drag & drop **sans alternative** (boutons monter/descendre, TalkBack), pas de support `fontScale` (textes en `sp` mais layouts rigides), couleurs ligne/texte non vérifiées en contraste (surtout lignes jaunes/claires avec `textColor` blanc), daltonisme (rouge/vert Success/Error comme seul signal).
-- [ ] **P2 — Chaînes en dur** (aucune i18n) : `strings.xml` ne contient que `app_name`. Le jeu cible Strasbourg → français probable ; textes actuels en anglais. Extraire en ressources (fr + en).
+- [x] **P2 — Chaînes en dur** : extraites en ressources en/fr/de (2026-09-21). Restent en anglais : écran Trace et variantes Sprint (dev-only).
 - [x] **P3 — Release** : `proguard-rules.pro` référencé mais **absent** → le build release (`isMinifyEnabled = true`) échouera / Gson (`GeoPointDto`, `Array<GeoPointDto>`) sera cassé par R8 sans règles keep. Prévoir règles ou migrer vers `kotlinx.serialization`.
   - ✅ `proguard-rules.pro` créé (keep `GeoPointDto` pour Gson) ; `assembleDebug` et `minifyReleaseWithR8` passent.
 - [x] **P3 — `allowBackup="true"`** sans `dataExtractionRules`/`fullBackupContent` (Android 12+ warning) ; scores + badges seraient restaurés sans cohérence avec la DB.
@@ -283,18 +283,18 @@ Principe retenu : **non intrusif**. Jamais de pub pendant une partie (le chrono 
 ## Checklist avant mise en production (2026-09-21)
 
 **Bloquants**
-- [ ] **Vérifier le nom « Network Rush »** : Play Store, TMview (classes 9/41), réserver un domaine (`networkrush.app`/`.fr`). `applicationId` fixé : `com.agsoft.networkrush`.
+- [x] **Vérifier le nom « Network Rush »** : Play Store, TMview (classes 9/41), réserver un domaine (`networkrush.app`/`.fr`). `applicationId` fixé : `com.agsoft.networkrush`.
 - [x] **targetSdk** : passé de 35 à 36 (2026-09-21). Reste à valider visuellement sur un appareil/émulateur API 36 (edge-to-edge, écran large).
 - [ ] **Signature release** : keystore + Play App Signing, `versionCode/versionName`, build AAB (`bundleRelease`), tester le build R8 sur appareil (pas seulement compilé).
 - [~] **Monétisation store** (ids AdMob réels fournis et placés dans `~/.gradle/gradle.properties`, **release uniquement** ; debug garde les ids de test) : compte AdMob + ids réels (`gradle.properties`, jamais commités), message RGPD UMP, produits `support_coffee` / `support_tram_ticket`, test d'achat (testeurs de licence) et du refus de consentement (`docs/MONETIZATION.md`).
 - [~] **Conformité Play** : brouillons prêts dans `docs/legal/` (politique de confidentialité fr/en, conditions d'utilisation, attribution des données, réponses Data safety / pubs / classification, fiche fr/en). Reste : remplir les `[PLACEHOLDERS]` (éditeur, adresse, email, date), héberger la politique en HTTPS puis renseigner `res/values/legal.xml` (`privacy_policy_url`, `terms_url`), statut « trader » DSA, captures et visuels, relecture par un juriste.
 - [x] **Données Etalab** : source confirmée (jeu « Stations de tram », data.strasbourg.eu, accès le 2026-09-21, mise à jour du jeu le 2026-06-17) ; mention datée dans Settings > Legal et `docs/legal/DATA_ATTRIBUTION.md`. À refaire (date) si le jeu est actualisé. Reste : l'ordre des stations par ligne et les coordonnées schématiques sont notre adaptation (déjà indiquée) ; vérifier l'exactitude des ordres (fourches A/D, E/F) vs la carte CTS.
-- [~] **Données** : provenance et licence documentées (Etalab, 2026-09-21). Reste la validation des ordres de stations (fourches A/D, E/F, lignes G/H) vs la carte CTS.
+- [x] **Données** : provenance et licence documentées (Etalab, 2026-09-21). Reste la validation des ordres de stations (fourches A/D, E/F, lignes G/H) vs la carte CTS.
 - [x] **Test de migration Room 1→2→3** (`MigrationTestHelper`) : perte de scores = inacceptable en prod.
 - [ ] **Test sur appareil réel** : drag & drop (CLASSIFY, mode gaucher, 8-10 tuiles), perf, contraste tuiles teintées (lignes F/G).
 
 **Fortement recommandés**
-- [ ] **i18n fr/en** (§1) : toute l'UI est en anglais, public cible francophone.
+- [x] **i18n en/fr/de** (2026-09-21) : chaînes dans `res/values{,-fr,-de}/strings.xml`, textes des badges/niveaux/pourboires dans `presentation/common/DomainText.kt`, partage localisé, langue par app (Android 13+, `locales_config.xml`). Reste : relecture des traductions par un natif, politique de confidentialité et conditions en allemand, chaînes dev-only (Trace, variantes) laissées en anglais.
 - [ ] **Crash reporting** respectueux de la vie privée (§2), au moins Play Console vitals.
 - [ ] **Accessibilité minimale** : `contentDescription`, boutons monter/descendre (§4 P3), `fontScale`.
 - [ ] **Process death** : l'état de partie est perdu (§1 P1) ; au minimum ne pas crasher au retour.

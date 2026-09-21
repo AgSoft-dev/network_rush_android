@@ -53,6 +53,32 @@ Free, with a discreet banner on the home screen (never during a game). Optional 
 
 Independent app, not affiliated with the CTS or the Eurométropole de Strasbourg. Data: Ville et Eurométropole de Strasbourg, Licence Ouverte v2.0 (Etalab). Not for trip planning.
 
+## German (de-DE)
+- Title: `Network Rush: Tram Strasbourg` (same brand; keep "Strasbourg" for search) 
+- Short description: `Bring die Haltestellen der Straßburger Tram gegen die Uhr in Reihenfolge!` (72)
+- Long description:
+Network Rush ist das schnelle Spiel, mit dem du das Straßenbahnnetz von Straßburg lernst.
+
+⏱ STATION SPRINT
+Bring die Haltestellen in die richtige Reihenfolge, bevor die Zeit abläuft. Richtige Antworten bringen Zeit und Punkte, Fehler kosten dich. Baue eine Combo auf!
+
+🚋 3 RÄTSELARTEN
+• Haltestellen einer Linie ordnen (mit Fahrtrichtung)
+• Haltestellen zwischen zwei Linien und ihrem gemeinsamen Umsteigepunkt sortieren
+• Speed Burst: 3 Haltestellen, wenige Sekunden
+
+📅 TAGESRÄTSEL
+Dieselben Rätsel für alle, ein Versuch pro Tag. Teile dein Ergebnis 🟩🟥⬜.
+
+📈 FORTSCHRITT
+Level, Abzeichen, Serie, gemeisterte Haltestellen pro Linie und die am häufigsten verfehlten Haltestellen.
+
+✋ Linkshändermodus, Vibration, offizielle Linienfarben.
+
+Kostenlos, mit einem dezenten Banner auf dem Startbildschirm (nie während eines Spiels). Freiwillige Trinkgelder unterstützen das Spiel und entfernen das Banner.
+
+Unabhängige App, nicht mit der CTS oder der Eurométropole de Strasbourg verbunden. Daten: Ville et Eurométropole de Strasbourg, Licence Ouverte v2.0 (Etalab). Nicht zur Reiseplanung geeignet.
+
 ## Assets checklist
 - Icon 512×512 (adaptive icon source `res/drawable/ic_launcher_*`; no CTS logo).
 - Feature graphic 1024×500.

@@ -24,8 +24,9 @@ class ProgressTest {
     }
 
     @Test fun titlesAdvanceEveryThreeLevels() {
-        assertEquals("Passenger", Progression.levelFor(0).title)
-        assertNotEquals(Progression.levelFor(0).title, Progression.levelFor(Progression.xpToReach(4)).title)
+        assertEquals(0, Progression.levelFor(0).titleIndex)
+        assertEquals(1, Progression.levelFor(Progression.xpToReach(4)).titleIndex)
+        assertEquals(5, Progression.levelFor(Progression.xpToReach(100)).titleIndex)
     }
 
     @Test fun dailyRunsGiveBonusXp() {
@@ -79,7 +80,7 @@ class ProgressTest {
     }
 
     @Test fun shareTextIsCompactAndTruncated() {
-        val t = ShareText.build(true, "MEDIUM", 20_000, 14, 12_340, 9, "GGRS" + "G".repeat(40))
+        val t = ShareText.build("Daily 2024-10-04", "Level 14 · 12,340 pts", "GGRS" + "G".repeat(40))
         assertTrue(t.contains("Daily 2024-10-04"))
         assertTrue(t.contains("Level 14"))
         assertTrue(t.contains("🟩🟩🟥⬜"))

@@ -80,13 +80,15 @@ fun SettingsScreen(
     val privacyRequired by vm.privacyOptionsRequired.collectAsState()
     val activity = LocalContext.current.findActivity()
     val scaffoldState = rememberScaffoldState()
+    val thanksText = stringResource(R.string.snack_thanks)
+    val failedText = stringResource(R.string.snack_failed)
 
     LaunchedEffect(Unit) {
         vm.supportEvents.collect { event ->
             scaffoldState.snackbarHostState.showSnackbar(
                 when (event) {
-                    is SupportEvent.Thanks -> "Thank you so much! \u2665"
-                    SupportEvent.Failed -> "Purchase unavailable right now, please try again later."
+                    is SupportEvent.Thanks -> thanksText
+                    SupportEvent.Failed -> failedText
                 }
             )
         }
@@ -102,10 +104,10 @@ fun SettingsScreen(
                 elevation = 0.dp,
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = OnSurface)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = OnSurface)
                     }
                 },
-                title = { Text("Settings", color = OnSurface, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold) }
+                title = { Text(stringResource(R.string.settings_title), color = OnSurface, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold) }
             )
         }
     ) { padding ->
@@ -114,14 +116,14 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             SettingRow(
-                title = "Left-handed mode",
-                description = "Puts the drag handles on the left edge of the tiles in Station Sprint.",
+                title = stringResource(R.string.left_title),
+                description = stringResource(R.string.left_desc),
                 checked = leftHanded,
                 onChange = vm::setLeftHanded
             )
             SettingRow(
-                title = "Vibrations",
-                description = "Feedback when dragging tiles and on correct / wrong answers.",
+                title = stringResource(R.string.vib_title),
+                description = stringResource(R.string.vib_desc),
                 checked = haptics,
                 onChange = vm::setHaptics
             )
@@ -136,7 +138,7 @@ fun SettingsScreen(
                 OutlinedButton(
                     onClick = { activity?.let(vm::showPrivacyOptions) },
                     modifier = Modifier.fillMaxWidth()
-                ) { Text("Privacy choices (ads)", color = OnSurfaceMed) }
+                ) { Text(stringResource(R.string.privacy_choices), color = OnSurfaceMed) }
             }
 
             LegalSection()
@@ -166,14 +168,14 @@ private fun SettingRow(title: String, description: String, checked: Boolean, onC
 private fun SupportSection(offers: List<SupportOffer>, isSupporter: Boolean, onBuy: (SupportTier) -> Unit) {
     Surface(shape = RoundedCornerShape(18.dp), color = Ticket, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Support Network Rush", color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+            Text(stringResource(R.string.support_title, stringResource(R.string.app_name)), color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
             Text(
-                if (isSupporter) "You're a supporter, thank you! The banner on the home screen is gone for good."
-                else "A solo project. A tip keeps it going and removes the banner on the home screen. Nothing in the game is locked.",
+                if (isSupporter) stringResource(R.string.support_supporter)
+                else stringResource(R.string.support_pitch),
                 color = InkMed, fontSize = 12.sp
             )
             if (offers.isEmpty()) {
-                Text("Tips are not available right now (offline, or not published on Google Play yet).", color = InkMed, fontSize = 11.sp)
+                Text(stringResource(R.string.support_unavailable), color = InkMed, fontSize = 11.sp)
             } else {
                 offers.forEach { offer ->
                     Button(
@@ -181,7 +183,7 @@ private fun SupportSection(offers: List<SupportOffer>, isSupporter: Boolean, onB
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = Sun, contentColor = Ink)
-                    ) { Text("${offer.tier.emoji}  ${offer.tier.title} · ${offer.price}", fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold) }
+                    ) { Text("${offer.tier.emoji}  ${tierTitle(offer.tier)} · ${offer.price}", fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold) }
                 }
             }
         }
@@ -198,20 +200,19 @@ private fun LegalSection() {
 
     Surface(shape = RoundedCornerShape(18.dp), color = Surface, border = BorderStroke(2.dp, Border), modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Legal", color = OnSurface, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+            Text(stringResource(R.string.legal_title), color = OnSurface, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
             Text(
-                "Station data: \u00ab Stations de tram \u00bb, Ville et Eurom\u00e9tropole de Strasbourg, Licence Ouverte v2.0 (Etalab), data.strasbourg.eu, last updated 17 June 2026 (accessed 21 September 2026). " +
-                    "Data adapted (station order per line, schematic coordinates).",
+                stringResource(R.string.legal_data),
                 color = OnSurfaceMed, fontSize = 12.sp
             )
             Text(
-                "Unofficial app, not affiliated with the CTS or the Eurom\u00e9tropole de Strasbourg. Do not use it to plan a trip.",
+                stringResource(R.string.legal_unofficial),
                 color = OnSurfaceMed, fontSize = 12.sp
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = { open(dataUrl) }) { Text("Data source", color = Sun) }
-                if (privacyUrl.isNotBlank()) TextButton(onClick = { open(privacyUrl) }) { Text("Privacy policy", color = Sun) }
-                if (termsUrl.isNotBlank()) TextButton(onClick = { open(termsUrl) }) { Text("Terms", color = Sun) }
+                TextButton(onClick = { open(dataUrl) }) { Text(stringResource(R.string.legal_data_source), color = Sun) }
+                if (privacyUrl.isNotBlank()) TextButton(onClick = { open(privacyUrl) }) { Text(stringResource(R.string.legal_privacy), color = Sun) }
+                if (termsUrl.isNotBlank()) TextButton(onClick = { open(termsUrl) }) { Text(stringResource(R.string.legal_terms), color = Sun) }
             }
         }
     }

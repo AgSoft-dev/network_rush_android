@@ -1,5 +1,7 @@
 package com.triviamap.presentation.results
 
+import com.triviamap.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
@@ -76,8 +78,8 @@ fun ResultsScreen(
         ) {
             Text(
                 text = when (mode) {
-                    GameMode.STATION_SPRINT -> "STATION SPRINT"
-                    GameMode.DAILY_SPRINT -> "DAILY CHALLENGE"
+                    GameMode.STATION_SPRINT -> stringResource(R.string.results_mode_sprint)
+                    GameMode.DAILY_SPRINT -> stringResource(R.string.home_daily_title)
                     GameMode.TRACE_NETWORK -> "NETWORK TRACE"
                 },
                 color = OnSurfaceMed, letterSpacing = 4.sp, fontSize = 13.sp
@@ -94,7 +96,7 @@ fun ResultsScreen(
                         fontWeight = FontWeight.ExtraBold
                     )
                     Text(
-                        text = if (mode == GameMode.TRACE_NETWORK) "/ 1000" else "TOTAL POINTS",
+                        text = if (mode == GameMode.TRACE_NETWORK) "/ 1000" else stringResource(R.string.results_total),
                         color = OnSurfaceMed,
                         fontSize = if (mode == GameMode.TRACE_NETWORK) 20.sp else 16.sp,
                         fontWeight = FontWeight.Bold,
@@ -117,9 +119,9 @@ fun ResultsScreen(
             if (summary != null) {
                 Spacer(Modifier.height(28.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    StatItem("LEVELS", summary.level.toString())
-                    StatItem("MAX COMBO", summary.maxCombo.toString())
-                    StatItem("ACCURACY", "${(summary.accuracy * 100).roundToInt()}%")
+                    StatItem(stringResource(R.string.results_levels), summary.level.toString())
+                    StatItem(stringResource(R.string.results_max_combo), summary.maxCombo.toString())
+                    StatItem(stringResource(R.string.results_accuracy), "${(summary.accuracy * 100).roundToInt()}%")
                 }
 
                 Spacer(Modifier.height(24.dp))
@@ -137,8 +139,8 @@ fun ResultsScreen(
                                 Icon(Icons.Default.EmojiEvents, null, tint = Accent, modifier = Modifier.size(28.dp))
                                 Spacer(Modifier.width(12.dp))
                                 Column {
-                                    Text("Badge unlocked: ${badge.title}", color = OnSurface, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold)
-                                    Text(badge.description, color = OnSurfaceMed, fontSize = 12.sp)
+                                    Text(stringResource(R.string.results_badge, badgeTitle(badge.id)), color = OnSurface, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold)
+                                    Text(badgeDescription(badge.id), color = OnSurfaceMed, fontSize = 12.sp)
                                 }
                             }
                         }
@@ -150,7 +152,7 @@ fun ResultsScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.Whatshot, null, tint = Accent, modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("${summary.streak} DAY STREAK", color = OnSurface, fontWeight = FontWeight.Black, fontSize = 14.sp)
+                        Text(stringResource(R.string.results_streak, summary.streak), color = OnSurface, fontWeight = FontWeight.Black, fontSize = 14.sp)
                     }
                 }
             }
@@ -160,8 +162,8 @@ fun ResultsScreen(
             if (summary != null) {
                 Button(
                     onClick = {
-                        shareText(context, ShareText.build(
-                            isDaily = summary.mode == GameMode.DAILY_SPRINT,
+                        shareText(context, buildShareMessage(
+                            context, isDaily = summary.mode == GameMode.DAILY_SPRINT,
                             difficultyName = summary.difficulty.name,
                             epochDay = summary.epochDay,
                             level = summary.level,
@@ -176,7 +178,7 @@ fun ResultsScreen(
                 ) {
                     Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("SHARE", fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
+                    Text(stringResource(R.string.results_share), fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
                 }
                 Spacer(Modifier.height(12.dp))
             }
@@ -191,7 +193,7 @@ fun ResultsScreen(
                 ) {
                     Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("PLAY AGAIN", fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
+                    Text(stringResource(R.string.results_play_again), fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
                 }
                 Spacer(Modifier.height(12.dp))
             }
@@ -204,7 +206,7 @@ fun ResultsScreen(
             ) {
                 Icon(Icons.Default.Home, contentDescription = null, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("HOME", letterSpacing = 2.sp)
+                Text(stringResource(R.string.results_home), letterSpacing = 2.sp)
             }
         }
     }
@@ -222,7 +224,7 @@ private fun XpCard(summary: RunSummary) {
                 }
                 Spacer(Modifier.width(12.dp))
                 Text(
-                    after.title.uppercase(),
+                    levelTitle(after.titleIndex).uppercase(),
                     color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, modifier = Modifier.weight(1f)
                 )
                 Text("+${summary.xpEarned} XP", color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
@@ -236,7 +238,7 @@ private fun XpCard(summary: RunSummary) {
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                if (leveledUp) "LEVEL UP!" else "${after.xpIntoLevel} / ${after.xpForNext} XP to next level",
+                if (leveledUp) stringResource(R.string.xp_level_up) else stringResource(R.string.xp_to_next, after.xpIntoLevel, after.xpForNext),
                 color = if (leveledUp) SunEdge else InkMed,
                 fontSize = 11.sp, fontWeight = FontWeight.Bold
             )
@@ -270,13 +272,14 @@ private fun scoreColor(mode: GameMode, score: Int) = when {
     else -> Error
 }
 
+@Composable
 private fun scoreLabel(mode: GameMode, score: Int) = when {
     mode != GameMode.TRACE_NETWORK -> when {
-        score <= 0 -> "TRY AGAIN"
-        score > 5000 -> "LEGENDARY"
-        score > 2500 -> "ELITE"
-        score > 1000 -> "SPEEDSTER"
-        else -> "GOOD RUN"
+        score <= 0 -> stringResource(R.string.label_try_again)
+        score > 5000 -> stringResource(R.string.label_legendary)
+        score > 2500 -> stringResource(R.string.label_elite)
+        score > 1000 -> stringResource(R.string.label_speedster)
+        else -> stringResource(R.string.label_good_run)
     }
     score >= 900 -> "PERFECT"
     score >= 700 -> "GREAT"

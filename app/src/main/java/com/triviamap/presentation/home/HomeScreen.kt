@@ -1,5 +1,7 @@
 package com.triviamap.presentation.home
 
+import com.triviamap.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -69,19 +71,20 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "TRIVIAMAP",
+                text = stringResource(R.string.app_name).uppercase(),
                 color = OnSurface,
                 fontFamily = DisplayFont,
-                fontSize = 36.sp,
+                fontSize = 30.sp,
                 fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 6.sp
+                letterSpacing = 3.sp
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Strasbourg Tram Challenge",
+                text = stringResource(R.string.app_tagline),
                 color = OnSurfaceMed,
                 fontSize = 14.sp,
-                letterSpacing = 2.sp
+                letterSpacing = 2.sp,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
 
             Spacer(Modifier.height(16.dp))
@@ -89,7 +92,7 @@ fun HomeScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (ui.isSupporter) Text("\u2665 ", color = Accent, fontSize = 12.sp, fontWeight = FontWeight.Black)
                 Text(
-                    "LV ${ui.level.level} · ${ui.level.title.uppercase()}",
+                    stringResource(R.string.home_level, ui.level.level, levelTitle(ui.level.titleIndex).uppercase()),
                     color = OnSurfaceMed, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp
                 )
                 if (ui.streak > 0) {
@@ -127,30 +130,30 @@ fun HomeScreen(
             val daily = ui.dailyToday
             if (daily == null) {
                 ModeButton(
-                    title = "DAILY CHALLENGE",
+                    title = stringResource(R.string.home_daily_title),
                     icon = Icons.Default.CalendarToday,
                     color = Surface,
                     contentColor = OnSurface,
                     onClick = { onPlay(GameMode.DAILY_SPRINT, Difficulty.MEDIUM) }
                 )
                 Text(
-                    "Same puzzles for everyone, one attempt a day",
+                    stringResource(R.string.home_daily_hint),
                     color = OnSurfaceMed, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp)
                 )
             } else {
                 Surface(shape = RoundedCornerShape(20.dp), color = Ticket, modifier = Modifier.fillMaxWidth()) {
                     Row(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
-                            Text("TODAY'S DAILY · VALIDATED", color = Color(0xFF008A2E), fontWeight = FontWeight.Black, fontSize = 12.sp, letterSpacing = 1.sp)
-                            Text("${daily.score} pts · level ${daily.level}", color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
-                            Text("Come back tomorrow for a new one", color = InkMed, fontSize = 11.sp)
+                            Text(stringResource(R.string.home_daily_done), color = Color(0xFF008A2E), fontWeight = FontWeight.Black, fontSize = 12.sp, letterSpacing = 1.sp)
+                            Text(stringResource(R.string.home_daily_result, daily.score, daily.level), color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                            Text(stringResource(R.string.home_daily_back), color = InkMed, fontSize = 11.sp)
                         }
                         IconButton(onClick = {
-                            shareText(context, ShareText.build(
-                                isDaily = true, difficultyName = daily.difficulty.name, epochDay = ui.epochDay,
+                            shareText(context, buildShareMessage(
+                                context, isDaily = true, difficultyName = daily.difficulty.name, epochDay = ui.epochDay,
                                 level = daily.level, score = daily.score, maxCombo = daily.maxCombo, answerLog = daily.answerLog
                             ))
-                        }) { Icon(Icons.Default.Share, contentDescription = "Share", tint = Ink) }
+                        }) { Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share), tint = Ink) }
                     }
                 }
             }
@@ -168,13 +171,13 @@ fun HomeScreen(
                 ),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = OnSurface)
             ) {
-                Text("PROGRESS", fontWeight = FontWeight.Medium, letterSpacing = 2.sp)
+                Text(stringResource(R.string.home_progress), fontWeight = FontWeight.Medium, letterSpacing = 2.sp)
             }
 
             Spacer(Modifier.height(12.dp))
 
             TextButton(onClick = onSettings) {
-                Text("SETTINGS", color = OnSurfaceMed, fontWeight = FontWeight.Medium, letterSpacing = 2.sp)
+                Text(stringResource(R.string.home_settings), color = OnSurfaceMed, fontWeight = FontWeight.Medium, letterSpacing = 2.sp)
             }
         }
         }
@@ -184,7 +187,7 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "v0.3 · Station Sprint Edition",
+                text = "v${BuildConfig.VERSION_NAME}",
                 color = OnSurfaceMed.copy(alpha = 0.4f),
                 fontSize = 10.sp,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -246,17 +249,17 @@ private fun DifficultyPickerDialog(
         backgroundColor = Surface,
         contentColor = OnSurface,
         shape = RoundedCornerShape(24.dp),
-        title = { Text("Select difficulty", fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold) },
+        title = { Text(stringResource(R.string.difficulty_title), fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                DifficultyOption("Easy", "60 s clock · the most time back per answer", Success) { onSelect(Difficulty.EASY) }
-                DifficultyOption("Medium", "45 s clock · balanced", Sun) { onSelect(Difficulty.MEDIUM) }
-                DifficultyOption("Hard", "30 s clock · reversed lines, gaps, less time back", Error) { onSelect(Difficulty.HARD) }
+                DifficultyOption(stringResource(R.string.diff_easy), stringResource(R.string.diff_easy_desc), Success) { onSelect(Difficulty.EASY) }
+                DifficultyOption(stringResource(R.string.diff_medium), stringResource(R.string.diff_medium_desc), Sun) { onSelect(Difficulty.MEDIUM) }
+                DifficultyOption(stringResource(R.string.diff_hard), stringResource(R.string.diff_hard_desc), Error) { onSelect(Difficulty.HARD) }
             }
         },
         buttons = {
             Box(Modifier.fillMaxWidth().padding(8.dp), contentAlignment = Alignment.CenterEnd) {
-                TextButton(onClick = onDismiss) { Text("Cancel", color = OnSurfaceMed) }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), color = OnSurfaceMed) }
             }
         }
     )
@@ -364,7 +367,7 @@ private fun SprintHero(onGo: () -> Unit) {
             }
             Spacer(Modifier.height(10.dp))
             Text("Station Sprint", color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 26.sp)
-            Text("Put the stops back in order before the terminus.", color = InkMed, fontSize = 14.sp)
+            Text(stringResource(R.string.sprint_tagline), color = InkMed, fontSize = 14.sp)
             Spacer(Modifier.height(14.dp))
             Button(
                 onClick = onGo,
@@ -373,7 +376,7 @@ private fun SprintHero(onGo: () -> Unit) {
                 colors = ButtonDefaults.buttonColors(backgroundColor = Sun, contentColor = Ink),
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp)
             ) {
-                Text("GO", fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, letterSpacing = 2.sp)
+                Text(stringResource(R.string.go), fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, letterSpacing = 2.sp)
                 Spacer(Modifier.width(12.dp))
                 Icon(Icons.Default.ElectricBolt, null, modifier = Modifier.size(26.dp))
             }

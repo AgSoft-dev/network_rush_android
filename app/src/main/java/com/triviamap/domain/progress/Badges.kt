@@ -1,6 +1,7 @@
 package com.triviamap.domain.progress
 
-data class Badge(val id: String, val title: String, val description: String)
+/** Display texts live in string resources (see presentation/common/DomainText.kt). */
+data class Badge(val id: String)
 
 object Badges {
     const val FIRST_RUN = "first_run"
@@ -15,16 +16,16 @@ object Badges {
     const val LINE_MASTER = "line_master"
 
     val all = listOf(
-        Badge(FIRST_RUN, "First ride", "Finish your first run"),
-        Badge(HUB_EXPERT, "Hub expert", "Solve 10 sorting challenges in one run"),
-        Badge(NIGHT_RIDER, "Night rider", "Finish a run between 10 pm and 4 am"),
-        Badge(COMBO_10, "On a roll", "Reach a x10 combo"),
-        Badge(TERMINUS, "Terminus", "Reach level 21"),
-        Badge(STREAK_3, "Three in a row", "Play 3 days in a row"),
-        Badge(STREAK_7, "Weekly commuter", "Play 7 days in a row"),
-        Badge(DAILY_PLAYER, "Daily rider", "Complete a daily challenge"),
-        Badge(REGULAR, "Regular", "Place 200 stations"),
-        Badge(LINE_MASTER, "Line master", "Master every station of one line")
+        Badge(FIRST_RUN),
+        Badge(HUB_EXPERT),
+        Badge(NIGHT_RIDER),
+        Badge(COMBO_10),
+        Badge(TERMINUS),
+        Badge(STREAK_3),
+        Badge(STREAK_7),
+        Badge(DAILY_PLAYER),
+        Badge(REGULAR),
+        Badge(LINE_MASTER)
     )
 
     fun byId(id: String): Badge? = all.firstOrNull { it.id == id }

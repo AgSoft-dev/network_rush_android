@@ -5,9 +5,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /** Optional tips. Consumable one-time products, so they can be bought again. Ids must match the Play Console. */
-enum class SupportTier(val productId: String, val title: String, val emoji: String) {
-    COFFEE("support_coffee", "Buy me a coffee", "\u2615"),
-    TRAM_TICKET("support_tram_ticket", "Buy me a tram ticket", "\uD83C\uDF9F\uFE0F");
+enum class SupportTier(val productId: String, val emoji: String) {
+    COFFEE("support_coffee", "\u2615"),
+    TRAM_TICKET("support_tram_ticket", "\uD83C\uDF9F\uFE0F");
 
     companion object {
         fun fromProductId(id: String): SupportTier? = entries.firstOrNull { it.productId == id }

@@ -3,7 +3,8 @@ package com.triviamap.domain.progress
 /** Player level derived from accumulated XP. */
 data class PlayerLevel(
     val level: Int,
-    val title: String,
+    /** Index of the title tier (0 = Passenger ... 5 = Network Master); the text comes from resources. */
+    val titleIndex: Int,
     val xpIntoLevel: Int,
     val xpForNext: Int
 ) {
@@ -11,9 +12,7 @@ data class PlayerLevel(
 }
 
 object Progression {
-    private val TITLES = listOf(
-        "Passenger", "Regular", "Commuter", "Conductor", "Line Chief", "Network Master"
-    )
+    private const val TITLE_COUNT = 6
 
     /** XP needed to reach [level] (level 1 = 0, 2 = 100, 3 = 300, 4 = 600...). */
     fun xpToReach(level: Int): Int = 50 * level * (level - 1)
@@ -24,7 +23,7 @@ object Progression {
         val start = xpToReach(level)
         return PlayerLevel(
             level = level,
-            title = TITLES[minOf((level - 1) / 3, TITLES.lastIndex)],
+            titleIndex = minOf((level - 1) / 3, TITLE_COUNT - 1),
             xpIntoLevel = xp - start,
             xpForNext = xpToReach(level + 1) - start
         )
