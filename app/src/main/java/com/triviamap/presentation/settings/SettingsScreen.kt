@@ -97,6 +97,7 @@ fun SettingsScreen(
         backgroundColor = Background,
         topBar = {
             TopAppBar(
+                modifier = Modifier.statusBarsPadding(),
                 backgroundColor = Background,
                 elevation = 0.dp,
                 navigationIcon = {
@@ -109,7 +110,7 @@ fun SettingsScreen(
         }
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(padding).navigationBarsPadding().verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             SettingRow(

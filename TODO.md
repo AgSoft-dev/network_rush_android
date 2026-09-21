@@ -100,7 +100,8 @@ Constats principaux :
   - ⏸ concerne Trace + fond Sprint ; à traiter avec le §3.
 - [x] **P2 — Dépendances datées** : Kotlin 1.9.23, Compose BOM 2024.05, AGP 8.13.2 (décalage avec Kotlin/Gradle), `compileSdk/targetSdk 34` (Play exige 35 depuis 2025-08), Gson (maintenance mode), Material 2 (roadmap M3 abandonnée en pratique). Planifier bump : Kotlin 2.x + plugin Compose compiler, BOM récent, targetSdk 35/36, `kotlinx.serialization`.
   - ✅ 2026-09-21 : Gradle 8.13→9.7.1, AGP 8.13.2→9.4.1 (Kotlin intégré), Kotlin 1.9.23→2.3.21 (plugin Compose), KSP 2.3.12, Hilt 2.59.2, Room 2.8.5, Compose BOM 2026.09.00, Navigation 2.10.1, Lifecycle 2.10.0, Activity 1.12.4, DataStore 1.2.1, coroutines 1.10.2, Gson 2.13.2, compileSdk 37 / targetSdk 35, JDK daemon épinglé à 21 (`gradle-daemon-jvm.properties` + foojay). Build vérifié : `testDebugUnitTest` (21 tests OK), `lintDebug`, `assembleDebug`, `assembleRelease` (R8). Corrigé : `animateItemPlacement`→`animateItem`, `hiltViewModel`/`LocalLifecycleOwner` déplacés, lint `NonObservableLocale`.
-  - ⏸ Reste : targetSdk 36 (lint `OldTargetApi`) à tester visuellement (edge-to-edge), migration Material 3, `kotlinx.serialization` à la place de Gson.
+  - ✅ 2026-09-21 : targetSdk 35→36 (insets barres système ajoutés Settings/Progress/Results/Sprint, `enableOnBackInvokedCallback`, UI centrée max 600dp car l'orientation portrait est ignorée sur écrans ≥ 600dp ; non testé sur émulateur API 36).
+  - ⏸ Reste : migration Material 3, `kotlinx.serialization` à la place de Gson.
 - [x] **P2 — Pas de CI / lint** : ajouter GitHub Actions (`./gradlew lintDebug testDebugUnitTest assembleDebug`), ktlint/detekt.
   - ✅ `.github/workflows/ci.yml` (tests + lintDebug + assembleDebug, JDK 17). Reste : ktlint/detekt, lint jamais exécuté localement.
 - [ ] **P2 — Logging / analytics / crash reporting** : rien. Au minimum Crashlytics (ou équivalent respectueux de la vie privée) avant beta.
@@ -282,7 +283,7 @@ Principe retenu : **non intrusif**. Jamais de pub pendant une partie (le chrono 
 
 **Bloquants**
 - [ ] **Vérifier le nom « Network Rush »** : Play Store, TMview (classes 9/41), réserver un domaine (`networkrush.app`/`.fr`). `applicationId` fixé : `com.agsoft.networkrush`.
-- [ ] **targetSdk** : Play exige un niveau récent (probablement 36 depuis août 2026, à vérifier dans la console) ; passer de 35 à 36, tester edge-to-edge.
+- [x] **targetSdk** : passé de 35 à 36 (2026-09-21). Reste à valider visuellement sur un appareil/émulateur API 36 (edge-to-edge, écran large).
 - [ ] **Signature release** : keystore + Play App Signing, `versionCode/versionName`, build AAB (`bundleRelease`), tester le build R8 sur appareil (pas seulement compilé).
 - [~] **Monétisation store** (ids AdMob réels fournis et placés dans `~/.gradle/gradle.properties`, **release uniquement** ; debug garde les ids de test) : compte AdMob + ids réels (`gradle.properties`, jamais commités), message RGPD UMP, produits `support_coffee` / `support_tram_ticket`, test d'achat (testeurs de licence) et du refus de consentement (`docs/MONETIZATION.md`).
 - [~] **Conformité Play** : brouillons prêts dans `docs/legal/` (politique de confidentialité fr/en, conditions d'utilisation, attribution des données, réponses Data safety / pubs / classification, fiche fr/en). Reste : remplir les `[PLACEHOLDERS]` (éditeur, adresse, email, date), héberger la politique en HTTPS puis renseigner `res/values/legal.xml` (`privacy_policy_url`, `terms_url`), statut « trader » DSA, captures et visuels, relecture par un juriste.

@@ -3,7 +3,14 @@ package com.triviamap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.Alignment
+import com.triviamap.presentation.common.Background
+import com.triviamap.presentation.common.MaxContentWidth
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
@@ -38,7 +45,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             TriviaMapTheme {
                 val navController = rememberNavController()
-                TriviaMapNavGraph(navController = navController)
+                // API 36 ignores the portrait lock on >= 600dp displays: keep the portrait UI centred
+                Box(Modifier.fillMaxSize().background(Background), contentAlignment = Alignment.TopCenter) {
+                    Box(Modifier.fillMaxHeight().widthIn(max = MaxContentWidth)) {
+                        TriviaMapNavGraph(navController = navController)
+                    }
+                }
             }
         }
     }

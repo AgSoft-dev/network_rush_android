@@ -19,7 +19,7 @@ import com.triviamap.BuildConfig
 @Composable
 fun AdBanner(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val widthDp = LocalConfiguration.current.screenWidthDp
+    val widthDp = minOf(LocalConfiguration.current.screenWidthDp, MaxContentWidth.value.toInt())
     val lifecycle = LocalLifecycleOwner.current.lifecycle
 
     val adView = remember(widthDp) {

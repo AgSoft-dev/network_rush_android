@@ -97,6 +97,7 @@ fun StatsScreen(
         backgroundColor = Background,
         topBar = {
             TopAppBar(
+                modifier = Modifier.statusBarsPadding(),
                 backgroundColor = Background,
                 elevation = 0.dp,
                 navigationIcon = {
@@ -109,7 +110,7 @@ fun StatsScreen(
         }
     ) { padding ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxSize().padding(padding).navigationBarsPadding().padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {

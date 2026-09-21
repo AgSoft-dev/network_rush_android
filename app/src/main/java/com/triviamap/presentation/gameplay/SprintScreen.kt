@@ -643,7 +643,7 @@ private fun TileList(
 
 @Composable
 private fun SubmitSection(onSubmit: () -> Unit) {
-    Box(modifier = Modifier.fillMaxWidth().padding(24.dp)) {
+    Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(24.dp)) {
         Button(
             onClick = onSubmit,
             modifier = Modifier.fillMaxWidth().height(56.dp),
