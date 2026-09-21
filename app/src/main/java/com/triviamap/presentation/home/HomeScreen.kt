@@ -5,6 +5,8 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -54,10 +56,15 @@ fun HomeScreen(
     ) {
         AnimatedBackground()
 
+        // Scrollable: on small screens the lower buttons must stay reachable (centered when there is room)
+        BoxWithConstraints(Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp),
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .statusBarsPadding()
+                .heightIn(min = maxHeight)
+                .padding(start = 32.dp, end = 32.dp, top = 16.dp, bottom = if (ui.showBanner) 160.dp else 100.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -169,6 +176,7 @@ fun HomeScreen(
             TextButton(onClick = onSettings) {
                 Text("SETTINGS", color = OnSurfaceMed, fontWeight = FontWeight.Medium, letterSpacing = 2.sp)
             }
+        }
         }
 
         Column(

@@ -270,8 +270,9 @@ Principe retenu : **non intrusif**. Jamais de pub pendant une partie (le chrono 
 ### Identité visuelle « Terminus » (2026-09-21)
 - [x] Thème (palette, polices Bricolage Grotesque + DM Sans embarquées), pastilles de ligne, tuiles Sprint en plaques blanches (drag : liseré jaune, légère rotation), carte héros Accueil, ticket du défi validé, icône adaptative (+ monochrome).
 - [x] Results (carte XP en plaque, badges à liseré jaune, boutons) et Progress (niveau en plaque, maîtrise en pastilles de ligne, graphe) restylés.
-- [ ] Restent au style intermédiaire : Settings, dialogues (difficulté, dev), écran Trace (dev).
-- [ ] Une partie à 0 point affiche « GOOD RUN » et compte dans la série de jours : à revoir (libellé « Try again » sous un seuil, pas de série sans réponse correcte). Descriptions du sélecteur de difficulté à réaligner sur l'économie actuelle.
+- [x] Settings (panneaux à bordure, interrupteurs jaunes, carte Support en ticket) et dialogues (difficulté en plaques, dev) restylés ; descriptions de difficulté réalignées sur l'économie.
+- [ ] Reste au style intermédiaire : écran Trace (dev).
+- [x] Une partie sans bonne réponse ne compte plus dans la série de jours et affiche « TRY AGAIN ».
 - [ ] Fonctionnalités de la maquette non faites : carte de validation hebdomadaire (perforations), cigogne (emblème de niveau/badges), filtre de lignes, sons/haptique signature.
 - [ ] **Nom de l'app** : décider avant la 1re publication (« Terminus » jugé trop générique) ; vérifier Play Store, INPI/EUIPO, domaine ; `applicationId` irréversible après publication.
 - [ ] Contraste à vérifier sur tuiles teintées (Classify) avec les couleurs de ligne claires (F, G).
