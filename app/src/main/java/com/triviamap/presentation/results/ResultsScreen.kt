@@ -71,6 +71,7 @@ fun ResultsScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .statusBarsPadding()
+                .navigationBarsPadding()
                 .padding(horizontal = 32.dp, vertical = 24.dp)
         ) {
             Text(

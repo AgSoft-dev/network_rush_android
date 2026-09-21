@@ -15,7 +15,7 @@ android {
     defaultConfig {
         applicationId = "com.agsoft.networkrush"
         minSdk = 28
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
 

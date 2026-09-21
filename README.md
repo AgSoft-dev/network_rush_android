@@ -36,7 +36,7 @@ Data provenance and licence still need to be documented (see TODO.md §5).
 
 ## Build & test
 
-Gradle 9.7 + AGP 9.4 + Kotlin 2.3, compileSdk 37 / targetSdk 35. `gradle/gradle-daemon-jvm.properties` pins the Gradle daemon to **JDK 21**; Gradle downloads it automatically (foojay resolver), whatever JDK your shell or IDE uses. In Android Studio, set *Settings → Build Tools → Gradle → Gradle JDK* to **Gradle Daemon JVM** (or any JDK 17–24).
+Gradle 9.7 + AGP 9.4 + Kotlin 2.3, compileSdk 37 / targetSdk 36. `gradle/gradle-daemon-jvm.properties` pins the Gradle daemon to **JDK 21**; Gradle downloads it automatically (foojay resolver), whatever JDK your shell or IDE uses. In Android Studio, set *Settings → Build Tools → Gradle → Gradle JDK* to **Gradle Daemon JVM** (or any JDK 17–24).
 
 ```bash
 ./gradlew testDebugUnitTest   # unit tests

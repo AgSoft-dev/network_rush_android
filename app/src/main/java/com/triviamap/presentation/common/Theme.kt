@@ -30,6 +30,9 @@ import com.triviamap.R
 // solid line pills, one sun-yellow action colour.
 // ---------------------------------------------------------------------------
 
+/** Max width of the portrait UI; wider windows (API 36 large screens) centre it. */
+val MaxContentWidth = 600.dp
+
 val Background   = Color(0xFF0F1A3C)   // station night
 val Surface      = Color(0xFF18275A)   // panel
 val SurfaceHigh  = Color(0xFF1D2F6A)
