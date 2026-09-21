@@ -199,7 +199,7 @@ private fun LegalSection() {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("Legal", color = OnSurface, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
             Text(
-                "Station data: \u00ab Stations de tram \u00bb, Ville et Eurom\u00e9tropole de Strasbourg, Licence Ouverte v2.0 (Etalab), data.strasbourg.eu. " +
+                "Station data: \u00ab Stations de tram \u00bb, Ville et Eurom\u00e9tropole de Strasbourg, Licence Ouverte v2.0 (Etalab), data.strasbourg.eu, last updated 17 June 2026 (accessed 21 September 2026). " +
                     "Data adapted (station order per line, schematic coordinates).",
                 color = OnSurfaceMed, fontSize = 12.sp
             )

@@ -9,13 +9,13 @@ https://data.strasbourg.eu/explore/dataset/stations_tram/
 - The licence requires **mentioning the source and the date of the last update** of the data. It allows reuse, including commercial, and adaptation.
 
 ### Mention to display (in-app, Settings > Legal, and on the store listing)
-> Station data: « Stations de tram », Ville et Eurométropole de Strasbourg, Licence Ouverte v2.0 (Etalab), data.strasbourg.eu. Data adapted (ordering by line, schematic diagram coordinates). Last update of the source: [DATE OF THE DATA VERSION USED].
+> Station data: « Stations de tram », Ville et Eurométropole de Strasbourg, Licence Ouverte v2.0 (Etalab), data.strasbourg.eu. Data adapted (ordering by line, schematic diagram coordinates). Last update of the source: 17 June 2026 (accessed 21 September 2026).
 
 ### Adaptation notice
 The dataset gives station positions. The app **adapts** it: the order of stations along each line and the schematic diagram coordinates were curated by hand and are not official geographic positions. The Ville et Eurométropole de Strasbourg does not endorse the app and is not responsible for its content (the Etalab licence forbids implying official endorsement).
 
-### Open item
-`app/src/main/assets/strasbourg_stations.json` was curated from this dataset and other sources over time. Before release, confirm that every station name and every line order comes from this dataset or from the CTS public network map (fix or replace anything you cannot source), and write the exact **data version date** in the mention above.
+### Provenance (confirmed by the author, 2026-09-21)
+The station names come from the dataset above (table view sorted by `nom_arret`, filter `ligne_s`), accessed on 21 September 2026. The portal metadata gives the last modification of the dataset as 2026-06-17. The line order and schematic coordinates in `app/src/main/assets/strasbourg_stations.json` are the app's own adaptation (mention above). If the dataset is refreshed, update the date in this file and in `SettingsScreen.kt` (`LegalSection`).
 
 ## CTS (Compagnie des Transports Strasbourgeois)
 Line names (A to F...) and their colours reproduce the public identity of the CTS network to identify lines. "CTS" and its logos are the property of the CTS. Network Rush is an independent, unofficial fan/educational app, **not affiliated with, sponsored or endorsed by the CTS or the Eurométropole**; the CTS logo is not used. Keep it that way: do not use CTS logos or its wordmark in the icon, screenshots or the listing.

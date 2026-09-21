@@ -6,7 +6,7 @@ Drafts prepared for the first Play release. **Not legal advice**: have them read
 |---|---|---|
 | `PRIVACY_POLICY.fr.md`, `PRIVACY_POLICY.en.md` | Privacy policy (mandatory with ads and Play Billing) | Host on a public URL, paste the URL in Play Console (App content > Privacy policy) and in `gradle.properties` as `privacyPolicyUrl` |
 | `TERMS_OF_USE.md` | Short terms of use (optional but recommended: tips, ads, data, liability) | Same host, link from the store listing |
-| `DATA_ATTRIBUTION.md` | Etalab Open Licence v2.0 attribution for the Strasbourg open data + CTS trademark note | Shown in Settings > Legal (already wired) and in the store description |
+| `DATA_ATTRIBUTION.md` | Etalab Open Licence v2.0 attribution for the Strasbourg open data + CTS trademark note | Shown in Settings > Legal (already wired, dated) and in the store description |
 | `PLAY_DATA_SAFETY.md` | Answers for the Play "Data safety" form, ads declaration, content rating, target audience | Play Console |
 | `STORE_LISTING.md` | Title, short/long descriptions fr + en, keywords, screenshots list | Play Console > Main store listing |
 
