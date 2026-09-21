@@ -16,8 +16,8 @@ object ShareText {
         maxCombo: Int,
         answerLog: String
     ): String {
-        val header = if (isDaily) "Next Stop Strasbourg · Daily ${LocalDate.ofEpochDay(epochDay)}"
-        else "Next Stop Strasbourg · Sprint ${difficultyName.lowercase(Locale.ROOT)}"
+        val header = if (isDaily) "Network Rush Strasbourg · Daily ${LocalDate.ofEpochDay(epochDay)}"
+        else "Network Rush Strasbourg · Sprint ${difficultyName.lowercase(Locale.ROOT)}"
         val marks = answerLog.take(MAX_MARKS).map {
             when (it) {
                 'G' -> "🟩"

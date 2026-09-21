@@ -10,7 +10,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.triviamap"
+        applicationId = "com.agsoft.networkrush"
         minSdk = 28
         targetSdk = 35
         versionCode = 1

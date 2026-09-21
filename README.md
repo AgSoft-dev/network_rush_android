@@ -1,4 +1,4 @@
-# Next Stop — Tram Quiz Strasbourg
+# Network Rush — Tram Strasbourg
 
 Android game (Kotlin, Jetpack Compose) to learn the Strasbourg tram network.
 
@@ -59,7 +59,7 @@ CI (`.github/workflows/ci.yml`) runs tests, lint and a debug build.
 
 ## Visual identity
 
-"Terminus" (tram signage): ink-blue station night, white plates for tiles and the main card, solid round line pills in the official CTS colours, one sun-yellow action colour. Bricolage Grotesque (headlines, plates, buttons) and DM Sans (body), bundled in `res/font` (SIL OFL). Tokens live in `presentation/common/Theme.kt`; the adaptive launcher icon is the three-colour "S" line (`res/drawable/ic_launcher_*`). The app is called **Next Stop** (Play title: "Next Stop: Tram Quiz Strasbourg"; `strings.xml`). The code, package and `applicationId` are still `com.triviamap`; `applicationId` must be settled before the first Play release.
+"Terminus" (tram signage): ink-blue station night, white plates for tiles and the main card, solid round line pills in the official CTS colours, one sun-yellow action colour. Bricolage Grotesque (headlines, plates, buttons) and DM Sans (body), bundled in `res/font` (SIL OFL). Tokens live in `presentation/common/Theme.kt`; the adaptive launcher icon is the three-colour "S" line (`res/drawable/ic_launcher_*`). The app is called **Network Rush** (Play title: "Network Rush: Tram Strasbourg"; `strings.xml`). `applicationId` is `com.agsoft.networkrush` (irreversible once published); the Kotlin package stays `com.triviamap`.
 
 ## Monetization
 

@@ -1,4 +1,4 @@
-# Next Stop (TriviaMap) — Revue technique & gameplay
+# Network Rush (TriviaMap) — Revue technique & gameplay
 
 Revue du 2026-09-20 sur `master` (v0.1.0, POC). Statut : `[ ]` à faire · `[~]` en cours · `[x]` fait.
 Priorités : **P0** bug bloquant / perte de données · **P1** important · **P2** confort · **P3** idée.
@@ -274,14 +274,14 @@ Principe retenu : **non intrusif**. Jamais de pub pendant une partie (le chrono 
 - [ ] Reste au style intermédiaire : écran Trace (dev).
 - [x] Une partie sans bonne réponse ne compte plus dans la série de jours et affiche « TRY AGAIN ».
 - [ ] Fonctionnalités de la maquette non faites : carte de validation hebdomadaire (perforations), cigogne (emblème de niveau/badges), filtre de lignes, sons/haptique signature.
-- [x] **Nom de l'app** : « Next Stop », titre Play « Next Stop: Tram Quiz Strasbourg » (2026-09-21, nom affiché appliqué). ⚠ Des apps « Next Stop » existent déjà : vérifier collision Play Store, INPI/EUIPO, domaine ; risque de refus/confusion assumé.
-- [ ] **`applicationId`** : garder `com.triviamap` ou passer à `com.<dev>.nextstop` **avant** la 1re publication (irréversible ensuite).
+- [x] **Nom de l'app** : « Network Rush », titre Play « Network Rush: Tram Strasbourg » (29 car., limite 30). Pas d'homonyme trouvé sur le Play Store (recherche web, 2026-09-21) ; domaines `.app/.fr/.game/.io` libres, `.com` en vente. Reste à vérifier : recherche directe Play Store, TMview (classes 9/41).
+- [x] **`applicationId`** = `com.agsoft.networkrush` (irréversible après publication ; le package Kotlin reste `com.triviamap`).
 - [ ] Contraste à vérifier sur tuiles teintées (Classify) avec les couleurs de ligne claires (F, G).
 
 ## Checklist avant mise en production (2026-09-21)
 
 **Bloquants**
-- [ ] **`applicationId`** + vérification du nom « Next Stop » (Play Store / INPI / EUIPO / domaine ; des homonymes existent). L'id est irréversible après publication.
+- [ ] **Vérifier le nom « Network Rush »** : Play Store, TMview (classes 9/41), réserver un domaine (`networkrush.app`/`.fr`). `applicationId` fixé : `com.agsoft.networkrush`.
 - [ ] **targetSdk** : Play exige un niveau récent (probablement 36 depuis août 2026, à vérifier dans la console) ; passer de 35 à 36, tester edge-to-edge.
 - [ ] **Signature release** : keystore + Play App Signing, `versionCode/versionName`, build AAB (`bundleRelease`), tester le build R8 sur appareil (pas seulement compilé).
 - [ ] **Monétisation store** : compte AdMob + ids réels (`gradle.properties`, jamais commités), message RGPD UMP, produits `support_coffee` / `support_tram_ticket`, test d'achat (testeurs de licence) et du refus de consentement (`docs/MONETIZATION.md`).

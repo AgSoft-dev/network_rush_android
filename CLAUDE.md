@@ -1,4 +1,4 @@
-# Next Stop (code name TriviaMap)
+# Network Rush (code name TriviaMap)
 
 Android game (Kotlin, Jetpack Compose, Hilt, Room) to learn the Strasbourg tram network. Only Station Sprint is shipped; Trace Network is parked (debug button). See `README.md` for architecture and build, `TODO.md` for the tracked backlog.
 
