@@ -1,6 +1,6 @@
 ---
 name: sprint-gameplay
-description: Frozen game design and balance rules of TriviaMap's Station Sprint mode (challenge types, clock economy, scoring, skips, spaced repetition, daily challenge, XP/levels/badges, streak). Use before changing anything that affects how the game plays, is scored, generated or progresses, so changes are deliberate and tests/docs stay in sync.
+description: Frozen game design and balance rules of Next Stop's Station Sprint mode (challenge types, clock economy, scoring, skips, spaced repetition, daily challenge, XP/levels/badges, streak). Use before changing anything that affects how the game plays, is scored, generated or progresses, so changes are deliberate and tests/docs stay in sync.
 ---
 
 # Station Sprint: gameplay contract

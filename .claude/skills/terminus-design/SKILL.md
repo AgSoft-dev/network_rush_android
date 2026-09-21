@@ -1,6 +1,6 @@
 ---
 name: terminus-design
-description: TriviaMap's "Terminus" visual identity (tram signage) for the Android Compose app. Use whenever you create or restyle a screen, dialog, button, tile, icon or any UI in this repo, or write UI copy, so new work matches the existing look (tokens, fonts, plates, line pills, sun-yellow CTA).
+description: Next Stop's "Terminus" visual identity (tram signage) for the Android Compose app. Use whenever you create or restyle a screen, dialog, button, tile, icon or any UI in this repo, or write UI copy, so new work matches the existing look (tokens, fonts, plates, line pills, sun-yellow CTA).
 ---
 
 # Terminus design system (TriviaMap)
@@ -61,4 +61,4 @@ Adaptive icon: navy background (#101B3F with a lighter #16255A disc), foreground
 
 ## Known gaps / ideas from the design exploration
 Weekly "validation card" with punch holes for the streak, stork as level/badge emblem, line-filter chips on Home, signature sounds/haptics, Trace (dev) screen still on the old look, tinted Classify tiles vs light line colours (F, G) to check for contrast. See `TODO.md` ("Identité visuelle Terminus"). The full 3-identity HTML mockups (Terminus, Grès, Noctambule) live in `design-explorations/`, which is **not tracked by git**, so it may be absent; do not rely on it.
-The app name is still "TriviaMap" (`strings.xml`); a rename is undecided (see `TODO.md`).
+The app is named "Next Stop" (Play title "Next Stop: Tram Quiz Strasbourg"); the code base and `applicationId` keep the `triviamap` name (see `TODO.md`).

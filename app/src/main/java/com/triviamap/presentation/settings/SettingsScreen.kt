@@ -159,7 +159,7 @@ private fun SettingRow(title: String, description: String, checked: Boolean, onC
 private fun SupportSection(offers: List<SupportOffer>, isSupporter: Boolean, onBuy: (SupportTier) -> Unit) {
     Surface(shape = RoundedCornerShape(18.dp), color = Ticket, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Support TriviaMap", color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+            Text("Support Next Stop", color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
             Text(
                 if (isSupporter) "You're a supporter, thank you! The banner on the home screen is gone for good."
                 else "A solo project. A tip keeps it going and removes the banner on the home screen. Nothing in the game is locked.",

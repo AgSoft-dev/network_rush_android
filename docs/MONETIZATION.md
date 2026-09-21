@@ -7,7 +7,7 @@ Implemented: **A** (AdMob banner on the home screen only) and **B2** (tips throu
 - `data/monetization/AdsControllerImpl.kt`: Google UMP consent (GDPR) first, AdMob SDK started only once ads may be requested; content rating capped at G.
 - `data/monetization/BillingSupportRepository.kt`: Play Billing, tips are consumed right away (repeatable), sets the local `supporter` flag. No server-side verification (nothing valuable is unlocked).
 - `presentation/common/AdBanner.kt`: adaptive banner, used only in `HomeScreen`.
-- Settings: "Support TriviaMap" section (prices from the store, thank-you snackbar) + "Privacy choices (ads)" when UMP requires it.
+- Settings: "Support Next Stop" section (prices from the store, thank-you snackbar) + "Privacy choices (ads)" when UMP requires it.
 
 ## Before publishing (checklist)
 1. **AdMob**: create the app + a banner ad unit, then put the real ids in `~/.gradle/gradle.properties` (never commit them):
