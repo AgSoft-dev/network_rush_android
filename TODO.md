@@ -212,7 +212,8 @@ Analyse statique de `TileList` (`SprintScreen.kt` ~l.324-460) et de `SprintViewM
 
 ### Suivi technique de la session 2026-09-21 (Sprint P0-P2 + progression)
 
-- [ ] **P1 — Tester la migration Room 1→2→3 sur appareil** (schémas `2.json` et `3.json` exportés ; ajouter un test instrumenté `MigrationTestHelper`). Nouveautés v3 : colonne `game_results.answerLog`, table `station_stats`.
+- [x] **P1 — Tester la migration Room 1→2→3 sur appareil** (schémas `2.json` et `3.json` exportés ; ajouter un test instrumenté `MigrationTestHelper`). Nouveautés v3 : colonne `game_results.answerLog`, table `station_stats`.
+  - ✅ 2026-09-21 : `MigrationTest` instrumenté (5 tests verts sur émulateur API 35) : 1→2 (lignes SPRINT/TRACE, cas où `mode` existe déjà), 2→3, 1→2→3 chaîné, ouverture Room finale + DAOs. v1 recréé en SQL brut (pas de `1.json`). Aucun bug de migration trouvé.
 - [ ] **P1 — Valider au doigt** : détection des colonnes CLASSIFY (zone de poignée avec tuile décalée, mode gaucher), drag avec 8-10 tuiles, marques vert/rouge, haptique.
 - [ ] **P2 — Retuner l'économie avec des parties réelles** : les modèles de joueur de `SprintEconomyTest` (temps de résolution 2 s + 1.3 s/tuile, précision 75/85/95 %) sont des hypothèses. Journaliser durée par question et taux d'erreur réels.
 - [ ] **P2 — Le daily est « une tentative par jour » mais non protégé** (données locales : réinstaller ou effacer les données permet de rejouer). Suffisant sans classement ; à revoir avec un classement en ligne.
@@ -287,7 +288,7 @@ Principe retenu : **non intrusif**. Jamais de pub pendant une partie (le chrono 
 - [ ] **Monétisation store** : compte AdMob + ids réels (`gradle.properties`, jamais commités), message RGPD UMP, produits `support_coffee` / `support_tram_ticket`, test d'achat (testeurs de licence) et du refus de consentement (`docs/MONETIZATION.md`).
 - [ ] **Conformité Play** : politique de confidentialité hébergée (pubs/AdID), Data safety, déclaration de pubs, classification de contenu, fiche (captures, description fr/en).
 - [ ] **Données** : provenance/licence des données CTS documentée (§5 P1) et validation des stations/ordres (lignes, fourches).
-- [ ] **Test de migration Room 1→2→3** (`MigrationTestHelper`) : perte de scores = inacceptable en prod.
+- [x] **Test de migration Room 1→2→3** (`MigrationTestHelper`) : perte de scores = inacceptable en prod.
 - [ ] **Test sur appareil réel** : drag & drop (CLASSIFY, mode gaucher, 8-10 tuiles), perf, contraste tuiles teintées (lignes F/G).
 
 **Fortement recommandés**
