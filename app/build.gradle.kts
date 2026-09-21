@@ -28,8 +28,21 @@ android {
         buildConfigField("boolean", "ADS_ENABLED", providers.gradleProperty("adsEnabled").getOrElse("true"))
     }
 
+    // Upload key for Play App Signing. Values live in ~/.gradle/gradle.properties (never in the repo):
+    //   nrStoreFile=/abs/path/networkrush-upload.jks  nrStorePassword=...  nrKeyAlias=upload  nrKeyPassword=...
+    // Without them the release build is simply left unsigned (debug and CI builds are unaffected).
+    val releaseSigning = providers.gradleProperty("nrStoreFile").orNull?.let { storeFile ->
+        signingConfigs.create("release") {
+            this.storeFile = file(storeFile)
+            storePassword = providers.gradleProperty("nrStorePassword").get()
+            keyAlias = providers.gradleProperty("nrKeyAlias").get()
+            keyPassword = providers.gradleProperty("nrKeyPassword").get()
+        }
+    }
+
     buildTypes {
         release {
+            releaseSigning?.let { signingConfig = it }
             providers.gradleProperty("admobAppId").orNull?.let { manifestPlaceholders["admobAppId"] = it }
             providers.gradleProperty("admobBannerId").orNull?.let {
                 buildConfigField("String", "ADMOB_BANNER_ID", "\"$it\"")
