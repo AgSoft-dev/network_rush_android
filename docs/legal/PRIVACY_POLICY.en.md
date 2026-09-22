@@ -1,8 +1,8 @@
 # Privacy Policy: Network Rush
 
-Last updated: [DATE]
+Last updated: 2026-09-22
 
-Network Rush ("the app") is published by **[PUBLISHER NAME]**, [POSTAL ADDRESS OR "address available on request"]. Contact: **[CONTACT EMAIL]**.
+Network Rush ("the app") is published by **AgSoftware**, address available on request. Contact: **agsoftdev94@gmail.com**.
 
 ## In short
 No account, no personal data sent to us. Your scores and progress stay on your phone. The app shows an ad banner on the home screen (through Google AdMob, after your consent where required) and offers optional tips through Google Play.
@@ -29,7 +29,7 @@ We do not use analytics or crash-reporting services, we do not create accounts, 
 Advertising: your consent. Local storage needed to run the app: performance of the service and legitimate interest.
 
 ## Your rights
-Because we hold no personal data about you, there is nothing to access or delete on our side. For data processed by Google, exercise your rights with Google (https://myaccount.google.com). You may also contact us at [CONTACT EMAIL] and lodge a complaint with your data protection authority (in France: CNIL, www.cnil.fr).
+Because we hold no personal data about you, there is nothing to access or delete on our side. For data processed by Google, exercise your rights with Google (https://myaccount.google.com). You may also contact us at agsoftdev94@gmail.com and lodge a complaint with your data protection authority (in France: CNIL, www.cnil.fr).
 
 ## Children
 The app is a general audience game and is **not directed to children under 13**. Ad requests are configured with a content rating capped at "G".

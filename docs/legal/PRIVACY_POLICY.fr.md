@@ -1,8 +1,8 @@
 # Politique de confidentialité : Network Rush
 
-Dernière mise à jour : [DATE]
+Dernière mise à jour : 22/09/2026
 
-Network Rush (« l'application ») est éditée par **[NOM DE L'ÉDITEUR]**, [ADRESSE POSTALE OU « adresse communiquée sur demande »]. Contact : **[EMAIL DE CONTACT]**.
+Network Rush (« l'application ») est éditée par **AgSoftware**, adresse communiquée sur demande. Contact : **agsoftdev94@gmail.com**.
 
 ## En bref
 Pas de compte, aucune donnée personnelle envoyée à l'éditeur. Vos scores et votre progression restent sur votre téléphone. L'application affiche une bannière publicitaire sur l'écran d'accueil (via Google AdMob, après votre consentement lorsque la loi l'exige) et propose des pourboires facultatifs via Google Play.
@@ -29,7 +29,7 @@ Pas d'outil d'analyse d'audience ni de rapport de plantage, pas de compte, pas d
 Publicité : votre consentement. Stockage local nécessaire au fonctionnement : exécution du service et intérêt légitime.
 
 ## Vos droits
-Nous ne détenons aucune donnée personnelle vous concernant : il n'y a rien à consulter ou supprimer de notre côté. Pour les données traitées par Google, exercez vos droits auprès de Google (https://myaccount.google.com). Vous pouvez aussi nous écrire à [EMAIL DE CONTACT] et saisir la CNIL (www.cnil.fr).
+Nous ne détenons aucune donnée personnelle vous concernant : il n'y a rien à consulter ou supprimer de notre côté. Pour les données traitées par Google, exercez vos droits auprès de Google (https://myaccount.google.com). Vous pouvez aussi nous écrire à agsoftdev94@gmail.com et saisir la CNIL (www.cnil.fr).
 
 ## Enfants
 L'application est grand public et **ne s'adresse pas aux enfants de moins de 13 ans**. Les demandes d'annonces sont limitées à la classe de contenu « G ».

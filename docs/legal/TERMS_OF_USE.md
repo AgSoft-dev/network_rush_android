@@ -1,6 +1,6 @@
 # Terms of use: Network Rush / Conditions d'utilisation
 
-Last updated / Dernière mise à jour : [DATE]. Publisher / Éditeur : **[PUBLISHER NAME]**, [CONTACT EMAIL].
+Last updated / Dernière mise à jour : 2026-09-22 / 22/09/2026. Publisher / Éditeur : **AgSoftware**, agsoftdev94@gmail.com.
 
 ## English
 1. **Purpose.** Network Rush is a free game to learn the Strasbourg tram network. It is provided "as is", for entertainment and education. Station data may not reflect the latest network changes: do not use it for travel planning; check the official CTS information.
@@ -10,7 +10,7 @@ Last updated / Dernière mise à jour : [DATE]. Publisher / Éditeur : **[PUBLIS
 5. **Fair use.** Do not reverse engineer, tamper with scores or the daily challenge, or use the app unlawfully.
 6. **Liability.** To the extent permitted by law, the publisher is not liable for indirect damages or loss of local data (scores, progress).
 7. **Governing law.** French law; consumer protection rules of your country of residence remain applicable.
-8. **Data.** Station data: see `DATA_ATTRIBUTION` (Licence Ouverte v2.0). Code, design and texts © [PUBLISHER NAME] [YEAR].
+8. **Data.** Station data: see `DATA_ATTRIBUTION` (Licence Ouverte v2.0). Code, design and texts © AgSoftware 2026.
 
 ## Français
 1. **Objet.** Network Rush est un jeu gratuit pour apprendre le réseau de tram de Strasbourg, fourni « en l'état » à titre de divertissement et d'apprentissage. Les données peuvent ne pas refléter les dernières évolutions du réseau : ne l'utilisez pas pour préparer un trajet, consultez les informations officielles de la CTS.
@@ -20,4 +20,4 @@ Last updated / Dernière mise à jour : [DATE]. Publisher / Éditeur : **[PUBLIS
 5. **Usage loyal.** Pas de rétro-ingénierie, de triche sur les scores ou le défi du jour, ni d'usage illicite.
 6. **Responsabilité.** Dans la mesure permise par la loi, l'éditeur n'est pas responsable des dommages indirects ni de la perte de données locales (scores, progression).
 7. **Droit applicable.** Droit français ; les règles de protection des consommateurs de votre pays de résidence restent applicables.
-8. **Données.** Données des stations : voir `DATA_ATTRIBUTION` (Licence Ouverte v2.0). Code, design et textes © [NOM DE L'ÉDITEUR] [ANNÉE].
+8. **Données.** Données des stations : voir `DATA_ATTRIBUTION` (Licence Ouverte v2.0). Code, design et textes © AgSoftware 2026.
