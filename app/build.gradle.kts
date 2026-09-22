@@ -52,6 +52,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Bundle native debug symbols (from Room/AdMob/Billing's .so libs) so Play Console
+            // can symbolicate native crashes/ANRs instead of showing raw addresses.
+            ndk { debugSymbolLevel = "FULL" }
         }
     }
 
