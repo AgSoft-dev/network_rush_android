@@ -28,7 +28,7 @@ Niveaux, badges, série de jours, stations maîtrisées par ligne et stations qu
 
 Gratuit, avec une bannière discrète sur l'accueil (jamais pendant une partie). Des pourboires facultatifs permettent de soutenir le jeu et de retirer la bannière.
 
-Application indépendante, non affiliée à la CTS ni à l'Eurométropole de Strasbourg. Données : Ville et Eurométropole de Strasbourg, Licence Ouverte v2.0 (Etalab). Ne pas utiliser pour planifier un trajet.
+Application indépendante, non affiliée à la CTS ni à l'Eurométropole de Strasbourg et ne représentant aucune entité gouvernementale. Données : « Stations de tram », Ville et Eurométropole de Strasbourg, Licence Ouverte v2.0 (Etalab), source : data.strasbourg.eu/explore/dataset/stations_tram. Ne pas utiliser pour planifier un trajet.
 
 ## Long description EN
 Network Rush is a fast game to learn the Strasbourg tram network.
@@ -51,7 +51,7 @@ Levels, badges, day streak, mastery per line and the stations you miss most: the
 
 Free, with a discreet banner on the home screen (never during a game). Optional tips support the game and remove the banner.
 
-Independent app, not affiliated with the CTS or the Eurométropole de Strasbourg. Data: Ville et Eurométropole de Strasbourg, Licence Ouverte v2.0 (Etalab). Not for trip planning.
+Independent app, not affiliated with the CTS or the Eurométropole de Strasbourg, and not representing any government entity. Data: "Stations de tram", Ville et Eurométropole de Strasbourg, Licence Ouverte v2.0 (Etalab), source: data.strasbourg.eu/explore/dataset/stations_tram. Not for trip planning.
 
 ## German (de-DE)
 - Title: `Network Rush: Tram Strasbourg` (same brand; keep "Strasbourg" for search) 
@@ -77,7 +77,7 @@ Level, Abzeichen, Serie, gemeisterte Haltestellen pro Linie und die am häufigst
 
 Kostenlos, mit einem dezenten Banner auf dem Startbildschirm (nie während eines Spiels). Freiwillige Trinkgelder unterstützen das Spiel und entfernen das Banner.
 
-Unabhängige App, nicht mit der CTS oder der Eurométropole de Strasbourg verbunden. Daten: Ville et Eurométropole de Strasbourg, Licence Ouverte v2.0 (Etalab). Nicht zur Reiseplanung geeignet.
+Unabhängige App, nicht mit der CTS oder der Eurométropole de Strasbourg verbunden und keine staatliche Einrichtung. Daten: „Stations de tram", Ville et Eurométropole de Strasbourg, Licence Ouverte v2.0 (Etalab), Quelle: data.strasbourg.eu/explore/dataset/stations_tram. Nicht zur Reiseplanung geeignet.
 
 ## Assets checklist
 - Icon 512×512 (adaptive icon source `res/drawable/ic_launcher_*`; no CTS logo).
