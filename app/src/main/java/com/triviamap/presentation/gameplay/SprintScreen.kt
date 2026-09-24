@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.triviamap.domain.sprint.Side
+import com.triviamap.util.ClassifyLayout
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.CornerRadius
@@ -443,8 +444,11 @@ private fun TileList(
         val listWidthPx = with(density) { maxWidth.toPx() }
         // CLASSIFY: tiles are 62 % wide and slide between three columns; otherwise full width
         val tileFraction = if (isClassify) 0.62f else 1f
-        val shiftPx = listWidthPx * (1f - tileFraction) / 2f
         val tileWidthPx = listWidthPx * tileFraction
+        // Keep outer columns clear of Android's edge-swipe back-gesture zone (see ClassifyLayout):
+        // flush against the screen edge, a horizontal drag there gets stolen by the system.
+        val edgeMarginPx = with(density) { ClassifyLayout.DEFAULT_EDGE_MARGIN_DP.dp.toPx() }
+        val shiftPx = ClassifyLayout.shiftPx(listWidthPx, tileFraction, edgeMarginPx)
         val handleZonePx = with(density) { 80.dp.toPx() }
 
         fun sideForOffset(x: Float): Int = when {

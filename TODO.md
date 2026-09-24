@@ -194,6 +194,8 @@ Analyse statique de `TileList` (`SprintScreen.kt` ~l.324-460) et de `SprintViewM
 - [x] **P2 — Mode gaucher** (2026-09-21) : réglage `Left-handed mode` dans un nouvel écran Settings (Home → SETTINGS), stocké en DataStore (`left_handed`). Poignée de drag et zone de saisie passent à gauche, l'icône de direction à droite. Test manuel à faire au doigt.
 - [ ] **P3 — Settings à étoffer** : mode gaucher et vibrations existent ; candidats : sons, langue, réinitialiser les scores / la progression.
 - [ ] **P3 — Alternative d'accessibilité :** boutons monter/descendre par tuile (TalkBack, précision), utile aussi comme repli sur petits écrans.
+- [x] **P1 — CLASSIFY : drag horizontal bloqué une fois la tuile dans une colonne latérale** (signalé 2026-09-24, Pixel 4a) : `shiftPx = listWidthPx * (1 - tileFraction) / 2` place le bord de la tuile **exactement** sur le bord de l'écran dès qu'elle est en colonne E/B (marge = 0), ce qui la fait tomber dans la zone d'edge-swipe (retour) de la navigation gestuelle Android. Un drag qui repart de là avec un mouvement majoritairement horizontal est volé par le système ; un drag vertical (réordonner) ne l'est pas, d'où le symptôme observé (haut/bas OK, gauche/droite bloqué).
+  - ✅ `ClassifyLayout.shiftPx` (`util/ClassifyLayout.kt`) plafonne le décalage pour garder ≥ 24 dp entre le bord de la tuile et le bord de l'écran, utilisé dans `SprintScreen.kt`. Test unitaire `ClassifyLayoutTest`. À confirmer au doigt sur le Pixel 4a du testeur.
 
 ## 5. Produit / contenu / croissance
 
