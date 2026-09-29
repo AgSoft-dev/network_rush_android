@@ -17,6 +17,7 @@ Spec: https://keepachangelog.com/en/1.1.0/. The file is `CHANGELOG.md` at the re
 - Never put secrets, ids or signing details in it.
 
 ## Release procedure
+The full workflow (PR, tag after merge, GitHub release, Play text) is automated by the `release` skill (`/release`). The steps below are the changelog-specific part.
 1. Choose the version by SemVer: breaking/removed feature or data reset = major, new feature = minor, fixes only = patch.
 2. Rename `[Unreleased]` content into a new `## [x.y.z] - YYYY-MM-DD` section and add a fresh empty `## [Unreleased]` above it.
 3. Bump `versionName` **and increase `versionCode`** in `app/build.gradle.kts` (the Play Store, and the in-app update prompt, rely on `versionCode` going up on every upload).
