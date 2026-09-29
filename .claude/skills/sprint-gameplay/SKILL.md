@@ -28,7 +28,7 @@ Reorder the stations of a tram line by drag & drop, press CHECK ORDER, gain time
 
 ## Stages and puzzle types
 Stage by level: 1-5 -> 1, 6-10 -> 2, 11-15 -> 3, 16-20 -> 4, 21+ -> 5.
-- Tiles: stage 1 = 3-4, stage 2 = 5, stage 3 = 6, stage 4 = 6-7, stage 5 = 7 growing to a cap of 10.
+- Tiles: stage 1 = 3-4, stage 2 = 5, stage 3 = 6, stage 4 = 6-7, stage 5 = 7 growing to a cap of 8 (`SprintRules.MAX_TILES`, so the list fits on one screen without scrolling; Classify is also 7-8 at most).
 - **Reorder**: stations of one line in order; direction shown as "line -> terminus" chips ("first station on top").
 - **Classify** (from stage 3): sort stations into 3 columns (line A / shared hub / line B), then each column is ordered by its own line's direction; hubs follow line 1. The generator never serves an already-solved puzzle.
 - **Speed burst** (from stage 2): 3 tiles, limit 8 s (stages 1-2), 7 s (3), 6.5 s (4), 6 s (5).

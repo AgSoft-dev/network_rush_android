@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.triviamap.domain.sprint.Side
 import com.triviamap.util.ClassifyLayout
+import com.triviamap.util.TileSizing
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.CornerRadius
@@ -385,6 +386,8 @@ private fun DirectionHints(directions: List<Direction>, isForward: Boolean) {
     }
 }
 
+private const val LIST_BOTTOM_PADDING_DP = 8f
+
 @Composable
 private fun TileList(
     tiles: List<Station>,
@@ -450,6 +453,9 @@ private fun TileList(
         val edgeMarginPx = with(density) { ClassifyLayout.DEFAULT_EDGE_MARGIN_DP.dp.toPx() }
         val shiftPx = ClassifyLayout.shiftPx(listWidthPx, tileFraction, edgeMarginPx)
         val handleZonePx = with(density) { 80.dp.toPx() }
+        // Tiles shrink (64 -> 48 dp) so the whole puzzle fits without scrolling; scroll is a last resort
+        val sizing = TileSizing.layout(maxHeight.value - LIST_BOTTOM_PADDING_DP, order.size)
+        val compactText = sizing.tileDp < 58f
 
         fun sideForOffset(x: Float): Int = when {
             x < -shiftPx / 2f -> Side.LINE_1
@@ -529,9 +535,10 @@ private fun TileList(
         LazyColumn(
             state = listState,
             // A drag must never scroll the list underneath
-            userScrollEnabled = draggedStationId == null,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(bottom = 100.dp),
+            userScrollEnabled = sizing.scrolls && draggedStationId == null,
+            verticalArrangement = Arrangement.spacedBy(sizing.gapDp.dp),
+            // Room for the plate edge drawn under the last tile
+            contentPadding = PaddingValues(bottom = LIST_BOTTOM_PADDING_DP.dp),
             modifier = Modifier.fillMaxSize().pointerInput(Unit) {
                 // Runs in the Initial pass, i.e. before the list's own scroll gesture:
                 //  - touch on the drag handle (end of the tile, start in left-handed mode): drag starts immediately
@@ -654,12 +661,12 @@ private fun TileList(
                                 contentDescription = null, tint = Ink.copy(alpha = 0.15f), modifier = Modifier.size(20.dp)
                             )
                         }
-                        Row(modifier = Modifier.heightIn(min = 64.dp).padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Row(modifier = Modifier.height(sizing.tileDp.dp).padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                             if (leftHanded) handle() else direction()
                             Spacer(Modifier.width(12.dp))
                             Text(
                                 text = station.name, modifier = Modifier.weight(1f),
-                                fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, color = Ink,
+                                fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = if (compactText) 16.sp else 18.sp, color = Ink,
                                 maxLines = 1, overflow = TextOverflow.Ellipsis
                             )
                             if (leftHanded) direction() else handle()
@@ -673,7 +680,7 @@ private fun TileList(
 
 @Composable
 private fun SubmitSection(onSubmit: () -> Unit) {
-    Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(24.dp)) {
+    Box(modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 24.dp, vertical = 12.dp)) {
         Button(
             onClick = onSubmit,
             modifier = Modifier.fillMaxWidth().height(56.dp),
