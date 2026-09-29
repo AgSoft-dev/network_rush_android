@@ -7,13 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-09-29
+
 ### Added
-- In-app update prompt: a banner on the home screen when a newer version is on Google Play (flexible update, background download, then "restart"), dismissible once per version. Only appears for builds installed from Google Play.
-- Changelog (this file) and a `changelog` skill describing how to maintain it.
+- In-app update prompt: a banner on the home screen when a newer version is on Google Play (background download, then "restart"), dismissible once per version. Only appears for builds installed from Google Play.
 
-## [1.0.0] - Unreleased
+### Changed
+- The Sprint tile list fits on screen instead of scrolling.
 
-First public release, not yet published on Google Play (`versionCode` 1).
+### Fixed
+- Crash on rapid back taps.
+- CLASSIFY drag getting stuck at the screen edge, which blocked horizontal moves.
+
+## [1.0.0] - 2026-09-21
+
+First release (`versionCode` 1).
 
 ### Added
 - Station Sprint: reorder or classify tram stations against the clock, with combo scoring, skips, spaced repetition and rising difficulty.
@@ -27,11 +35,10 @@ First public release, not yet published on Google Play (`versionCode` 1).
 
 ### Changed
 - Targets API 36: system-bar insets, predictive back, centred UI on wide windows.
-- The Sprint tile list fits on screen instead of scrolling.
 
 ### Fixed
-- Crash on rapid back taps.
-- CLASSIFY drag getting stuck at the screen edge, which blocked horizontal moves.
 - Data-loading race at start-up that could leave the loading screen forever.
 
-[Unreleased]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/AgSoft-dev/network_rush_android/releases/tag/v1.0.0
