@@ -1,6 +1,8 @@
 package com.triviamap.presentation.common
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.Lifecycle
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -31,6 +33,15 @@ sealed class Route(val path: String) {
     object Settings       : Route("settings")
 }
 
+/**
+ * Pops only from a settled screen. `popBackStack()` removes the entry at once, so rapid taps on a
+ * back button would otherwise pop Home too (blank screen, then an NPE in NavController on the next pop).
+ */
+private fun NavController.safePopBackStack() {
+    val entry = currentBackStackEntry ?: return
+    if (entry.lifecycle.currentState == Lifecycle.State.RESUMED && previousBackStackEntry != null) popBackStack()
+}
+
 @Composable
 fun TriviaMapNavGraph(navController: NavHostController) {
     NavHost(navController = navController, startDestination = Route.Home.path) {
@@ -39,16 +50,16 @@ fun TriviaMapNavGraph(navController: NavHostController) {
             HomeScreen(
                 onPlay = { mode, difficulty ->
                     when (mode) {
-                        GameMode.TRACE_NETWORK -> navController.navigate(Route.Gameplay.build(difficulty))
-                        GameMode.STATION_SPRINT -> navController.navigate(Route.Sprint.build(difficulty))
-                        GameMode.DAILY_SPRINT -> navController.navigate(Route.Sprint.build(Difficulty.MEDIUM, daily = true))
+                        GameMode.TRACE_NETWORK -> navController.navigate(Route.Gameplay.build(difficulty)) { launchSingleTop = true }
+                        GameMode.STATION_SPRINT -> navController.navigate(Route.Sprint.build(difficulty)) { launchSingleTop = true }
+                        GameMode.DAILY_SPRINT -> navController.navigate(Route.Sprint.build(Difficulty.MEDIUM, daily = true)) { launchSingleTop = true }
                     }
                 },
                 onDevSprint = { difficulty, level, force ->
-                    navController.navigate(Route.Sprint.build(difficulty, startLevel = level, force = force))
+                    navController.navigate(Route.Sprint.build(difficulty, startLevel = level, force = force)) { launchSingleTop = true }
                 },
-                onStats = { navController.navigate(Route.Stats.path) },
-                onSettings = { navController.navigate(Route.Settings.path) }
+                onStats = { navController.navigate(Route.Stats.path) { launchSingleTop = true } },
+                onSettings = { navController.navigate(Route.Settings.path) { launchSingleTop = true } }
             )
         }
 
@@ -64,7 +75,7 @@ fun TriviaMapNavGraph(navController: NavHostController) {
                         popUpTo(Route.Home.path)
                     }
                 },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.safePopBackStack() }
             )
         }
 
@@ -85,7 +96,7 @@ fun TriviaMapNavGraph(navController: NavHostController) {
                         popUpTo(Route.Home.path)
                     }
                 },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.safePopBackStack() }
             )
         }
 
@@ -116,11 +127,11 @@ fun TriviaMapNavGraph(navController: NavHostController) {
         }
 
         composable(Route.Stats.path) {
-            StatsScreen(onBack = { navController.popBackStack() })
+            StatsScreen(onBack = { navController.safePopBackStack() })
         }
 
         composable(Route.Settings.path) {
-            SettingsScreen(onBack = { navController.popBackStack() })
+            SettingsScreen(onBack = { navController.safePopBackStack() })
         }
     }
 }

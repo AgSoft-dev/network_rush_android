@@ -78,6 +78,7 @@ Constats principaux :
   - ✅ `allowBackup="false"`.
 
 ---
+- [x] **P0 — Crash au retour rapide (Daily/Sprint)** : appuis répétés sur ← appelaient `popBackStack()` plusieurs fois, dépilant Home (écran vide, puis NPE `currentDestination!!` dans NavController). ✅ `safePopBackStack()` (pop seulement depuis un écran RESUMED) + `launchSingleTop` sur les navigations depuis Home (`NavGraph.kt`).
 
 ## 2. Dette technique / architecture
 
