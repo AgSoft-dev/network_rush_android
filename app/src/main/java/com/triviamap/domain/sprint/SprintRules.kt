@@ -15,6 +15,9 @@ object SprintRules {
     const val SKIP_PENALTY_MS = 4_000L
     const val MAX_SKIPS = 3
 
+    /** Largest puzzle: keeps the tile list on one screen (no scrolling) with tiles >= 48 dp. */
+    const val MAX_TILES = 8
+
     /** Daily challenge: fixed number of questions, one attempt each, difficulty ramps up question by question. */
     const val DAILY_QUESTIONS = 8
     private const val DAILY_LEVEL_STEP = 3
@@ -55,13 +58,13 @@ object SprintRules {
         return (base * (0.5 + 0.5 * misplacedFraction.coerceIn(0f, 1f))).toLong()
     }
 
-    /** How many tiles a level should use (stage 5 keeps growing up to 10). */
+    /** How many tiles a level should use (stage 5 keeps growing up to [MAX_TILES]). */
     fun tileCount(level: Int, random: kotlin.random.Random): Int = when (stage(level)) {
         1 -> random.nextInt(3, 5)
         2 -> 5
         3 -> 6
         4 -> random.nextInt(6, 8)
-        else -> min(10, 7 + (level - 21) / 6 + random.nextInt(0, 2))
+        else -> min(MAX_TILES, 7 + (level - 21) / 6 + random.nextInt(0, 2))
     }
 
     data class Reward(val timeGainMs: Long, val points: Int)

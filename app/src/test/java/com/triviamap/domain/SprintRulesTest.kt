@@ -61,10 +61,10 @@ class SprintRulesTest {
         assertTrue(SprintRules.burstLimitMs(12) > SprintRules.burstLimitMs(30))
     }
 
-    @Test fun tileCountKeepsGrowingInStageFiveUpToTen() {
+    @Test fun tileCountKeepsGrowingInStageFiveUpToMaxTiles() {
         val r = Random(1)
-        assertTrue((1..200).all { SprintRules.tileCount(it, r) in 3..10 })
-        assertEquals(10, SprintRules.tileCount(500, r))
-        assertTrue(SprintRules.tileCount(21, Random(1)) <= 8)
+        assertTrue((1..200).all { SprintRules.tileCount(it, r) in 3..SprintRules.MAX_TILES })
+        assertEquals(SprintRules.MAX_TILES, SprintRules.tileCount(500, r))
+        assertTrue(SprintRules.tileCount(21, Random(1)) in 7..SprintRules.MAX_TILES)
     }
 }

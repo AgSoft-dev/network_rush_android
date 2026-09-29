@@ -33,7 +33,7 @@ Line colours are kept as is for instant recognition (A red #E10D19, B cyan #009E
 
 ## Components and recipes
 - **Line pill**: `LinePill(letter, Color(line.color), size)`. Round, letter in `onLineColor()` (ink or white, whichever contrasts best). Use it everywhere a line is named (headers, direction hints, mastery rows).
-- **Plate** (tile / hero / card on dark): `RoundedCornerShape(18-26.dp)`, `Plate` background, `Ink` text, optional `PlateEdge` 4 dp offset behind (see `drawBehind` in `SprintScreen.kt`). Min height 64 dp for draggable tiles, handle = `Ink` at 45% alpha.
+- **Plate** (tile / hero / card on dark): `RoundedCornerShape(18-26.dp)`, `Plate` background, `Ink` text, optional `PlateEdge` 4 dp offset behind (see `drawBehind` in `SprintScreen.kt`). Draggable tiles are 64 dp high and shrink down to 48 dp at most so the whole puzzle fits without scrolling (`util/TileSizing.kt`; name 16 sp when compact, scroll only as a fallback on tiny screens), handle = `Ink` at 45% alpha.
 - **Dragging tile**: keep plate white, add a 3 dp `Sun` outline, rotate about -2 degrees, elevation. Checked tiles: 3 dp `Success`/`Error` border.
 - **Primary CTA**: `Sun` background, `Ink` text, radius 18 dp, `DisplayFont` ExtraBold 18-24 sp, no elevation. One per screen region; secondary actions are `Surface` panels or outlined buttons in `OnSurface`.
 - **Dark panel**: `Surface` + 2 dp `Border`, radius 18 dp, white text (Settings rows).
@@ -46,7 +46,7 @@ Line colours are kept as is for instant recognition (A red #E10D19, B cyan #009E
 ## Rules
 1. Sun yellow is for **the** action, combo and timer. Do not use it as decoration, and do not put white text on it (ink only).
 2. Text on white/cream is always `Ink`/`InkMed`; text on navy is `OnSurface`/`OnSurfaceMed`. Keep WCAG AA (4.5:1) for body text.
-3. Big touch targets (tiles >= 64 dp, buttons >= 52 dp), one-handed and left-handed friendly (the drag handle side follows the left-handed setting).
+3. Big touch targets (tiles 64 dp, never below 48 dp when shrunk to fit; buttons >= 52 dp), one-handed and left-handed friendly (the drag handle side follows the left-handed setting).
 4. Gameplay screens stay uncluttered: no ads, no decorative motion competing with the timer.
 5. Copy is English in the app for now, short, imperative and lightly cheeky.
 6. Do not add new colours or fonts without adding a token in `Theme.kt` (and updating this file).
