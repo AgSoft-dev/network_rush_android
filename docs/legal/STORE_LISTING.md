@@ -85,3 +85,22 @@ Unabhängige App, nicht mit der CTS oder der Eurométropole de Strasbourg verbun
 - ≥ 2 phone screenshots (Home, Sprint Reorder, Sprint Classify, Results, Progress); avoid any logo of the CTS.
 - Category: Games > Trivia (or Puzzle). Tags: quiz, puzzle, transport.
 - Contact email, website (optional), privacy policy URL.
+
+## What's new: 1.0.1 (max 500 per language)
+### EN
+• The app now tells you when a new version is available on Google Play.
+• The Sprint mode list now fits on screen.
+• Fixed a crash when tapping back quickly.
+• Fixed a drag that could get stuck at the screen edge in "sort between two lines" puzzles.
+
+### FR
+• L'appli te prévient maintenant quand une nouvelle version est disponible sur Google Play.
+• La liste des modes Sprint tient désormais à l'écran.
+• Correction d'un plantage en appuyant vite sur retour.
+• Correction d'un glissement qui pouvait rester coincé au bord de l'écran dans les puzzles « trier entre deux lignes ».
+
+### DE
+• Die App meldet dir jetzt, wenn eine neue Version im Google Play Store verfügbar ist.
+• Die Sprint-Liste passt jetzt auf den Bildschirm.
+• Absturz beim schnellen Zurücktippen behoben.
+• Ziehen am Bildschirmrand blieb in den Rätseln „Zwischen zwei Linien sortieren“ manchmal hängen – behoben.
