@@ -75,8 +75,8 @@ Constats principaux :
 - [x] **P3 — Release** : `proguard-rules.pro` référencé mais **absent** → le build release (`isMinifyEnabled = true`) échouera / Gson (`GeoPointDto`, `Array<GeoPointDto>`) sera cassé par R8 sans règles keep. Prévoir règles ou migrer vers `kotlinx.serialization`.
   - ✅ `proguard-rules.pro` créé (keep `GeoPointDto` pour Gson) ; `assembleDebug` et `minifyReleaseWithR8` passent.
 - [x] **P3 — `allowBackup="true"`** sans `dataExtractionRules`/`fullBackupContent` (Android 12+ warning) ; scores + badges seraient restaurés sans cohérence avec la DB.
-- [x] **P0 — Crash au retour rapide (Daily/Sprint)** : appuis répétés sur ← appelaient `popBackStack()` plusieurs fois, dépilant Home (écran vide, puis NPE `currentDestination!!` dans NavController). ✅ `safePopBackStack()` (pop seulement depuis un écran RESUMED) + `launchSingleTop` sur les navigations depuis Home (`NavGraph.kt`).
   - ✅ `allowBackup="false"`.
+- [x] **P0 — Crash au retour rapide (Daily/Sprint)** : appuis répétés sur ← appelaient `popBackStack()` plusieurs fois, dépilant Home (écran vide, puis NPE `currentDestination!!` dans NavController). ✅ `safePopBackStack()` (pop seulement depuis un écran RESUMED) + `launchSingleTop` sur les navigations depuis Home (`NavGraph.kt`).
 
 ---
 
