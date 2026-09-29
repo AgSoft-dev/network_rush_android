@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
@@ -27,15 +28,18 @@ data class HomeUiState(
     /** First daily-challenge result of today, if the player already played it. */
     val dailyToday: GameResult? = null,
     val isSupporter: Boolean = false,
-    val showBanner: Boolean = false
+    val showBanner: Boolean = false,
+    /** Non-null while the Play update banner should be shown. */
+    val update: com.triviamap.domain.update.UpdateState? = null
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    prefs: UserPreferencesRepository,
+    private val prefs: UserPreferencesRepository,
     results: GameResultRepository,
     ads: com.triviamap.domain.monetization.AdsController,
+    private val updates: com.triviamap.domain.update.AppUpdateChecker,
     clock: Clock
 ) : ViewModel() {
 
@@ -58,10 +62,24 @@ class HomeViewModel @Inject constructor(
         HomeUiState(Progression.levelFor(xp), liveStreak, day, daily)
     }
 
-    val state = combine(progress, prefs.isSupporter, ads.canRequestAds) { ui, supporter, canAds ->
+    private val updateBanner = combine(updates.state, prefs.dismissedUpdateVersion) { state, dismissed ->
+        state.takeIf { com.triviamap.domain.update.UpdatePolicy.shouldShow(it, dismissed) }
+    }
+
+    val state = combine(progress, prefs.isSupporter, ads.canRequestAds, updateBanner) { ui, supporter, canAds, update ->
         ui.copy(
             isSupporter = supporter,
-            showBanner = com.triviamap.domain.monetization.MonetizationPolicy.shouldShowBanner(supporter, canAds)
+            showBanner = com.triviamap.domain.monetization.MonetizationPolicy.shouldShowBanner(supporter, canAds),
+            update = update
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
+
+    fun startUpdate(activity: android.app.Activity) = updates.startUpdate(activity)
+
+    fun installUpdate() = updates.install()
+
+    fun dismissUpdate() {
+        val available = updates.state.value as? com.triviamap.domain.update.UpdateState.Available ?: return
+        viewModelScope.launch { prefs.setDismissedUpdateVersion(available.versionCode) }
+    }
 }

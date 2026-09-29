@@ -28,6 +28,7 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var tramLineRepository: TramLineRepository
     @Inject lateinit var adsController: com.triviamap.domain.monetization.AdsController
     @Inject lateinit var supportRepository: com.triviamap.domain.monetization.SupportRepository
+    @Inject lateinit var appUpdateChecker: com.triviamap.domain.update.AppUpdateChecker
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,5 +54,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Also picks up an update downloaded in the background while the app was away
+        appUpdateChecker.check()
     }
 }

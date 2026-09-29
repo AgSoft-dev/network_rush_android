@@ -286,6 +286,9 @@ Principe retenu : **non intrusif**. Jamais de pub pendant une partie (le chrono 
 - [x] **`applicationId`** = `com.agsoft.networkrush` (irréversible après publication ; le package Kotlin reste `com.triviamap`).
 - [ ] Contraste à vérifier sur tuiles teintées (Classify) avec les couleurs de ligne claires (F, G).
 
+- [x] **P2 — Message de mise à jour Play Store** (2026-09-29) : Play In-App Updates (flux flexible), bannière sur l'accueil (`AppUpdateChecker`, `PlayAppUpdateChecker`, `UpdatePolicy`). Ne fonctionne que pour une build installée depuis Play : à valider sur la piste de test interne (v1 → v2, `versionCode` croissant). Reste : test instrumenté avec `FakeAppUpdateManager`.
+- [x] **P2 — CHANGELOG.md** (Keep a Changelog 1.1.0) + skill `.claude/skills/changelog` (2026-09-29).
+
 ## Checklist avant mise en production (2026-09-21)
 
 **Bloquants**

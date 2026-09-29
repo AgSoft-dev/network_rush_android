@@ -16,8 +16,8 @@ android {
         applicationId = "com.agsoft.networkrush"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // AdMob: Google's public TEST ids. Release builds use the real ids from ~/.gradle/gradle.properties (or -P):
@@ -135,6 +135,8 @@ dependencies {
 
     implementation(libs.play.services.ads)
     implementation(libs.billing.ktx)
+    implementation(libs.play.app.update)
+    implementation(libs.play.app.update.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

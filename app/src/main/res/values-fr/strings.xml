@@ -122,4 +122,10 @@
     <string name="results_correct">RÉUSSIES</string>
     <string name="results_time">TEMPS</string>
     <string name="daily_question">DÉFI · QUESTION %1$d/%2$d</string>
+    <string name="update_available">Une nouvelle version est disponible</string>
+    <string name="update_downloading">Téléchargement de la mise à jour…</string>
+    <string name="update_ready">Mise à jour prête</string>
+    <string name="update_action">METTRE À JOUR</string>
+    <string name="update_later">PLUS TARD</string>
+    <string name="update_restart">REDÉMARRER</string>
 </resources>

@@ -31,6 +31,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         val HAPTICS = booleanPreferencesKey("haptics_enabled")
         val SUPPORTER = booleanPreferencesKey("supporter")
         val XP = intPreferencesKey("xp")
+        val DISMISSED_UPDATE = intPreferencesKey("dismissed_update_version")
     }
 
     override val dailyStreak: Flow<Int> = context.dataStore.data.map { it[Keys.DAILY_STREAK] ?: 0 }
@@ -48,6 +49,12 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     }
 
     override val hapticsEnabled: Flow<Boolean> = context.dataStore.data.map { it[Keys.HAPTICS] ?: true }
+
+    override val dismissedUpdateVersion: Flow<Int> = context.dataStore.data.map { it[Keys.DISMISSED_UPDATE] ?: 0 }
+
+    override suspend fun setDismissedUpdateVersion(versionCode: Int) {
+        context.dataStore.edit { it[Keys.DISMISSED_UPDATE] = versionCode }
+    }
 
     override val xp: Flow<Int> = context.dataStore.data.map { it[Keys.XP] ?: 0 }
 

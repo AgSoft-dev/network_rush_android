@@ -62,6 +62,10 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindAppUpdateChecker(impl: com.triviamap.data.update.PlayAppUpdateChecker): com.triviamap.domain.update.AppUpdateChecker
+
+    @Binds
+    @Singleton
     abstract fun bindAdsController(impl: com.triviamap.data.monetization.AdsControllerImpl): com.triviamap.domain.monetization.AdsController
 }
 

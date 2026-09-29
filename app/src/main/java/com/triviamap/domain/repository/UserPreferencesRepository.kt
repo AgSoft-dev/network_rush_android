@@ -15,11 +15,14 @@ interface UserPreferencesRepository {
     val xp: Flow<Int>
     /** True once the player has tipped at least once (hides the home banner). */
     val isSupporter: Flow<Boolean>
-    
+    /** versionCode of the Play update the player last dismissed (0 = none). */
+    val dismissedUpdateVersion: Flow<Int>
+
     suspend fun updateStreak()
     suspend fun earnBadge(badgeId: String)
     suspend fun setLeftHanded(enabled: Boolean)
     suspend fun setHapticsEnabled(enabled: Boolean)
     suspend fun setSupporter(value: Boolean)
     suspend fun addXp(amount: Int)
+    suspend fun setDismissedUpdateVersion(versionCode: Int)
 }

@@ -184,6 +184,16 @@ fun HomeScreen(
         }
         }
 
+        ui.update?.let { update ->
+            UpdateBanner(
+                state = update,
+                onUpdate = { (context as? android.app.Activity)?.let(vm::startUpdate) },
+                onInstall = vm::installUpdate,
+                onDismiss = vm::dismissUpdate,
+                modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+        }
+
         Column(
             modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -381,6 +391,45 @@ private fun SprintHero(onGo: () -> Unit) {
                 Text(stringResource(R.string.go), fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, letterSpacing = 2.sp)
                 Spacer(Modifier.width(12.dp))
                 Icon(Icons.Default.ElectricBolt, null, modifier = Modifier.size(26.dp))
+            }
+        }
+    }
+}
+
+/** Play in-app update prompt: a white plate with a sun-yellow action, on top of the home screen. */
+@Composable
+private fun UpdateBanner(
+    state: com.triviamap.domain.update.UpdateState,
+    onUpdate: () -> Unit,
+    onInstall: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(shape = RoundedCornerShape(18.dp), color = Plate, modifier = modifier.fillMaxWidth()) {
+        Row(Modifier.padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            val text = when (state) {
+                is com.triviamap.domain.update.UpdateState.Available -> R.string.update_available
+                com.triviamap.domain.update.UpdateState.Downloading -> R.string.update_downloading
+                else -> R.string.update_ready
+            }
+            Text(stringResource(text), color = Ink, fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
+            when (state) {
+                is com.triviamap.domain.update.UpdateState.Available -> {
+                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.update_later), color = InkMed, fontSize = 12.sp) }
+                    Button(
+                        onClick = onUpdate,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Sun, contentColor = Ink),
+                        elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp)
+                    ) { Text(stringResource(R.string.update_action), fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp) }
+                }
+                com.triviamap.domain.update.UpdateState.ReadyToInstall -> Button(
+                    onClick = onInstall,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Sun, contentColor = Ink),
+                    elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp)
+                ) { Text(stringResource(R.string.update_restart), fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp) }
+                else -> Unit
             }
         }
     }

@@ -122,4 +122,10 @@
     <string name="results_correct">RICHTIG</string>
     <string name="results_time">ZEIT</string>
     <string name="daily_question">TAGESRÄTSEL · FRAGE %1$d/%2$d</string>
+    <string name="update_available">Eine neue Version ist verfügbar</string>
+    <string name="update_downloading">Update wird heruntergeladen…</string>
+    <string name="update_ready">Update bereit</string>
+    <string name="update_action">AKTUALISIEREN</string>
+    <string name="update_later">SPÄTER</string>
+    <string name="update_restart">NEUSTART</string>
 </resources>

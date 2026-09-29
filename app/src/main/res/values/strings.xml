@@ -123,4 +123,10 @@
     <string name="results_correct">CORRECT</string>
     <string name="results_time">TIME</string>
     <string name="daily_question">DAILY · QUESTION %1$d/%2$d</string>
+    <string name="update_available">A new version is available</string>
+    <string name="update_downloading">Downloading the update…</string>
+    <string name="update_ready">Update ready</string>
+    <string name="update_action">UPDATE</string>
+    <string name="update_later">LATER</string>
+    <string name="update_restart">RESTART</string>
 </resources>
