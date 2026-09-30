@@ -182,8 +182,8 @@ fun SprintScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Box(modifier = Modifier.fillMaxWidth()) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally, 
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.align(Alignment.Center)
                             ) {
                                 Text(
@@ -192,7 +192,7 @@ fun SprintScreen(
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Black
                                 )
-                                
+                                Spacer(Modifier.width(8.dp))
                                 Text(
                                     when (state.challengeType) {
                                         ChallengeType.REORDER -> stringResource(R.string.type_reorder)
@@ -215,7 +215,11 @@ fun SprintScreen(
                             }
                         }
                         
-                        DirectionHints(state.directions, state.isForward)
+                        if (state.challengeType == ChallengeType.CLASSIFY) {
+                            ClassifyHeader(state.line, state.line2, state.directions)
+                        } else {
+                            DirectionHints(state.directions, state.isForward)
+                        }
 
                         if (state.challengeType == ChallengeType.SPEED_BURST) {
                             Spacer(Modifier.height(8.dp))
@@ -227,20 +231,6 @@ fun SprintScreen(
                             )
                         }
 
-                        if (state.challengeType == ChallengeType.CLASSIFY) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 10.dp, bottom = 4.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                HeaderLineBadge(state.line?.id ?: "", state.line?.color ?: 0xFF000000L)
-                                Text(stringResource(R.string.hub), color = OnSurfaceMed, fontSize = 10.sp, fontWeight = FontWeight.Black)
-                                HeaderLineBadge(state.line2?.id ?: "", state.line2?.color ?: 0xFF000000L)
-                            }
-                        }
-                        
                         Spacer(Modifier.height(8.dp))
                         
                         Box(modifier = Modifier.weight(1f)) {
@@ -363,6 +353,49 @@ private fun MetroTimerBar(
 }
 
 /** "Line A → Illkirch": which way the player must order the stations. */
+/**
+ * Classify header: each line's badge with its direction right under it, "hub" in the middle.
+ * Replaces the stacked direction rows + badge row to leave more height to the tiles.
+ */
+@Composable
+private fun ClassifyHeader(line1: com.triviamap.domain.model.TramLine?, line2: com.triviamap.domain.model.TramLine?, directions: List<Direction>) {
+    @Composable
+    fun Column1(line: com.triviamap.domain.model.TramLine?, alignment: Alignment.Horizontal, modifier: Modifier) {
+        val direction = directions.firstOrNull { it.lineId == line?.id }
+        Column(horizontalAlignment = alignment, modifier = modifier) {
+            HeaderLineBadge(line?.id ?: "", line?.color ?: 0xFF000000L)
+            if (direction != null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.ArrowDownward, null, tint = Accent, modifier = Modifier.size(12.dp))
+                    Text(
+                        stringResource(R.string.toward, direction.toward),
+                        color = OnSurface, fontSize = 11.sp, fontWeight = FontWeight.Bold,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
+    ) {
+        Column1(line1, Alignment.Start, Modifier.weight(1f))
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(top = 4.dp, start = 8.dp, end = 8.dp).widthIn(max = 96.dp)
+        ) {
+            Text(stringResource(R.string.hub), color = OnSurfaceMed, fontSize = 10.sp, fontWeight = FontWeight.Black)
+            Text(
+                stringResource(R.string.first_on_top), color = OnSurfaceMed, fontSize = 9.sp,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center, lineHeight = 11.sp, maxLines = 2
+            )
+        }
+        Column1(line2, Alignment.End, Modifier.weight(1f))
+    }
+}
+
 @Composable
 private fun DirectionHints(directions: List<Direction>, isForward: Boolean) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 4.dp)) {
@@ -453,20 +486,22 @@ private fun TileList(
         val edgeMarginPx = with(density) { ClassifyLayout.DEFAULT_EDGE_MARGIN_DP.dp.toPx() }
         val shiftPx = ClassifyLayout.shiftPx(listWidthPx, tileFraction, edgeMarginPx)
         val handleZonePx = with(density) { 80.dp.toPx() }
+        // The gesture handler below is created once (pointerInput(Unit)): it must read the geometry
+        // through these, never the locals, or it keeps the values of the first puzzle (e.g. a Reorder
+        // with shiftPx = 0) and Classify columns can never be reached.
+        val currentTileWidthPx by rememberUpdatedState(tileWidthPx)
+        val currentShiftPx by rememberUpdatedState(shiftPx)
+        val currentHandleZonePx by rememberUpdatedState(handleZonePx)
         // Tiles shrink (64 -> 48 dp) so the whole puzzle fits without scrolling; scroll is a last resort
         val sizing = TileSizing.layout(maxHeight.value - LIST_BOTTOM_PADDING_DP, order.size)
         val compactText = sizing.tileDp < 58f
 
-        fun sideForOffset(x: Float): Int = when {
-            x < -shiftPx / 2f -> Side.LINE_1
-            x > shiftPx / 2f -> Side.LINE_2
-            else -> Side.HUB
-        }
+        fun sideForOffset(x: Float): Int = ClassifyLayout.sideForOffset(x, currentShiftPx)
 
         fun startDrag(stationId: String) {
             draggedStationId = stationId
             dragOffsetY = 0f
-            dragOffsetX = (sides[stationId] ?: 0) * shiftPx
+            dragOffsetX = (sides[stationId] ?: 0) * currentShiftPx
             buzz(HapticFeedbackType.LongPress)
         }
 
@@ -474,9 +509,9 @@ private fun TileList(
             val stationId = draggedStationId ?: return
             dragOffsetY += dy
             if (currentType == ChallengeType.CLASSIFY) {
-                val newSide = sideForOffset((dragOffsetX + dx).coerceIn(-shiftPx, shiftPx))
-                if (newSide != sideForOffset(dragOffsetX)) buzz(HapticFeedbackType.SegmentTick)
-                dragOffsetX = (dragOffsetX + dx).coerceIn(-shiftPx, shiftPx)
+                val newX = (dragOffsetX + dx).coerceIn(-currentShiftPx, currentShiftPx)
+                if (sideForOffset(newX) != sideForOffset(dragOffsetX)) buzz(HapticFeedbackType.SegmentTick)
+                dragOffsetX = newX
             }
 
             val fromIndex = order.indexOfFirst { it.id == stationId }
@@ -551,11 +586,11 @@ private fun TileList(
                     val station = hit?.let { order.getOrNull(it.index) } ?: return@awaitEachGesture
                     if (currentSuccess) return@awaitEachGesture
 
-                    val spanStart = (size.width - tileWidthPx) / 2f + (sides[station.id] ?: 0) * shiftPx
-                    val spanEnd = spanStart + tileWidthPx
+                    val spanStart = (size.width - currentTileWidthPx) / 2f + (sides[station.id] ?: 0) * currentShiftPx
+                    val spanEnd = spanStart + currentTileWidthPx
                     if (down.position.x < spanStart || down.position.x > spanEnd) return@awaitEachGesture
-                    val onHandle = if (currentLeftHanded) down.position.x <= spanStart + handleZonePx
-                                   else down.position.x >= spanEnd - handleZonePx
+                    val onHandle = if (currentLeftHanded) down.position.x <= spanStart + currentHandleZonePx
+                                   else down.position.x >= spanEnd - currentHandleZonePx
                     val armed = onHandle || withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
                         while (true) {
                             val change = awaitPointerEvent(PointerEventPass.Initial).changes

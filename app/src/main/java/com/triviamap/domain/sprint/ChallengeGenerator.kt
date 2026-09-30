@@ -113,7 +113,7 @@ class ChallengeGenerator @Inject constructor(private val random: Random) {
         val line2 = others.filter { o -> o.stations.any { s -> line1.stations.any { it.id == s.id } } }
             .randomOrNull(random) ?: others.random(random)
 
-        val totalCount = if (stage <= 4) random.nextInt(5, 7) else random.nextInt(7, 9)
+        val totalCount = if (stage <= 4) random.nextInt(5, 7) else SprintRules.MAX_TILES
         val maxHubs = (if (stage <= 4) 1 else 3) + (if (difficulty == Difficulty.HARD) 1 else 0)
 
         val ids1 = line1.stations.mapTo(HashSet()) { it.id }

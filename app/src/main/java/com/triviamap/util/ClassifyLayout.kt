@@ -25,4 +25,11 @@ object ClassifyLayout {
         val maxShiftPx = (listWidthPx - tileWidthPx) / 2f - edgeMarginPx
         return naiveShiftPx.coerceAtMost(maxShiftPx).coerceAtLeast(0f)
     }
+
+    /** Column (Side.LINE_1 = -1, HUB = 0, LINE_2 = 1) a tile dragged [offsetX] px from the centre is over. */
+    fun sideForOffset(offsetX: Float, shiftPx: Float): Int = when {
+        offsetX < -shiftPx / 2f -> -1
+        offsetX > shiftPx / 2f -> 1
+        else -> 0
+    }
 }
