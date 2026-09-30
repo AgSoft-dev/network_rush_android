@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Puzzles are at most 7 stations, and the Sprint header is more compact (stage and type on one line; in Sort & Reorder each line's direction sits under its badge), so the tile list never needs scrolling on most phones.
+
+### Fixed
+- Sort & Reorder: stations could not be dragged sideways between columns after earlier Reorder puzzles in a run.
+
 ## [1.0.1] - 2026-09-29
 
 ### Added

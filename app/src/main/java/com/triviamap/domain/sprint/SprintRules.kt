@@ -16,7 +16,7 @@ object SprintRules {
     const val MAX_SKIPS = 3
 
     /** Largest puzzle: keeps the tile list on one screen (no scrolling) with tiles >= 48 dp. */
-    const val MAX_TILES = 8
+    const val MAX_TILES = 7
 
     /** Daily challenge: fixed number of questions, one attempt each, difficulty ramps up question by question. */
     const val DAILY_QUESTIONS = 8
