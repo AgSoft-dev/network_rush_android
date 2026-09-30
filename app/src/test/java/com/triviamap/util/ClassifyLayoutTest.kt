@@ -1,5 +1,6 @@
 package com.triviamap.util
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -34,5 +35,20 @@ class ClassifyLayoutTest {
         val shift = ClassifyLayout.shiftPx(widthPx, tileFraction, edgeMarginPx)
         assertTrue(shift <= naiveShift)
         assertTrue(shift > 0f)
+    }
+
+    @Test
+    fun sideFollowsTheDragOffsetAroundHalfAShift() {
+        val shift = 126f
+        assertEquals(0, ClassifyLayout.sideForOffset(0f, shift))
+        assertEquals(0, ClassifyLayout.sideForOffset(shift / 2f - 1f, shift))
+        assertEquals(1, ClassifyLayout.sideForOffset(shift / 2f + 1f, shift))
+        assertEquals(-1, ClassifyLayout.sideForOffset(-shift / 2f - 1f, shift))
+    }
+
+    @Test
+    fun withoutShiftEveryTileStaysInTheHub() {
+        // What a stale Reorder geometry (shift = 0) used to do to Classify: no column reachable
+        assertEquals(0, ClassifyLayout.sideForOffset(0f, 0f))
     }
 }
