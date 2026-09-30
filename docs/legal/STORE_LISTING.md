@@ -86,21 +86,15 @@ Unabhängige App, nicht mit der CTS oder der Eurométropole de Strasbourg verbun
 - Category: Games > Trivia (or Puzzle). Tags: quiz, puzzle, transport.
 - Contact email, website (optional), privacy policy URL.
 
-## What's new: 1.0.1 (max 500 per language)
+## What's new: 1.0.2 (max 500 per language)
 ### EN
-• The app now tells you when a new version is available on Google Play.
-• The Sprint mode list now fits on screen.
-• Fixed a crash when tapping back quickly.
-• Fixed a drag that could get stuck at the screen edge in "sort between two lines" puzzles.
+• Puzzles now have at most 7 stations, and the Sprint header is more compact, so the list fits on most phones without scrolling.
+• Fixed stations that could not be dragged sideways between lines after a few reorder puzzles.
 
 ### FR
-• L'appli te prévient maintenant quand une nouvelle version est disponible sur Google Play.
-• La liste des modes Sprint tient désormais à l'écran.
-• Correction d'un plantage en appuyant vite sur retour.
-• Correction d'un glissement qui pouvait rester coincé au bord de l'écran dans les puzzles « trier entre deux lignes ».
+• Les puzzles comptent au maximum 7 stations et l'en-tête du Sprint est plus compact : la liste tient sur la plupart des téléphones sans défiler.
+• Correction des stations impossibles à glisser sur le côté entre deux lignes après quelques puzzles de tri.
 
 ### DE
-• Die App meldet dir jetzt, wenn eine neue Version im Google Play Store verfügbar ist.
-• Die Sprint-Liste passt jetzt auf den Bildschirm.
-• Absturz beim schnellen Zurücktippen behoben.
-• Ziehen am Bildschirmrand blieb in den Rätseln „Zwischen zwei Linien sortieren“ manchmal hängen – behoben.
+• Rätsel haben jetzt höchstens 7 Stationen und die Sprint-Kopfzeile ist kompakter, sodass die Liste auf den meisten Handys ohne Scrollen passt.
+• Stationen ließen sich nach einigen Sortier-Rätseln nicht mehr seitlich zwischen die Linien ziehen – behoben.
