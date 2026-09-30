@@ -5,7 +5,8 @@ Android game (Kotlin, Jetpack Compose, Hilt, Room) to learn the Strasbourg tram 
 ## Skills (read before working in these areas)
 - `.claude/skills/terminus-design/SKILL.md`: visual identity, tokens, components. Use for any UI/UX work or copy.
 - `.claude/skills/sprint-gameplay/SKILL.md`: frozen gameplay/balance contract. Use before touching rules, scoring, puzzle generation, progression or the daily challenge.
-- `.claude/skills/changelog/SKILL.md`: Keep a Changelog rules and release procedure. Use for any user-visible change and when releasing.
+- `.claude/skills/changelog/SKILL.md`: Keep a Changelog rules and release procedure. Use for any user-visible change.
+- `.claude/skills/release/SKILL.md`: `/release` workflow (versionCode, changelog, Play what's new, PR, tag, GitHub release). Use when shipping a version.
 
 ## Conventions
 - Game rules stay in `domain/` (pure Kotlin, unit-tested); ViewModels orchestrate; composables only render.
