@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-09-30
+
 ### Changed
 - Puzzles are at most 7 stations, and the Sprint header is more compact (stage and type on one line; in Sort & Reorder each line's direction sits under its badge), so the tile list never needs scrolling on most phones.
 
@@ -45,6 +47,7 @@ First release (`versionCode` 1).
 ### Fixed
 - Data-loading race at start-up that could leave the loading screen forever.
 
-[Unreleased]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/AgSoft-dev/network_rush_android/releases/tag/v1.0.0
