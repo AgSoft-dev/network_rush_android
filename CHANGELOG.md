@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Home: Progress and Settings are now icons in a top bar next to your level, making the screen more compact.
+
 ### Fixed
 - Game over: the HOME button could sit under the Android navigation buttons on some devices.
 - Game over: the "New record" badge no longer covers the score.
