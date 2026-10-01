@@ -73,8 +73,7 @@ fun ResultsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .statusBarsPadding()
-                .navigationBarsPadding()
+                .systemBarsSafePadding()
                 .padding(horizontal = 32.dp, vertical = 24.dp)
         ) {
             Text(
@@ -87,26 +86,28 @@ fun ResultsScreen(
             )
             Spacer(Modifier.height(8.dp))
 
-            Box(contentAlignment = Alignment.TopCenter) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = animatedScore.toString(),
-                        color = scoreColor(mode, score),
-                        fontFamily = DisplayFont,
-                        fontSize = 88.sp,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                    Text(
-                        text = if (mode == GameMode.TRACE_NETWORK) "/ 1000" else stringResource(R.string.results_total),
-                        color = OnSurfaceMed,
-                        fontSize = if (mode == GameMode.TRACE_NETWORK) 20.sp else 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = if (mode == GameMode.TRACE_NETWORK) 0.sp else 2.sp
-                    )
-                }
+            // Reserved slot: the badge appearing never overlaps the digits nor shifts the layout
+            Box(Modifier.height(28.dp), contentAlignment = Alignment.Center) {
                 if (summary?.isNewRecord == true && animatedScore == score) {
-                    NewRecordBadge(Modifier.padding(top = 10.dp))
+                    NewRecordBadge()
                 }
+            }
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = animatedScore.toString(),
+                    color = scoreColor(mode, score),
+                    fontFamily = DisplayFont,
+                    fontSize = 88.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Text(
+                    text = if (mode == GameMode.TRACE_NETWORK) "/ 1000" else stringResource(R.string.results_total),
+                    color = OnSurfaceMed,
+                    fontSize = if (mode == GameMode.TRACE_NETWORK) 20.sp else 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = if (mode == GameMode.TRACE_NETWORK) 0.sp else 2.sp
+                )
             }
 
             Spacer(Modifier.height(4.dp))
@@ -261,7 +262,7 @@ private fun NewRecordBadge(modifier: Modifier = Modifier) {
         Row(Modifier.padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Default.Star, null, tint = Ink, modifier = Modifier.size(14.dp))
             Spacer(Modifier.width(4.dp))
-            Text("NEW RECORD", color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp)
+            Text(stringResource(R.string.results_new_record), color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp)
         }
     }
 }

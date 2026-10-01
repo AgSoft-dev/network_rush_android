@@ -31,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.triviamap.BuildConfig
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.triviamap.domain.model.Difficulty
 import com.triviamap.domain.progress.ShareText
@@ -60,6 +62,9 @@ fun HomeScreen(
         AnimatedBackground()
 
         // Scrollable: on small screens the lower buttons must stay reachable (centered when there is room)
+        // Bottom overlay (version + banner) height, so the content never hides behind it
+        var bottomOverlayHeight by remember { mutableStateOf(0.dp) }
+        val density = LocalDensity.current
         BoxWithConstraints(Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -67,7 +72,7 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState())
                 .statusBarsPadding()
                 .heightIn(min = maxHeight)
-                .padding(start = 32.dp, end = 32.dp, top = 16.dp, bottom = if (ui.showBanner) 160.dp else 100.dp),
+                .padding(start = 32.dp, end = 32.dp, top = 16.dp, bottom = bottomOverlayHeight + 16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -195,7 +200,10 @@ fun HomeScreen(
         }
 
         Column(
-            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding(),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsSafePadding()
+                .onSizeChanged { bottomOverlayHeight = with(density) { it.height.toDp() } },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(

@@ -31,6 +31,7 @@
     <string name="results_share">TEILEN</string>
     <string name="results_play_again">NOCHMAL SPIELEN</string>
     <string name="results_home">START</string>
+    <string name="results_new_record">NEUER REKORD</string>
     <string name="xp_level_up">LEVEL-UP!</string>
     <string name="xp_to_next">%1$d / %2$d XP bis zum nächsten Level</string>
     <string name="label_try_again">NOCHMAL VERSUCHEN</string>

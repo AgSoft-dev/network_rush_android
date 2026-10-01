@@ -32,6 +32,7 @@
     <string name="results_share">SHARE</string>
     <string name="results_play_again">PLAY AGAIN</string>
     <string name="results_home">HOME</string>
+    <string name="results_new_record">NEW RECORD</string>
     <string name="xp_level_up">LEVEL UP!</string>
     <string name="xp_to_next">%1$d / %2$d XP to next level</string>
     <string name="label_try_again">TRY AGAIN</string>
