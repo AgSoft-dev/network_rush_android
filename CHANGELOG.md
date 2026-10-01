@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-10-01
+
 ### Changed
 - Home: Progress and Settings are now icons in a top bar next to your level, making the screen more compact.
 
@@ -55,7 +57,8 @@ First release (`versionCode` 1).
 ### Fixed
 - Data-loading race at start-up that could leave the loading screen forever.
 
-[Unreleased]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.3...HEAD
+[1.0.3]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/AgSoft-dev/network_rush_android/releases/tag/v1.0.0
