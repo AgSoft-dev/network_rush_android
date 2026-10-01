@@ -4,7 +4,12 @@ import com.triviamap.R
 import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -31,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.triviamap.BuildConfig
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.triviamap.domain.model.Difficulty
 import com.triviamap.domain.progress.ShareText
@@ -38,6 +45,56 @@ import com.triviamap.util.shareText
 import com.triviamap.domain.model.GameMode
 import com.triviamap.domain.sprint.SprintRules
 import com.triviamap.presentation.common.*
+
+private val TopBarHeight = 56.dp
+
+@Composable
+private fun HomeTopBar(
+    level: Int,
+    title: String,
+    streak: Int,
+    isSupporter: Boolean,
+    onStats: () -> Unit,
+    onSettings: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth().height(TopBarHeight).padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(shape = RoundedCornerShape(16.dp), color = Surface, border = BorderStroke(2.dp, Border)) {
+            Row(Modifier.padding(horizontal = 10.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (isSupporter) Text("\u2665 ", color = Accent, fontSize = 12.sp, fontWeight = FontWeight.Black)
+                Text(
+                    stringResource(R.string.home_level, level, title),
+                    color = OnSurfaceMed, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp,
+                    maxLines = 1
+                )
+            }
+        }
+        if (streak > 0) {
+            Spacer(Modifier.width(8.dp))
+            Icon(Icons.Default.Whatshot, null, tint = Accent, modifier = Modifier.size(16.dp))
+            Text("$streak", color = Accent, fontSize = 12.sp, fontWeight = FontWeight.Black)
+        }
+        Spacer(Modifier.weight(1f))
+        TopBarIcon(Icons.Default.BarChart, stringResource(R.string.home_progress), onStats)
+        Spacer(Modifier.width(8.dp))
+        TopBarIcon(Icons.Default.Settings, stringResource(R.string.home_settings), onSettings)
+    }
+}
+
+@Composable
+private fun TopBarIcon(icon: ImageVector, description: String, onClick: () -> Unit) {
+    Surface(
+        shape = CircleShape, color = Surface, border = BorderStroke(2.dp, Border),
+        modifier = Modifier.size(48.dp).clip(CircleShape).clickable(onClick = onClick)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(icon, contentDescription = description, tint = OnSurface, modifier = Modifier.size(24.dp))
+        }
+    }
+}
 
 @Composable
 fun HomeScreen(
@@ -60,6 +117,9 @@ fun HomeScreen(
         AnimatedBackground()
 
         // Scrollable: on small screens the lower buttons must stay reachable (centered when there is room)
+        // Bottom overlay (version + banner) height, so the content never hides behind it
+        var bottomOverlayHeight by remember { mutableStateOf(0.dp) }
+        val density = LocalDensity.current
         BoxWithConstraints(Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -67,7 +127,7 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState())
                 .statusBarsPadding()
                 .heightIn(min = maxHeight)
-                .padding(start = 32.dp, end = 32.dp, top = 16.dp, bottom = if (ui.showBanner) 160.dp else 100.dp),
+                .padding(start = 32.dp, end = 32.dp, top = TopBarHeight + 16.dp, bottom = bottomOverlayHeight + 16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -87,21 +147,6 @@ fun HomeScreen(
                 letterSpacing = 2.sp,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
-
-            Spacer(Modifier.height(16.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (ui.isSupporter) Text("\u2665 ", color = Accent, fontSize = 12.sp, fontWeight = FontWeight.Black)
-                Text(
-                    stringResource(R.string.home_level, ui.level.level, levelTitle(ui.level.titleIndex).uppercase()),
-                    color = OnSurfaceMed, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp
-                )
-                if (ui.streak > 0) {
-                    Spacer(Modifier.width(12.dp))
-                    Icon(Icons.Default.Whatshot, null, tint = Accent, modifier = Modifier.size(16.dp))
-                    Text("${ui.streak}", color = Accent, fontSize = 12.sp, fontWeight = FontWeight.Black)
-                }
-            }
 
             Spacer(Modifier.height(32.dp))
 
@@ -160,29 +205,18 @@ fun HomeScreen(
                 }
             }
 
-            Spacer(Modifier.height(32.dp))
-
-            OutlinedButton(
-                onClick = onStats,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(28.dp),
-                border = ButtonDefaults.outlinedBorder.copy(
-                    brush = Brush.horizontalGradient(listOf(LineB, LineA, LineD))
-                ),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = OnSurface)
-            ) {
-                Text(stringResource(R.string.home_progress), fontWeight = FontWeight.Medium, letterSpacing = 2.sp)
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            TextButton(onClick = onSettings) {
-                Text(stringResource(R.string.home_settings), color = OnSurfaceMed, fontWeight = FontWeight.Medium, letterSpacing = 2.sp)
-            }
         }
         }
+
+        HomeTopBar(
+            level = ui.level.level,
+            title = levelTitle(ui.level.titleIndex).uppercase(),
+            streak = ui.streak,
+            isSupporter = ui.isSupporter,
+            onStats = onStats,
+            onSettings = onSettings,
+            modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding()
+        )
 
         ui.update?.let { update ->
             UpdateBanner(
@@ -190,12 +224,15 @@ fun HomeScreen(
                 onUpdate = { (context as? android.app.Activity)?.let(vm::startUpdate) },
                 onInstall = vm::installUpdate,
                 onDismiss = vm::dismissUpdate,
-                modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(horizontal = 16.dp, vertical = 8.dp)
+                modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(start = 16.dp, end = 16.dp, top = TopBarHeight + 8.dp, bottom = 8.dp)
             )
         }
 
         Column(
-            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding(),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsSafePadding()
+                .onSizeChanged { bottomOverlayHeight = with(density) { it.height.toDp() } },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(

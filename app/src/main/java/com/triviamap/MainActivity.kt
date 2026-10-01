@@ -3,6 +3,7 @@ package com.triviamap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -12,7 +13,6 @@ import androidx.compose.ui.Alignment
 import com.triviamap.presentation.common.Background
 import com.triviamap.presentation.common.MaxContentWidth
 import androidx.compose.ui.Modifier
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.triviamap.domain.repository.TramLineRepository
@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // Edge-to-edge rendering
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge()
 
         // Pre-load tram data from assets (ViewModels also trigger load(); it is idempotent)
         lifecycleScope.launch { tramLineRepository.load() }

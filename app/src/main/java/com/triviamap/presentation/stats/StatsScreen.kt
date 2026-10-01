@@ -112,7 +112,7 @@ fun StatsScreen(
         }
     ) { padding ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding).navigationBarsPadding().padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxSize().padding(padding).navigationBarsSafePadding().padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {

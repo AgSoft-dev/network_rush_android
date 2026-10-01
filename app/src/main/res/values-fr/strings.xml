@@ -31,6 +31,7 @@
     <string name="results_share">PARTAGER</string>
     <string name="results_play_again">REJOUER</string>
     <string name="results_home">ACCUEIL</string>
+    <string name="results_new_record">NOUVEAU RECORD</string>
     <string name="xp_level_up">NIVEAU SUPÉRIEUR !</string>
     <string name="xp_to_next">%1$d / %2$d XP avant le niveau suivant</string>
     <string name="label_try_again">RÉESSAIE</string>
