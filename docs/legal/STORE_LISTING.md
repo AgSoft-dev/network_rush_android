@@ -86,6 +86,25 @@ Unabhängige App, nicht mit der CTS oder der Eurométropole de Strasbourg verbun
 - Category: Games > Trivia (or Puzzle). Tags: quiz, puzzle, transport.
 - Contact email, website (optional), privacy policy URL.
 
+## What's new: 1.0.3 (max 500 per language)
+### EN
+• Home is more compact: Progress and Settings are now icons next to your level.
+• Fixed the HOME button hidden under the Android navigation buttons on the game-over screen.
+• Fixed the "New record" badge covering your score.
+• Fixed the ad banner overlapping the buttons on small screens or with large text.
+
+### FR
+• L'accueil est plus compact : Progression et Réglages sont maintenant des icônes à côté de ton niveau.
+• Correction du bouton ACCUEIL masqué par les boutons de navigation Android sur l'écran de fin de partie.
+• Correction du badge « Nouveau record » qui cachait ton score.
+• Correction de la bannière de pub qui chevauchait les boutons sur petits écrans ou avec un texte agrandi.
+
+### DE
+• Der Startbildschirm ist kompakter: Fortschritt und Einstellungen sind jetzt Symbole neben deinem Level.
+• Die Schaltfläche START war am Spielende unter den Android-Navigationstasten verdeckt – behoben.
+• Das Abzeichen „Neuer Rekord“ verdeckte deinen Punktestand – behoben.
+• Das Werbebanner überlappte auf kleinen Displays oder bei großer Schrift die Schaltflächen – behoben.
+
 ## What's new: 1.0.2 (max 500 per language)
 ### EN
 • Puzzles now have at most 7 stations, and the Sprint header is more compact, so the list fits on most phones without scrolling.
