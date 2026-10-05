@@ -55,8 +55,7 @@
     <string name="stats_mode_daily">Défi du jour</string>
     <string name="stats_level">niveau %1$d</string>
     <string name="settings_title">Réglages</string>
-    <string name="left_title">Mode gaucher</string>
-    <string name="left_desc">Place les poignées de glissement sur le bord gauche des tuiles dans Station Sprint.</string>
+    <string name="drag_hint_hold">Appuyez longuement sur une station pour la déplacer</string>
     <string name="vib_title">Vibrations</string>
     <string name="vib_desc">Retour haptique pendant le glissement et sur les bonnes / mauvaises réponses.</string>
     <string name="privacy_choices">Choix de confidentialité (pubs)</string>

@@ -56,8 +56,7 @@
     <string name="stats_mode_daily">Daily Challenge</string>
     <string name="stats_level">level %1$d</string>
     <string name="settings_title">Settings</string>
-    <string name="left_title">Left-handed mode</string>
-    <string name="left_desc">Puts the drag handles on the left edge of the tiles in Station Sprint.</string>
+    <string name="drag_hint_hold">Press and hold a station to drag it</string>
     <string name="vib_title">Vibrations</string>
     <string name="vib_desc">Feedback when dragging tiles and on correct / wrong answers.</string>
     <string name="privacy_choices">Privacy choices (ads)</string>

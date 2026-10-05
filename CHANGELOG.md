@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Station Sprint: touch a tile anywhere to drag it, no need to aim for the handle. When the list is long enough to scroll (small screens, large text), press and hold a tile to drag it; a hint above the list says so.
+
+### Removed
+- The left-handed mode setting, no longer needed now that tiles can be dragged from anywhere.
+
 ### Fixed
 - Settings: the Legal links (Data source, Privacy policy, Terms) now wrap onto a second line on narrow screens or large text sizes instead of squashing "Terms" into a vertical column.
 

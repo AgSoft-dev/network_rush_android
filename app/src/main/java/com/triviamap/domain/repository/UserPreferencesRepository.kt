@@ -7,8 +7,6 @@ interface UserPreferencesRepository {
     /** Epoch day (device time zone) of the last played game, or -1. */
     val lastPlayedEpochDay: Flow<Long>
     val earnedBadges: Flow<Set<String>>
-    /** Drag handles on the left edge instead of the right. */
-    val leftHanded: Flow<Boolean>
     /** Vibrations on drag, success and failure. */
     val hapticsEnabled: Flow<Boolean>
     /** Accumulated experience points. */
@@ -20,7 +18,6 @@ interface UserPreferencesRepository {
 
     suspend fun updateStreak()
     suspend fun earnBadge(badgeId: String)
-    suspend fun setLeftHanded(enabled: Boolean)
     suspend fun setHapticsEnabled(enabled: Boolean)
     suspend fun setSupporter(value: Boolean)
     suspend fun addXp(amount: Int)

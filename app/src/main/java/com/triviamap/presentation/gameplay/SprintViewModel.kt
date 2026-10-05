@@ -79,7 +79,6 @@ data class SprintUiState(
     /** True when the bundled line data could not be loaded. */
     val loadFailed: Boolean = false,
     /** Settings */
-    val leftHanded: Boolean = false,
     val hapticsEnabled: Boolean = true,
 
     /** Stats for scoring improvements */
@@ -154,9 +153,6 @@ class SprintViewModel @Inject constructor(
     private var gameStartedAt = 0L
 
     init {
-        viewModelScope.launch {
-            userPrefs.leftHanded.collect { left -> _state.update { it.copy(leftHanded = left) } }
-        }
         viewModelScope.launch {
             userPrefs.hapticsEnabled.collect { on -> _state.update { it.copy(hapticsEnabled = on) } }
         }

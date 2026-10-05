@@ -53,18 +53,11 @@ class SettingsViewModel @Inject constructor(
     fun buy(activity: Activity, tier: SupportTier) = support.purchase(activity, tier)
     fun showPrivacyOptions(activity: Activity) = ads.showPrivacyOptions(activity)
 
-    val leftHanded = prefs.leftHanded
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-
     val haptics = prefs.hapticsEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
     fun setHaptics(enabled: Boolean) {
         viewModelScope.launch { prefs.setHapticsEnabled(enabled) }
-    }
-
-    fun setLeftHanded(enabled: Boolean) {
-        viewModelScope.launch { prefs.setLeftHanded(enabled) }
     }
 }
 
@@ -73,7 +66,6 @@ fun SettingsScreen(
     onBack: () -> Unit,
     vm: SettingsViewModel = hiltViewModel()
 ) {
-    val leftHanded by vm.leftHanded.collectAsState()
     val haptics by vm.haptics.collectAsState()
     val offers by vm.offers.collectAsState()
     val isSupporter by vm.isSupporter.collectAsState()
@@ -115,12 +107,6 @@ fun SettingsScreen(
             modifier = Modifier.fillMaxSize().padding(padding).navigationBarsSafePadding().verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            SettingRow(
-                title = stringResource(R.string.left_title),
-                description = stringResource(R.string.left_desc),
-                checked = leftHanded,
-                onChange = vm::setLeftHanded
-            )
             SettingRow(
                 title = stringResource(R.string.vib_title),
                 description = stringResource(R.string.vib_desc),

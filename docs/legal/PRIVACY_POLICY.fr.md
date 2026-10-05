@@ -8,7 +8,7 @@ Network Rush (« l'application ») est éditée par **AgSoftware**, adresse comm
 Pas de compte, aucune donnée personnelle envoyée à l'éditeur. Vos scores et votre progression restent sur votre téléphone. L'application affiche une bannière publicitaire sur l'écran d'accueil (via Google AdMob, après votre consentement lorsque la loi l'exige) et propose des pourboires facultatifs via Google Play.
 
 ## Données stockées uniquement sur votre appareil
-Scores, niveau, points d'expérience, badges, série de jours, statistiques par station, réglages (mode gaucher, vibrations) et un indicateur « supporter » sont enregistrés **localement**. Nous n'y avons pas accès. Désinstaller l'application les supprime.
+Scores, niveau, points d'expérience, badges, série de jours, statistiques par station, réglages (vibrations) et un indicateur « supporter » sont enregistrés **localement**. Nous n'y avons pas accès. Désinstaller l'application les supprime.
 
 ## Publicité (Google AdMob)
 L'écran d'accueil affiche une bannière diffusée par **Google AdMob** (Google Ireland Limited). Pour afficher et mesurer les publicités, Google peut collecter et traiter, sur votre appareil et ses serveurs, des données telles que l'identifiant publicitaire, l'adresse IP, des informations sur l'appareil et l'application, et les interactions avec les annonces. Les annonces peuvent être personnalisées ou non selon votre choix.

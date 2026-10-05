@@ -46,7 +46,7 @@ Line colours are kept as is for instant recognition (A red #E10D19, B cyan #009E
 ## Rules
 1. Sun yellow is for **the** action, combo and timer. Do not use it as decoration, and do not put white text on it (ink only).
 2. Text on white/cream is always `Ink`/`InkMed`; text on navy is `OnSurface`/`OnSurfaceMed`. Keep WCAG AA (4.5:1) for body text.
-3. Big touch targets (tiles 64 dp, never below 48 dp when shrunk to fit; buttons >= 52 dp), one-handed and left-handed friendly (the drag handle side follows the left-handed setting).
+3. Big touch targets (tiles 64 dp, never below 48 dp when shrunk to fit; buttons >= 52 dp), one-handed and left-handed friendly (the whole tile is the drag target; the handle icon is only a faint affordance).
 4. Gameplay screens stay uncluttered: no ads, no decorative motion competing with the timer.
 5. Copy is English in the app for now, short, imperative and lightly cheeky.
 6. Do not add new colours or fonts without adding a token in `Theme.kt` (and updating this file).
