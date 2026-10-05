@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The left-handed mode setting, no longer needed now that tiles can be dragged from anywhere.
 
 ### Fixed
+- Station Sprint: removed the per-tile arrows that could point the opposite way of the direction shown in the header.
 - Settings: the Legal links (Data source, Privacy policy, Terms) now wrap onto a second line on narrow screens or large text sizes instead of squashing "Terms" into a vertical column.
 
 ## [1.0.3] - 2026-10-01

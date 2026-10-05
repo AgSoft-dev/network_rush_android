@@ -218,7 +218,7 @@ fun SprintScreen(
                         if (state.challengeType == ChallengeType.CLASSIFY) {
                             ClassifyHeader(state.line, state.line2, state.directions)
                         } else {
-                            DirectionHints(state.directions, state.isForward)
+                            DirectionHints(state.directions)
                         }
 
                         if (state.challengeType == ChallengeType.SPEED_BURST) {
@@ -239,7 +239,6 @@ fun SprintScreen(
                                 challengeType = state.challengeType,
                                 line1 = state.line,
                                 line2 = state.line2,
-                                isForward = state.isForward,
                                 stationSides = state.stationSides,
                                 onReorder = vm::setTileOrder,
                                 onSideChanged = vm::setStationSide,
@@ -396,7 +395,7 @@ private fun ClassifyHeader(line1: com.triviamap.domain.model.TramLine?, line2: c
 }
 
 @Composable
-private fun DirectionHints(directions: List<Direction>, isForward: Boolean) {
+private fun DirectionHints(directions: List<Direction>) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 4.dp)) {
         directions.forEach { d ->
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 1.dp)) {
@@ -427,7 +426,6 @@ private fun TileList(
     challengeType: ChallengeType,
     line1: com.triviamap.domain.model.TramLine?,
     line2: com.triviamap.domain.model.TramLine?,
-    isForward: Boolean,
     stationSides: Map<String, Int>,
     onReorder: (List<Station>) -> Unit,
     onSideChanged: (String, Int) -> Unit,
@@ -687,15 +685,7 @@ private fun TileList(
                                 tint = Ink.copy(alpha = if (isSuccessState) 0f else 0.45f)
                             )
                         }
-                        val direction = @Composable {
-                            Icon(
-                                imageVector = if (isForward) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
-                                contentDescription = null, tint = Ink.copy(alpha = 0.15f), modifier = Modifier.size(20.dp)
-                            )
-                        }
                         Row(modifier = Modifier.height(sizing.tileDp.dp).padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            direction()
-                            Spacer(Modifier.width(12.dp))
                             Text(
                                 text = station.name, modifier = Modifier.weight(1f),
                                 fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = if (compactText) 16.sp else 18.sp, color = Ink,
