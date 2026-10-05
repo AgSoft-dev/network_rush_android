@@ -209,10 +209,10 @@ private fun LegalSection() {
                 stringResource(R.string.legal_unofficial),
                 color = OnSurfaceMed, fontSize = 12.sp
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = { open(dataUrl) }) { Text(stringResource(R.string.legal_data_source), color = Sun) }
-                if (privacyUrl.isNotBlank()) TextButton(onClick = { open(privacyUrl) }) { Text(stringResource(R.string.legal_privacy), color = Sun) }
-                if (termsUrl.isNotBlank()) TextButton(onClick = { open(termsUrl) }) { Text(stringResource(R.string.legal_terms), color = Sun) }
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = { open(dataUrl) }) { Text(stringResource(R.string.legal_data_source), color = Sun, maxLines = 1) }
+                if (privacyUrl.isNotBlank()) TextButton(onClick = { open(privacyUrl) }) { Text(stringResource(R.string.legal_privacy), color = Sun, maxLines = 1) }
+                if (termsUrl.isNotBlank()) TextButton(onClick = { open(termsUrl) }) { Text(stringResource(R.string.legal_terms), color = Sun, maxLines = 1) }
             }
         }
     }
