@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-05
+
 ### Changed
 - Station Sprint: touch a tile anywhere to drag it, no need to aim for the handle. When the list is long enough to scroll (small screens, large text), press and hold a tile to drag it; a hint above the list says so.
 
@@ -67,7 +69,8 @@ First release (`versionCode` 1).
 ### Fixed
 - Data-loading race at start-up that could leave the loading screen forever.
 
-[Unreleased]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.3...HEAD
+[Unreleased]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.3...v1.1.0
 [1.0.3]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.0...v1.0.1

@@ -86,6 +86,25 @@ Unabhängige App, nicht mit der CTS oder der Eurométropole de Strasbourg verbun
 - Category: Games > Trivia (or Puzzle). Tags: quiz, puzzle, transport.
 - Contact email, website (optional), privacy policy URL.
 
+## What's new: 1.1.0 (max 500 per language)
+### EN
+• Station Sprint: touch a tile anywhere to drag it, no need to aim for the handle. On long lists, press and hold to drag.
+• Removed the left-handed mode setting, no longer needed.
+• Fixed arrows that could point the opposite way of the direction in the header.
+• Fixed the Legal links being squashed on narrow screens or with large text.
+
+### FR
+• Station Sprint : touche une tuile n'importe où pour la glisser, plus besoin de viser la poignée. Sur les longues listes, maintiens appuyé pour glisser.
+• Suppression du mode gaucher, devenu inutile.
+• Correction des flèches qui pouvaient pointer dans le sens opposé à celui de l'en-tête.
+• Correction des liens légaux écrasés sur les écrans étroits ou avec un texte agrandi.
+
+### DE
+• Station Sprint: Berühre eine Kachel an beliebiger Stelle, um sie zu ziehen – du musst nicht mehr den Griff treffen. Bei langen Listen gedrückt halten, um zu ziehen.
+• Der Linkshändermodus wurde entfernt, da er nicht mehr nötig ist.
+• Pfeile, die entgegen der Richtung in der Kopfzeile zeigen konnten, wurden behoben.
+• Die rechtlichen Links wurden auf schmalen Displays oder bei großer Schrift zusammengedrückt – behoben.
+
 ## What's new: 1.0.3 (max 500 per language)
 ### EN
 • Home is more compact: Progress and Settings are now icons next to your level.
