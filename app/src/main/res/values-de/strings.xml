@@ -55,8 +55,7 @@
     <string name="stats_mode_daily">Tagesrätsel</string>
     <string name="stats_level">Level %1$d</string>
     <string name="settings_title">Einstellungen</string>
-    <string name="left_title">Linkshändermodus</string>
-    <string name="left_desc">Setzt die Ziehgriffe in Station Sprint an den linken Rand der Kacheln.</string>
+    <string name="drag_hint_hold">Station gedrückt halten, um sie zu ziehen</string>
     <string name="vib_title">Vibration</string>
     <string name="vib_desc">Rückmeldung beim Ziehen und bei richtigen / falschen Antworten.</string>
     <string name="privacy_choices">Datenschutzoptionen (Werbung)</string>

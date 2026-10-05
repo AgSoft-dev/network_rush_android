@@ -51,7 +51,7 @@ One attempt per day, exactly `SprintRules.DAILY_QUESTIONS` (8) questions, Medium
 - Badges (10): First ride, Hub expert (10 Classify in a run), Night rider (run between 22:00 and 04:00), On a roll (x10 combo), Terminus (level 21), Three in a row, Weekly commuter, Daily rider, Regular (200 stations placed), Line master. Ids and rules in `domain/progress/Badges.kt`.
 
 ## Input and feel constraints
-Drag is arbitrated on the pointer `Initial` pass so scrolling and dragging never fight; the drag handle sits on the right, or the left in left-handed mode (Settings). Haptics on drag start, column change, success, failure (Settings toggle). Don't reintroduce per-frame full-list recomposition or state commits during drag (commit to the ViewModel on release). The current line's stations must never be drawn on the background canvas (it leaks the answer).
+Drag is arbitrated on the pointer `Initial` pass so scrolling and dragging never fight; touching a tile anywhere drags it when the list fits on screen (the faint handle icon is decorative); when the list scrolls (tiny screen, large font) a long press arms the drag, a hint above the list says so, and a plain swipe scrolls. There is no left-handed setting. Haptics on drag start, column change, success, failure (Settings toggle). Don't reintroduce per-frame full-list recomposition or state commits during drag (commit to the ViewModel on release). The current line's stations must never be drawn on the background canvas (it leaks the answer).
 
 ## Changing the game: checklist
 1. Edit the constant/formula in the domain layer (never in a composable).

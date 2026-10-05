@@ -24,7 +24,7 @@ Les mêmes 8 puzzles pour tout le monde, une chance par question, un défi par j
 📈 PROGRESSION
 Niveaux, badges, série de jours, stations maîtrisées par ligne et stations que tu rates le plus : le jeu te fait revoir ce que tu connais mal.
 
-✋ Mode gaucher, vibrations, lignes aux couleurs officielles du réseau.
+✋ Vibrations, lignes aux couleurs officielles du réseau.
 
 Gratuit, avec une bannière discrète sur l'accueil (jamais pendant une partie). Des pourboires facultatifs permettent de soutenir le jeu et de retirer la bannière.
 
@@ -47,7 +47,7 @@ Same 8 puzzles for everyone, one try per question, one challenge a day. Share yo
 📈 PROGRESSION
 Levels, badges, day streak, mastery per line and the stations you miss most: the game brings back what you don't know yet.
 
-✋ Left-handed mode, vibrations, official network line colours.
+✋ Vibrations, official network line colours.
 
 Free, with a discreet banner on the home screen (never during a game). Optional tips support the game and remove the banner.
 
@@ -73,7 +73,7 @@ Dieselben 8 Rätsel für alle, ein Versuch pro Frage, ein Tagesrätsel pro Tag. 
 📈 FORTSCHRITT
 Level, Abzeichen, Serie, gemeisterte Haltestellen pro Linie und die am häufigsten verfehlten Haltestellen.
 
-✋ Linkshändermodus, Vibration, offizielle Linienfarben.
+✋ Vibration, offizielle Linienfarben.
 
 Kostenlos, mit einem dezenten Banner auf dem Startbildschirm (nie während eines Spiels). Freiwillige Trinkgelder unterstützen das Spiel und entfernen das Banner.
 

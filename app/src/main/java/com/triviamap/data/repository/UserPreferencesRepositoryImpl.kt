@@ -27,7 +27,6 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         val LAST_PLAYED_TIMESTAMP = longPreferencesKey("last_played_timestamp") // legacy
         val LAST_PLAYED_EPOCH_DAY = longPreferencesKey("last_played_epoch_day")
         val EARNED_BADGES = stringSetPreferencesKey("earned_badges")
-        val LEFT_HANDED = booleanPreferencesKey("left_handed")
         val HAPTICS = booleanPreferencesKey("haptics_enabled")
         val SUPPORTER = booleanPreferencesKey("supporter")
         val XP = intPreferencesKey("xp")
@@ -39,8 +38,6 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override val lastPlayedEpochDay: Flow<Long> = context.dataStore.data.map { it[Keys.LAST_PLAYED_EPOCH_DAY] ?: -1L }
     
     override val earnedBadges: Flow<Set<String>> = context.dataStore.data.map { it[Keys.EARNED_BADGES] ?: emptySet() }
-
-    override val leftHanded: Flow<Boolean> = context.dataStore.data.map { it[Keys.LEFT_HANDED] ?: false }
 
     override val isSupporter: Flow<Boolean> = context.dataStore.data.map { it[Keys.SUPPORTER] ?: false }
 
@@ -65,10 +62,6 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override suspend fun addXp(amount: Int) {
         if (amount <= 0) return
         context.dataStore.edit { it[Keys.XP] = (it[Keys.XP] ?: 0) + amount }
-    }
-
-    override suspend fun setLeftHanded(enabled: Boolean) {
-        context.dataStore.edit { it[Keys.LEFT_HANDED] = enabled }
     }
 
     override suspend fun updateStreak(): Unit = updateStreak(LocalDate.now(clock))

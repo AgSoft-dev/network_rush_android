@@ -218,7 +218,7 @@ fun SprintScreen(
                         if (state.challengeType == ChallengeType.CLASSIFY) {
                             ClassifyHeader(state.line, state.line2, state.directions)
                         } else {
-                            DirectionHints(state.directions, state.isForward)
+                            DirectionHints(state.directions)
                         }
 
                         if (state.challengeType == ChallengeType.SPEED_BURST) {
@@ -239,11 +239,9 @@ fun SprintScreen(
                                 challengeType = state.challengeType,
                                 line1 = state.line,
                                 line2 = state.line2,
-                                isForward = state.isForward,
                                 stationSides = state.stationSides,
                                 onReorder = vm::setTileOrder,
                                 onSideChanged = vm::setStationSide,
-                                leftHanded = state.leftHanded,
                                 hapticsEnabled = state.hapticsEnabled,
                                 misplacedIds = state.misplacedIds,
                                 isSuccessState = state.showFeedback && state.isCorrectFeedback
@@ -397,7 +395,7 @@ private fun ClassifyHeader(line1: com.triviamap.domain.model.TramLine?, line2: c
 }
 
 @Composable
-private fun DirectionHints(directions: List<Direction>, isForward: Boolean) {
+private fun DirectionHints(directions: List<Direction>) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 4.dp)) {
         directions.forEach { d ->
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 1.dp)) {
@@ -420,6 +418,7 @@ private fun DirectionHints(directions: List<Direction>, isForward: Boolean) {
 }
 
 private const val LIST_BOTTOM_PADDING_DP = 8f
+private const val HINT_HEIGHT_DP = 22f
 
 @Composable
 private fun TileList(
@@ -427,11 +426,9 @@ private fun TileList(
     challengeType: ChallengeType,
     line1: com.triviamap.domain.model.TramLine?,
     line2: com.triviamap.domain.model.TramLine?,
-    isForward: Boolean,
     stationSides: Map<String, Int>,
     onReorder: (List<Station>) -> Unit,
     onSideChanged: (String, Int) -> Unit,
-    leftHanded: Boolean,
     hapticsEnabled: Boolean,
     misplacedIds: Set<String>,
     isSuccessState: Boolean
@@ -456,7 +453,7 @@ private fun TileList(
     val currentOnSideChanged by rememberUpdatedState(onSideChanged)
     val currentType by rememberUpdatedState(challengeType)
     val currentSuccess by rememberUpdatedState(isSuccessState)
-    val currentLeftHanded by rememberUpdatedState(leftHanded)
+    // True when the list overflows and scrolls: a drag must then be armed by a long press
     val currentHaptics by rememberUpdatedState(hapticsEnabled)
 
     fun buzz(type: HapticFeedbackType) { if (currentHaptics) haptic.performHapticFeedback(type) }
@@ -485,15 +482,14 @@ private fun TileList(
         // flush against the screen edge, a horizontal drag there gets stolen by the system.
         val edgeMarginPx = with(density) { ClassifyLayout.DEFAULT_EDGE_MARGIN_DP.dp.toPx() }
         val shiftPx = ClassifyLayout.shiftPx(listWidthPx, tileFraction, edgeMarginPx)
-        val handleZonePx = with(density) { 80.dp.toPx() }
         // The gesture handler below is created once (pointerInput(Unit)): it must read the geometry
         // through these, never the locals, or it keeps the values of the first puzzle (e.g. a Reorder
         // with shiftPx = 0) and Classify columns can never be reached.
         val currentTileWidthPx by rememberUpdatedState(tileWidthPx)
         val currentShiftPx by rememberUpdatedState(shiftPx)
-        val currentHandleZonePx by rememberUpdatedState(handleZonePx)
         // Tiles shrink (64 -> 48 dp) so the whole puzzle fits without scrolling; scroll is a last resort
         val sizing = TileSizing.layout(maxHeight.value - LIST_BOTTOM_PADDING_DP, order.size)
+        val currentScrolls by rememberUpdatedState(sizing.scrolls)
         val compactText = sizing.tileDp < 58f
 
         fun sideForOffset(x: Float): Int = ClassifyLayout.sideForOffset(x, currentShiftPx)
@@ -573,12 +569,12 @@ private fun TileList(
             userScrollEnabled = sizing.scrolls && draggedStationId == null,
             verticalArrangement = Arrangement.spacedBy(sizing.gapDp.dp),
             // Room for the plate edge drawn under the last tile
-            contentPadding = PaddingValues(bottom = LIST_BOTTOM_PADDING_DP.dp),
+            // Room for the long-press hint above the first tile when the list scrolls
+            contentPadding = PaddingValues(top = if (sizing.scrolls) HINT_HEIGHT_DP.dp else 0.dp, bottom = LIST_BOTTOM_PADDING_DP.dp),
             modifier = Modifier.fillMaxSize().pointerInput(Unit) {
                 // Runs in the Initial pass, i.e. before the list's own scroll gesture:
-                //  - touch on the drag handle (end of the tile, start in left-handed mode): drag starts immediately
-                //  - long press anywhere on a tile: drag starts
-                //  - anything else falls through to normal scrolling
+                //  - the list fits (no scroll): touching a tile anywhere starts the drag immediately
+                //  - the list scrolls: a long press on a tile starts the drag, a plain swipe scrolls
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
                     val hit = listState.layoutInfo.visibleItemsInfo
@@ -589,9 +585,7 @@ private fun TileList(
                     val spanStart = (size.width - currentTileWidthPx) / 2f + (sides[station.id] ?: 0) * currentShiftPx
                     val spanEnd = spanStart + currentTileWidthPx
                     if (down.position.x < spanStart || down.position.x > spanEnd) return@awaitEachGesture
-                    val onHandle = if (currentLeftHanded) down.position.x <= spanStart + currentHandleZonePx
-                                   else down.position.x >= spanEnd - currentHandleZonePx
-                    val armed = onHandle || withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
+                    val armed = !currentScrolls || withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
                         while (true) {
                             val change = awaitPointerEvent(PointerEventPass.Initial).changes
                                 .firstOrNull { it.id == down.id } ?: return@withTimeoutOrNull false
@@ -684,31 +678,32 @@ private fun TileList(
                             // The dragged tile follows the finger: animating its placement would fight the drag offset
                             .then(if (isDragging) Modifier else Modifier.animateItem())
                     ) {
+                        // Purely decorative: the whole tile is the drag target
                         val handle = @Composable {
                             Icon(
                                 Icons.Default.DragHandle, null,
                                 tint = Ink.copy(alpha = if (isSuccessState) 0f else 0.45f)
                             )
                         }
-                        val direction = @Composable {
-                            Icon(
-                                imageVector = if (isForward) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
-                                contentDescription = null, tint = Ink.copy(alpha = 0.15f), modifier = Modifier.size(20.dp)
-                            )
-                        }
                         Row(modifier = Modifier.height(sizing.tileDp.dp).padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            if (leftHanded) handle() else direction()
-                            Spacer(Modifier.width(12.dp))
                             Text(
                                 text = station.name, modifier = Modifier.weight(1f),
                                 fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = if (compactText) 16.sp else 18.sp, color = Ink,
                                 maxLines = 1, overflow = TextOverflow.Ellipsis
                             )
-                            if (leftHanded) direction() else handle()
+                            handle()
                         }
                     }
                 }
             }
+        }
+
+        if (sizing.scrolls && !isSuccessState) {
+            Text(
+                text = stringResource(R.string.drag_hint_hold),
+                modifier = Modifier.align(Alignment.TopCenter).height(HINT_HEIGHT_DP.dp),
+                color = OnSurfaceMed, fontSize = 12.sp, letterSpacing = 1.sp, maxLines = 1
+            )
         }
     }
 }

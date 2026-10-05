@@ -8,7 +8,7 @@ Network Rush ("the app") is published by **AgSoftware**, address available on re
 No account, no personal data sent to us. Your scores and progress stay on your phone. The app shows an ad banner on the home screen (through Google AdMob, after your consent where required) and offers optional tips through Google Play.
 
 ## Data stored on your device only
-Scores, level, experience points, badges, day streak, per-station statistics, settings (left-handed mode, vibrations) and a "supporter" flag are stored **locally** on your device. We do not receive them. Uninstalling the app deletes them.
+Scores, level, experience points, badges, day streak, per-station statistics, settings (vibrations) and a "supporter" flag are stored **locally** on your device. We do not receive them. Uninstalling the app deletes them.
 
 ## Advertising (Google AdMob)
 The home screen shows a banner served by **Google AdMob** (Google Ireland Limited). To display and measure ads, Google may collect and process, on your device and on its servers, data such as your advertising ID, IP address, device and app information, and ad interactions. Ads may be personalised or not depending on your choice.
