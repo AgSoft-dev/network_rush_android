@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-10-10
+
+### Fixed
+- Tips: the offers are reloaded when the app is reopened if they could not be loaded the first time, instead of staying unavailable until the process is killed.
+
 ## [1.1.0] - 2026-10-05
 
 ### Changed
@@ -69,7 +74,8 @@ First release (`versionCode` 1).
 ### Fixed
 - Data-loading race at start-up that could leave the loading screen forever.
 
-[Unreleased]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.3...v1.1.0
 [1.0.3]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/AgSoft-dev/network_rush_android/compare/v1.0.1...v1.0.2

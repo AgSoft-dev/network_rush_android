@@ -86,6 +86,16 @@ Unabhängige App, nicht mit der CTS oder der Eurométropole de Strasbourg verbun
 - Category: Games > Trivia (or Puzzle). Tags: quiz, puzzle, transport.
 - Contact email, website (optional), privacy policy URL.
 
+## What's new: 1.1.1 (max 500 per language)
+### EN
+• Tips: the support options now reload when you reopen the app if they could not be loaded the first time.
+
+### FR
+• Pourboires : les options de soutien se rechargent à la réouverture de l'application si elles n'avaient pas pu être chargées.
+
+### DE
+• Trinkgeld: Die Unterstützungsoptionen werden beim erneuten Öffnen der App neu geladen, falls sie beim ersten Mal nicht geladen werden konnten.
+
 ## What's new: 1.1.0 (max 500 per language)
 ### EN
 • Station Sprint: touch a tile anywhere to drag it, no need to aim for the handle. On long lists, press and hold to drag.

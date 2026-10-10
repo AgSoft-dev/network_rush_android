@@ -59,7 +59,10 @@ class BillingSupportRepository @Inject constructor(
         .build()
 
     override fun connect() {
-        if (client.isReady) return
+        if (client.isReady) {
+            if (_offers.value.isEmpty()) scope.launch { loadOffers() }
+            return
+        }
         client.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(result: BillingResult) {
                 if (result.responseCode == BillingClient.BillingResponseCode.OK) {
@@ -67,6 +70,8 @@ class BillingSupportRepository @Inject constructor(
                         loadOffers()
                         consumeInterruptedPurchases()
                     }
+                } else {
+                    android.util.Log.w(TAG, "setup failed: code=${result.responseCode} msg=${result.debugMessage}")
                 }
             }
 
@@ -105,6 +110,12 @@ class BillingSupportRepository @Inject constructor(
                 .build()
         }
         val result = client.queryProductDetails(QueryProductDetailsParams.newBuilder().setProductList(products).build())
+        android.util.Log.d(
+            TAG,
+            "product details: code=${result.billingResult.responseCode} msg=${result.billingResult.debugMessage} " +
+                "returned=${result.productDetailsList.orEmpty().map { it.productId }} " +
+                "expected=${SupportTier.entries.map { it.productId }}"
+        )
         details.clear()
         result.productDetailsList.orEmpty().forEach { d ->
             SupportTier.fromProductId(d.productId)?.let { details[it] = d }
@@ -127,5 +138,9 @@ class BillingSupportRepository @Inject constructor(
         if (consumed.billingResult.responseCode != BillingClient.BillingResponseCode.OK) return
         prefs.setSupporter(true)
         if (announce) _events.tryEmit(SupportEvent.Thanks(purchase.products.firstNotNullOfOrNull { SupportTier.fromProductId(it) }))
+    }
+
+    private companion object {
+        const val TAG = "Billing"
     }
 }
