@@ -13,6 +13,8 @@ interface UserPreferencesRepository {
     val xp: Flow<Int>
     /** True once the player has tipped at least once (hides the home banner). */
     val isSupporter: Flow<Boolean>
+    /** Epoch millis until which the home banner stays hidden after a watched rewarded video (0 = none). */
+    val adFreeUntilMs: Flow<Long>
     /** versionCode of the Play update the player last dismissed (0 = none). */
     val dismissedUpdateVersion: Flow<Int>
 
@@ -20,6 +22,7 @@ interface UserPreferencesRepository {
     suspend fun earnBadge(badgeId: String)
     suspend fun setHapticsEnabled(enabled: Boolean)
     suspend fun setSupporter(value: Boolean)
+    suspend fun setAdFreeUntilMs(epochMs: Long)
     suspend fun addXp(amount: Int)
     suspend fun setDismissedUpdateVersion(versionCode: Int)
 }

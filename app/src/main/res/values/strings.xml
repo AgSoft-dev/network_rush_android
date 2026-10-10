@@ -64,6 +64,8 @@
     <string name="support_supporter">You\'re a supporter, thank you! The banner on the home screen is gone for good.</string>
     <string name="support_pitch">A solo project. A tip keeps it going and removes the banner on the home screen. Nothing in the game is locked.</string>
     <string name="support_unavailable">Tips are not available right now (offline, or not published on Google Play yet).</string>
+    <string name="support_video">Watch a short video (banner hidden for 24 h)</string>
+    <string name="support_video_active">Thanks for watching! The banner is hidden for 24 hours.</string>
     <string name="snack_thanks">Thank you so much! ♥</string>
     <string name="snack_failed">Purchase unavailable right now, please try again later.</string>
     <string name="tier_coffee">Buy me a coffee</string>
