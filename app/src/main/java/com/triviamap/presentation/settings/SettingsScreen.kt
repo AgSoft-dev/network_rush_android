@@ -25,6 +25,7 @@ import android.content.Intent
 import android.net.Uri
 import com.triviamap.R
 import com.triviamap.domain.monetization.AdsController
+import com.triviamap.domain.monetization.MonetizationPolicy
 import com.triviamap.domain.monetization.SupportEvent
 import com.triviamap.domain.monetization.SupportOffer
 import com.triviamap.domain.monetization.SupportRepository
@@ -33,7 +34,9 @@ import com.triviamap.domain.repository.UserPreferencesRepository
 import com.triviamap.util.findActivity
 import com.triviamap.presentation.common.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -42,16 +45,30 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val prefs: UserPreferencesRepository,
     private val support: SupportRepository,
-    private val ads: AdsController
+    private val ads: AdsController,
+    private val clock: java.time.Clock
 ) : ViewModel() {
     val offers = support.offers
-    val supportEvents = support.events
+    private val rewardEvents = MutableSharedFlow<SupportEvent>(extraBufferCapacity = 1)
+    val supportEvents = merge(support.events, rewardEvents)
+    val canRequestAds = ads.canRequestAds
+    val rewardedReady = ads.rewardedReady
+    val adFreeUntilMs = prefs.adFreeUntilMs
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0L)
     val privacyOptionsRequired = ads.privacyOptionsRequired
     val isSupporter = prefs.isSupporter
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     fun buy(activity: Activity, tier: SupportTier) = support.purchase(activity, tier)
     fun showPrivacyOptions(activity: Activity) = ads.showPrivacyOptions(activity)
+    fun loadRewarded() = ads.loadRewarded()
+
+    fun watchVideo(activity: Activity) = ads.showRewarded(activity) {
+        viewModelScope.launch {
+            prefs.setAdFreeUntilMs(MonetizationPolicy.adFreeUntilAfterReward(clock.millis()))
+            rewardEvents.tryEmit(SupportEvent.Thanks(null))
+        }
+    }
 
     val haptics = prefs.hapticsEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
@@ -70,10 +87,15 @@ fun SettingsScreen(
     val offers by vm.offers.collectAsState()
     val isSupporter by vm.isSupporter.collectAsState()
     val privacyRequired by vm.privacyOptionsRequired.collectAsState()
+    val canRequestAds by vm.canRequestAds.collectAsState()
+    val rewardedReady by vm.rewardedReady.collectAsState()
+    val adFreeUntilMs by vm.adFreeUntilMs.collectAsState()
     val activity = LocalContext.current.findActivity()
     val scaffoldState = rememberScaffoldState()
     val thanksText = stringResource(R.string.snack_thanks)
     val failedText = stringResource(R.string.snack_failed)
+
+    LaunchedEffect(canRequestAds) { if (canRequestAds) vm.loadRewarded() }
 
     LaunchedEffect(Unit) {
         vm.supportEvents.collect { event ->
@@ -117,7 +139,14 @@ fun SettingsScreen(
             SupportSection(
                 offers = offers,
                 isSupporter = isSupporter,
-                onBuy = { tier -> activity?.let { vm.buy(it, tier) } }
+                onBuy = { tier -> activity?.let { vm.buy(it, tier) } },
+                videoState = when {
+                    isSupporter || !canRequestAds -> VideoState.Hidden
+                    System.currentTimeMillis() < adFreeUntilMs -> VideoState.Active
+                    rewardedReady -> VideoState.Ready
+                    else -> VideoState.Hidden
+                },
+                onWatchVideo = { activity?.let(vm::watchVideo) }
             )
 
             if (privacyRequired) {
@@ -150,8 +179,16 @@ private fun SettingRow(title: String, description: String, checked: Boolean, onC
     }
 }
 
+private enum class VideoState { Hidden, Ready, Active }
+
 @Composable
-private fun SupportSection(offers: List<SupportOffer>, isSupporter: Boolean, onBuy: (SupportTier) -> Unit) {
+private fun SupportSection(
+    offers: List<SupportOffer>,
+    isSupporter: Boolean,
+    onBuy: (SupportTier) -> Unit,
+    videoState: VideoState,
+    onWatchVideo: () -> Unit
+) {
     Surface(shape = RoundedCornerShape(18.dp), color = Ticket, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.support_title, stringResource(R.string.app_name)), color = Ink, fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
@@ -171,6 +208,17 @@ private fun SupportSection(offers: List<SupportOffer>, isSupporter: Boolean, onB
                         colors = ButtonDefaults.buttonColors(backgroundColor = Sun, contentColor = Ink)
                     ) { Text("${offer.tier.emoji}  ${tierTitle(offer.tier)} · ${offer.price}", fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold) }
                 }
+            }
+            when (videoState) {
+                VideoState.Ready -> OutlinedButton(
+                    onClick = onWatchVideo,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    border = BorderStroke(2.dp, Ink),
+                    colors = ButtonDefaults.outlinedButtonColors(backgroundColor = androidx.compose.ui.graphics.Color.Transparent, contentColor = Ink)
+                ) { Text(stringResource(R.string.support_video), fontFamily = DisplayFont, fontWeight = FontWeight.ExtraBold) }
+                VideoState.Active -> Text(stringResource(R.string.support_video_active), color = InkMed, fontSize = 11.sp)
+                VideoState.Hidden -> Unit
             }
         }
     }

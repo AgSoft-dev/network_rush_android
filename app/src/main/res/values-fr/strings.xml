@@ -63,6 +63,8 @@
     <string name="support_supporter">Tu es un supporter, merci ! La bannière de l\'écran d\'accueil a disparu pour de bon.</string>
     <string name="support_pitch">Un projet en solo. Un pourboire le fait vivre et retire la bannière de l\'écran d\'accueil. Rien n\'est verrouillé dans le jeu.</string>
     <string name="support_unavailable">Les pourboires ne sont pas disponibles pour le moment (hors ligne, ou pas encore publiés sur Google Play).</string>
+    <string name="support_video">Regarder une courte vidéo (bannière masquée 24 h)</string>
+    <string name="support_video_active">Merci d\'avoir regardé ! La bannière est masquée pendant 24 heures.</string>
     <string name="snack_thanks">Merci infiniment ! ♥</string>
     <string name="snack_failed">Achat indisponible pour le moment, réessaie plus tard.</string>
     <string name="tier_coffee">Offre-moi un café</string>

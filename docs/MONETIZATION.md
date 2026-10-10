@@ -7,13 +7,15 @@ Implemented: **A** (AdMob banner on the home screen only) and **B2** (tips throu
 - `data/monetization/AdsControllerImpl.kt`: Google UMP consent (GDPR) first, AdMob SDK started only once ads may be requested; content rating capped at G.
 - `data/monetization/BillingSupportRepository.kt`: Play Billing, tips are consumed right away (repeatable), sets the local `supporter` flag. No server-side verification (nothing valuable is unlocked).
 - `presentation/common/AdBanner.kt`: adaptive banner, used only in `HomeScreen`.
+- Rewarded video (`AdsControllerImpl.loadRewarded/showRewarded`): optional button in Settings, hides the home banner for 24 h (`MonetizationPolicy.REWARD_AD_FREE_MS`, stored as `ad_free_until_ms`). Debug builds use Google's test rewarded id.
 - Settings: "Support Network Rush" section (prices from the store, thank-you snackbar) + "Privacy choices (ads)" when UMP requires it.
 
 ## Before publishing (checklist)
-1. **AdMob**: create the app + a banner ad unit, then put the real ids in `~/.gradle/gradle.properties` (never commit them):
+1. **AdMob**: create the app + a banner ad unit + a *Rewarded* ad unit (reward settings are informational: the app only hides the banner for 24 h), then put the real ids in `~/.gradle/gradle.properties` (never commit them):
    ```
    admobAppId=ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY
    admobBannerId=ca-app-pub-XXXXXXXXXXXXXXXX/ZZZZZZZZZZ
+   admobRewardedId=ca-app-pub-XXXXXXXXXXXXXXXX/WWWWWWWWWW
    ```
    Only **release** builds use them; debug and builds without them use Google's public **test** ids (test ads only, zero revenue). `adsEnabled=false` disables ads entirely (kill switch).
 2. **AdMob > Privacy & messaging**: create the GDPR message (UMP) for the app, otherwise no consent form is shown and EEA users get no ads.

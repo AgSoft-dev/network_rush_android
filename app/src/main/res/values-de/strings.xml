@@ -63,6 +63,8 @@
     <string name="support_supporter">Du bist Unterstützer, danke! Das Banner auf dem Startbildschirm ist für immer weg.</string>
     <string name="support_pitch">Ein Soloprojekt. Ein Trinkgeld hält es am Leben und entfernt das Banner auf dem Startbildschirm. Im Spiel ist nichts gesperrt.</string>
     <string name="support_unavailable">Trinkgelder sind gerade nicht verfügbar (offline oder noch nicht bei Google Play veröffentlicht).</string>
+    <string name="support_video">Kurzes Video ansehen (Banner 24 Std. ausgeblendet)</string>
+    <string name="support_video_active">Danke fürs Ansehen! Das Banner ist 24 Stunden ausgeblendet.</string>
     <string name="snack_thanks">Vielen herzlichen Dank! ♥</string>
     <string name="snack_failed">Kauf gerade nicht möglich, bitte versuche es später erneut.</string>
     <string name="tier_coffee">Spendier mir einen Kaffee</string>

@@ -40,7 +40,7 @@ class HomeViewModel @Inject constructor(
     results: GameResultRepository,
     ads: com.triviamap.domain.monetization.AdsController,
     private val updates: com.triviamap.domain.update.AppUpdateChecker,
-    clock: Clock
+    private val clock: Clock
 ) : ViewModel() {
 
     // Re-evaluated every minute so the daily card flips at midnight
@@ -66,10 +66,16 @@ class HomeViewModel @Inject constructor(
         state.takeIf { com.triviamap.domain.update.UpdatePolicy.shouldShow(it, dismissed) }
     }
 
-    val state = combine(progress, prefs.isSupporter, ads.canRequestAds, updateBanner) { ui, supporter, canAds, update ->
+    // The banner comes back by itself once a rewarded video's ad-free window ends
+    private val adFreeUntil = combine(
+        prefs.adFreeUntilMs,
+        flow { while (true) { emit(clock.millis()); delay(60_000) } }
+    ) { until, now -> until to now }
+
+    val state = combine(progress, prefs.isSupporter, ads.canRequestAds, updateBanner, adFreeUntil) { ui, supporter, canAds, update, (until, now) ->
         ui.copy(
             isSupporter = supporter,
-            showBanner = com.triviamap.domain.monetization.MonetizationPolicy.shouldShowBanner(supporter, canAds),
+            showBanner = com.triviamap.domain.monetization.MonetizationPolicy.shouldShowBanner(supporter, canAds, until, now),
             update = update
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())

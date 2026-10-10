@@ -86,6 +86,16 @@ Unabhängige App, nicht mit der CTS oder der Eurométropole de Strasbourg verbun
 - Category: Games > Trivia (or Puzzle). Tags: quiz, puzzle, transport.
 - Contact email, website (optional), privacy policy URL.
 
+## What's new: 1.2.0 (max 500 per language)
+### EN
+• New: watch a short optional video in Settings to hide the home banner for 24 hours. Nothing in the game is locked.
+
+### FR
+• Nouveau : regarde une courte vidéo facultative dans les Réglages pour masquer la bannière de l'accueil pendant 24 h. Rien n'est verrouillé dans le jeu.
+
+### DE
+• Neu: Sieh dir in den Einstellungen ein kurzes, optionales Video an, um das Banner auf dem Startbildschirm 24 Stunden auszublenden. Im Spiel ist nichts gesperrt.
+
 ## What's new: 1.1.1 (max 500 per language)
 ### EN
 • Tips: the support options now reload when you reopen the app if they could not be loaded the first time.

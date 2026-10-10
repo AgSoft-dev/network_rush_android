@@ -29,6 +29,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         val EARNED_BADGES = stringSetPreferencesKey("earned_badges")
         val HAPTICS = booleanPreferencesKey("haptics_enabled")
         val SUPPORTER = booleanPreferencesKey("supporter")
+        val AD_FREE_UNTIL = longPreferencesKey("ad_free_until_ms")
         val XP = intPreferencesKey("xp")
         val DISMISSED_UPDATE = intPreferencesKey("dismissed_update_version")
     }
@@ -43,6 +44,12 @@ class UserPreferencesRepositoryImpl @Inject constructor(
 
     override suspend fun setSupporter(value: Boolean) {
         context.dataStore.edit { it[Keys.SUPPORTER] = value }
+    }
+
+    override val adFreeUntilMs: Flow<Long> = context.dataStore.data.map { it[Keys.AD_FREE_UNTIL] ?: 0L }
+
+    override suspend fun setAdFreeUntilMs(epochMs: Long) {
+        context.dataStore.edit { it[Keys.AD_FREE_UNTIL] = epochMs }
     }
 
     override val hapticsEnabled: Flow<Boolean> = context.dataStore.data.map { it[Keys.HAPTICS] ?: true }
