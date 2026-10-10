@@ -214,7 +214,7 @@ Analyse statique de `TileList` (`SprintScreen.kt` ~l.324-460) et de `SprintViewM
 - [x] **P2 — Stats** : afficher évolution, taux d'erreur par ligne/station, stations les plus ratées (donnée disponible si on journalise les réponses).
   - ✅ 2026-09-21 : Statistiques par station persistées (`station_stats`, Room v3) ; écran Progress : niveau/XP, historique des 20 derniers runs, connaissance par ligne (maîtrisées/vues), stations les plus ratées (≥ 3 essais), badges, meilleurs scores par mode.
 - [ ] **P3 — Multi / social** : ghost replays, classement (Firebase) → nécessite anti-triche (score calculé côté client aujourd'hui).
-- [~] **P3 — Monétisation** : A (bannière accueil) et B2 (tips Play Billing) **implémentés côté code** (2026-09-21), reste la configuration store : voir `docs/MONETIZATION.md`. Autres options ci-dessous.
+- [~] **P3 — Monétisation** : A (bannière accueil) et B2 (tips Play Billing) **implémentés côté code** (2026-09-21), reste la configuration store : voir `docs/MONETIZATION.md`. Autres options ci-dessous. Diagnostic en cours (2026-10-10) : tips « non disponibles » en test fermé alors que les produits sont actifs ; logs `Billing` ajoutés, à lire via `adb logcat -s Billing` sur la prochaine release.
 - [~] **P3 — Store** : icône adaptative + monochrome faite (Terminus). Reste : captures, fiche Play, politique de confidentialité (obligatoire avec pubs).
 
 ---

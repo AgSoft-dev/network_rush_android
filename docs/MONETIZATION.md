@@ -26,3 +26,4 @@ Implemented: **A** (AdMob banner on the home screen only) and **B2** (tips throu
 - On an emulator the consent round trip can take ~20 s: the banner appears once UMP answers.
 - Tips are hidden ("not available right now") while offline or before the products exist in the Play Console.
 - Pending (slow payment) purchases are picked up on the next launch.
+- If the Support section shows "not available right now" on a Play-installed build, read `adb logcat -s Billing`: it logs the Billing response code and the product ids returned vs expected.
